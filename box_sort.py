@@ -33,7 +33,8 @@ class BoxNode:
         return self.box.overlaps(test_box)
 
     def evaluate_node(self, test_box, overlapping_box_list):
-        if self.in_this_box(test_box):
+        if self.in_this_box(test_box) and \
+                (self.left_child is None) and (self.right_child is None):   #leaf branch
             overlapping_box_list.append(self.box)
 
         if self.left_child:     #exists a left child
