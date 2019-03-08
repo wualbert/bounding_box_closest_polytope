@@ -1,5 +1,4 @@
 import numpy as np
-from utilities import *
 
 class AABB:
     def __init__(self, vertices):

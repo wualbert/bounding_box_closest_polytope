@@ -2,7 +2,7 @@ import numpy as np
 from box import AABB
 
 class BoxNode:
-    def __init__(self, q, uq, left_child=None, right_child=None, parent=None):
+    def __init__(self, q, uq, box, left_child=None, right_child=None, parent=None):
         self.left_child = left_child    #left child node
         self.right_child = right_child  #right child node
         self.parent = parent    #parent node

@@ -47,5 +47,8 @@ class AABBCollisionTestCase(unittest.TestCase):
         box2 = AABB(y)
         self.assertFalse(box1.overlaps(box2))
 
+class BoxNodeTestCase(unittest.TestCase):
+    def 
+
 if __name__=='__main__':
     unittest.main()
