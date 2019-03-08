@@ -17,11 +17,11 @@ class AABB:
 
         for d in range(self.dimension):
             if vertices[0][d]>vertices[1][d]:
-                self.v[d], self.u[d] = vertices[1][d], vertices[0][d]
-
+                self.v[d], self.u[d] = vertices[0][d], vertices[1][d]
 
     def __repr__(self):
-        return "R^%d AABB with vertices "%(self.dimension) + str(self.u, self.v)
+        return "R^%d AABB with vertices "%(self.dimension) + np.array2string(self.u) +\
+               ","+np.array2string(self.v)
 
     def overlaps(self, b2):
         '''
@@ -29,9 +29,9 @@ class AABB:
         :param b2: box to compare to
         :return:
         '''
-        u1_leq_v2 = np.invert(np.greater(self.u,b2.v))
-        u2_leq_v1 = np.invert(np.greater(b2.u, self.v))
-        return u1_leq_v2.any() and u2_leq_v1.any()
+        u1_leq_v2 = np.less_equal(self.u,b2.v)
+        u2_leq_v1 = np.less_equal(b2.u, self.v)
+        return u1_leq_v2.all() and u2_leq_v1.all()
 
 
 def overlaps(a,b):
