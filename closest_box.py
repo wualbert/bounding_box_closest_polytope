@@ -1,7 +1,7 @@
 import numpy as np
 from box import AABB
 
-class box_set:
+class BoxSet:
     def __init__(self, boxes):
         '''
 
@@ -22,4 +22,3 @@ class box_set:
             assert(query_point.shape[0] == self.boxes[0].dimension)
         except AssertionError:
             return None
-        
