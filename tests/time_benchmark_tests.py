@@ -1,12 +1,10 @@
-import numpy as np
-import time
-import unittest
 import random
-import matplotlib.pyplot as plt
+import time
 
-from box import *
-from visualize import *
-from box_sort import *
+from boxsort.box_sort import *
+
+from boxsort.box import *
+from utils.visualize import *
 
 space_size = 10000
 def time_construct_box_tree(box_count, dim):
@@ -19,10 +17,10 @@ def time_construct_box_tree(box_count, dim):
         for j in range(dim):
             uv[j,0] = xs[j]
             # uv[j,1] = ys[j]
-            uv[j,1] = xs[j]+abs(np.random.normal(scale=5)+10) #FIXME: Random box generation
+            uv[j,1] = xs[j]+abs(np.random.normal(scale=5)+10) #FIXME: Random boxsort generation
 
         box = AABB([uv[:,0],uv[:,1]])
-        # print(box)
+        # print(boxsort)
         box_list.append(box)
         box_node_list.append(BoxNode(box))
     start_time = time.time()
@@ -40,7 +38,7 @@ def test_closest_box(root, num_of_queries):
         for j in range(dim):
             uv[j,0] = xs[j]
             # uv[j,1] = ys[j]
-            uv[j,1] = xs[j]+abs(np.random.normal(scale=5)+10) #FIXME: Random box generation
+            uv[j,1] = xs[j]+abs(np.random.normal(scale=5)+10) #FIXME: Random boxsort generation
 
         box = AABB([uv[:,0],uv[:,1]])
         query_boxes.append(box)
@@ -66,7 +64,7 @@ def box_construction_over_box_count():
     runtime_stdev = np.zeros((num,1))
 
     for i, bc in enumerate(box_counts):
-        print('Starting box count ', bc)
+        print('Starting boxsort count ', bc)
         for r in range(repeats):
             print('Repeat ', r)
             runtime[i, r],_root,_bnl = time_construct_box_tree(int(bc),dimensions)
@@ -76,12 +74,12 @@ def box_construction_over_box_count():
     plt.semilogx(box_counts, runtime_avg)
     plt.xlabel('$log$ Number of boxes')
     plt.ylabel('Runtime(s)')
-    plt.title('Runtime vs $log$ box count in $R^{%d}$' % dimensions)
+    plt.title('Runtime vs $log$ boxsort count in $R^{%d}$' % dimensions)
     plt.subplot(2,1,2)
     plt.loglog(box_counts, runtime_avg)
     plt.xlabel('$log$ Number of boxes')
     plt.ylabel('$log$ Runtime(s)')
-    plt.title('$log$ Runtime vs $log$ box count in $R^{%d}$' % dimensions)
+    plt.title('$log$ Runtime vs $log$ boxsort count in $R^{%d}$' % dimensions)
     plt.show()
 
 def box_construction_over_runtime_dimensions():
@@ -131,7 +129,7 @@ def box_query_over_box_count():
     runtime_stdev = np.zeros((num,1))
 
     for i, bc in enumerate(box_counts):
-        print('Starting box count ', bc)
+        print('Starting boxsort count ', bc)
         for r in range(repeats):
             print('Repeat ', r)
             _rt,root,bnl = time_construct_box_tree(int(bc),dimensions)
@@ -142,7 +140,7 @@ def box_query_over_box_count():
     plt.semilogx(box_counts, runtime_avg)
     plt.xlabel('$log$ Number of boxes')
     plt.ylabel('Runtime(s)')
-    plt.title('Runtime for %d queries vs $log$ box count in $R^{%d}$' % (queries, dimensions))
+    plt.title('Runtime for %d queries vs $log$ boxsort count in $R^{%d}$' % (queries, dimensions))
     plt.subplot(2,1,2)
     plt.loglog(box_counts, runtime_avg)
     plt.xlabel('$log$ Number of boxes')

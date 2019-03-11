@@ -1,0 +1,3 @@
+[submodule "pypolycontain"]
+	path = pypolycontain
+	url = git@github.com:sadraddini/pypolycontain.git

@@ -3,7 +3,7 @@ import numpy as np
 class AABB:
     def __init__(self, vertices):
         '''
-        Creates an axis-aligned bounding box from two diagonal vertices
+        Creates an axis-aligned bounding boxsort from two diagonal vertices
         :param vertices: a list of defining vertices with shape (2, dimensions)
         '''
         try:
@@ -26,7 +26,7 @@ class AABB:
     def overlaps(self, b2):
         '''
         U: lower corner. V: upper corner
-        :param b2: box to compare to
+        :param b2: boxsort to compare to
         :return:
         '''
         u1_leq_v2 = np.less_equal(self.u,b2.v)
@@ -36,7 +36,6 @@ class AABB:
 
 def overlaps(a,b):
     return a.overlaps(b)
-
 
 def point_to_box_distance(point, box):
     out_range_dim = []

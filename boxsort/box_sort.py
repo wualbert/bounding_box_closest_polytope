@@ -1,5 +1,5 @@
 import numpy as np
-from box import AABB
+
 
 class BoxNode:
     def __init__(self, box, key_dim=None, key_value=None, left_child=None, right_child=None, parent=None):
@@ -33,9 +33,9 @@ class BoxNode:
             right_child_rep = self.right_child.box.__repr__()
 
         return '\nBoxNode: ' + '\n' + self.box.__repr__() +'\n'+\
-                '   parent box: ' + parent_rep +'\n'+\
-                '   left child box: ' + left_child_rep +'\n'+\
-                '   right child box: ' + right_child_rep +'\n'+\
+                '   parent boxsort: ' + parent_rep +'\n'+\
+                '   left child boxsort: ' + left_child_rep +'\n'+\
+                '   right child boxsort: ' + right_child_rep +'\n'+\
                 '   left child range '+ str((self.left_child_min_u, self.left_child_max_v))+ '\n'+\
                 '   right child range ' + str((self.right_child_min_u, self.right_child_max_v))+ '\n'+\
                 '   split by dim ' + str(self.key_dim) + ' at ' + str(self.key_value) + '\n'

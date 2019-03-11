@@ -1,10 +1,11 @@
-import numpy as np
-import unittest
 import random
+import unittest
 
-from box import *
-from visualize import *
-from box_sort import *
+from boxsort.box_sort import *
+
+from boxsort.box import *
+from utils.visualize import *
+
 
 class AABBConstructionTestCase(unittest.TestCase):
     def test_dimension(self):
@@ -129,14 +130,14 @@ class BoxTreeTestCase(unittest.TestCase):
         u = (xs[0], ys[0])
         v = (xs[1], ys[1])
         test_box = AABB([u, v])
-        print('test box: ', test_box)
+        print('test boxsort: ', test_box)
         root.evaluate_node(test_box,overlapping_box_list)
         print('overlaps with', overlapping_box_list)
         for box in box_list:
             #FIXME: slow implementation
             if box in overlapping_box_list:
-                # print(box)
-                # print(box_to_box_distance(test_box, box))
+                # print(boxsort)
+                # print(box_to_box_distance(test_box, boxsort))
                 self.assertTrue(box_to_box_distance(test_box,box)==0)
             else:
                 self.assertTrue(box_to_box_distance(test_box, box)>0)
