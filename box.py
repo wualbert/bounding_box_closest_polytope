@@ -36,3 +36,27 @@ class AABB:
 
 def overlaps(a,b):
     return a.overlaps(b)
+
+
+def point_to_box_distance(point, box):
+    out_range_dim = []
+    for dim in range(box.dimension):
+        if box.u[dim] < point[dim] and box.v[dim] > point[dim]:
+            pass
+        else:
+            out_range_dim.append(min(abs(box.u[dim]-point[dim]), abs(box.v[dim]-point[dim])))
+    return np.linalg.norm(out_range_dim)
+
+
+def box_to_box_distance(query_box, box):
+    out_range_dim = []
+    for dim in range(box.dimension):
+        if (box.u[dim] < query_box.u[dim] and box.v[dim] > query_box.u[dim]) or \
+            (box.u[dim] < query_box.v[dim] and box.v[dim] > query_box.v[dim]) or \
+            (query_box.u[dim] < box.u[dim] and query_box.v[dim] > box.u[dim]) or \
+            (query_box.u[dim] < box.v[dim] and query_box.v[dim] > box.v[dim]):
+            pass
+        else:
+            out_range_dim.append(min(min(abs(box.u[dim]-query_box.u[dim]), abs(box.v[dim]-query_box.u[dim])),
+                                 min(abs(box.u[dim]-query_box.v[dim]), abs(box.v[dim]-query_box.v[dim]))))
+    return np.linalg.norm(out_range_dim)

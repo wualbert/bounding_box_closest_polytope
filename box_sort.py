@@ -152,11 +152,11 @@ def binary_split(box_nodes_list, q=0, parent=None, recurse_q=None):
     if abs(len(box_nodes_l)-len(box_nodes_r))>1:    #unbalanced tree
         if recurse_q is None:
             return binary_split(box_nodes_list, q + 1, parent=parent, recurse_q=q)
-        elif q == np.mod(recurse_q-1):
+        elif q == np.mod(recurse_q-1, box_nodes_list[0].box.u.shape[0]):
             #FIXME: Find a better way to break ties
             pass
         else:
-            return binary_split(box_nodes_list, q + 1, parent=parent, recurse_q=q)
+            return binary_split(box_nodes_list, q + 1, parent=box_node_m, recurse_q=recurse_q)
     #set split key dimension and value
     box_node_m.set_key_dim(q)
     box_node_m.set_key_value(m)
@@ -165,4 +165,9 @@ def binary_split(box_nodes_list, q=0, parent=None, recurse_q=None):
     right_child_node = binary_split(box_nodes_r,q+1, parent=box_node_m)
     box_node_m.set_left_child(left_child_node)
     box_node_m.set_right_child(right_child_node)
+    box_node_m.set_parent(parent)
+    if left_child_node is not None:
+        left_child_node.set_parent(box_node_m)
+    if right_child_node is not None:
+        right_child_node.set_parent(box_node_m)
     return box_node_m
