@@ -1,10 +1,9 @@
 import random
 import time
 
-from boxsort.box_sort import *
-
 from boxsort.box import *
-from utils.visualize import *
+from boxsort.box_sort import *
+from visualization.visualize import *
 
 space_size = 10000
 def time_construct_box_tree(box_count, dim):

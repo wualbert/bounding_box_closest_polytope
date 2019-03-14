@@ -1,4 +1,13 @@
+# -*- coding: utf-8 -*-
+'''
+
+@author: wualbert
+'''
 import numpy as np
+from gurobipy import Model, GRB
+from pypolycontain.lib.zonotope import zonotope
+from pypolycontain.lib.polytope import polytope
+from pypolycontain.lib.inclusion_encodings import constraints_AB_eq_CD
 
 class AABB:
     def __init__(self, vertices):
@@ -59,3 +68,39 @@ def box_to_box_distance(query_box, box):
             out_range_dim.append(min(min(abs(box.u[dim]-query_box.u[dim]), abs(box.v[dim]-query_box.u[dim])),
                                  min(abs(box.u[dim]-query_box.v[dim]), abs(box.v[dim]-query_box.v[dim]))))
     return np.linalg.norm(out_range_dim)
+
+def zonotope_to_box(z):
+    model = Model("zonotope_AABB")
+
+    dim=z.x.shape[0]
+    p=np.empty((z.G.shape[1],1),dtype='object')
+    #find extremum on each dimension
+    results = [np.empty(z.x.shape[0]), np.empty(z.x.shape[0])]
+    x = np.empty((z.x.shape[0],1),dtype='object')
+    for row in range(p.shape[0]):
+        p[row,0]=model.addVar(lb=-1,ub=1)
+    model.update()
+    for d in range(dim):
+        x[d] = model.addVar(obj=0)
+    constraints_AB_eq_CD(model,np.eye(dim),x-z.x,z.G,p)
+
+    for d in range(dim):
+        print(d)
+        x[d,0].Obj = 1
+        #find minimum
+        model.ModelSense = 1
+        model.update()
+        model.optimize()
+        assert(model.Status==2)
+        results[0][d] = x[d,0].X
+        print(results)
+        #find maximum
+        model.ModelSense = -1
+        model.update()
+        model.optimize()
+        assert(model.Status==2)
+        results[1][d] = x[d,0].X
+        #reset coefficient
+        x[d,0].obj = 0
+        print(results)
+    return AABB(results)
