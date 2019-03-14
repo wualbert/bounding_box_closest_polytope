@@ -81,7 +81,7 @@ def zonotope_to_box(z):
         p[row,0]=model.addVar(lb=-1,ub=1)
     model.update()
     for d in range(dim):
-        x[d] = model.addVar(obj=0)
+        x[d] = model.addVar(obj=0,lb=-GRB.INFINITY,ub=GRB.INFINITY)
     constraints_AB_eq_CD(model,np.eye(dim),x-z.x,z.G,p)
 
     for d in range(dim):

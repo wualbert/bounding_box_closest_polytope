@@ -76,8 +76,9 @@ class ZonotopeToAABBTestCase(unittest.TestCase):
         zono_l = zonotope(x_l, G_l)
         zono_r = zonotope(x_r, G_r)
         AABB_r = zonotope_to_box(zono_r)
-        fix, ax = visZ([zono_r], title="")
-        visualize_boxes([AABB_r], ax= ax)
+        AABB_l = zonotope_to_box(zono_l)
+        fix, ax = visZ([zono_r,zono_l], title="")
+        visualize_boxes([AABB_r,AABB_l], ax= ax)
         plt.show()
 
 if __name__=='__main__':
