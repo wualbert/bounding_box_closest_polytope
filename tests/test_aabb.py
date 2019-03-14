@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from boxsort.box import *
+from lib.box import *
 from visualization.visualize import *
 from pypolycontain.lib.zonotope import zonotope
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
@@ -22,6 +22,29 @@ class AABBConstructionTestCase(unittest.TestCase):
         self.assertEqual(box.u.any(),answer.u.any())
         self.assertEqual(box.v.any(),answer.v.any())
 
+    def test_equality(self):
+        x = [(3,2,6),(1,5,5)]
+        box = AABB(x)
+        y = [(1,2,5),(3,5,9)]
+        b2 = AABB(y)
+        b3 = AABB(x)
+        self.assertNotEqual(box,b2)
+        self.assertEqual(box,b3)
+
+    def test_centroid_construction(self):
+        x = np.asarray([1,1,1])
+        edges = np.asarray([2,2,2])
+        answer = AABB_centroid_edge(x, edges)
+        self.assertEqual(answer, AABB([(0,0,0),(2,2,2)]))
+
+    def test_hash(self):
+        x = [(3,2,6),(1,5,5)]
+        box = AABB(x)
+        y = [(1,7,5),(3,5,6)]
+        b2 = AABB(y)
+        b3 = AABB(x)
+        self.assertEqual(hash(box),hash(b3))
+        self.assertNotEqual(hash(box),hash(b2))
 
 class AABBCollisionTestCase(unittest.TestCase):
     def test_collision_vertex_overlap(self):

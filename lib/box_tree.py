@@ -33,9 +33,9 @@ class BoxNode:
             right_child_rep = self.right_child.box.__repr__()
 
         return '\nBoxNode: ' + '\n' + self.box.__repr__() +'\n'+\
-                '   parent boxsort: ' + parent_rep +'\n'+\
-                '   left child boxsort: ' + left_child_rep +'\n'+\
-                '   right child boxsort: ' + right_child_rep +'\n'+\
+                '   parent lib: ' + parent_rep +'\n'+\
+                '   left child lib: ' + left_child_rep +'\n'+\
+                '   right child lib: ' + right_child_rep +'\n'+\
                 '   left child range '+ str((self.left_child_min_u, self.left_child_max_v))+ '\n'+\
                 '   right child range ' + str((self.right_child_min_u, self.right_child_max_v))+ '\n'+\
                 '   split by dim ' + str(self.key_dim) + ' at ' + str(self.key_value) + '\n'
@@ -77,6 +77,12 @@ class BoxNode:
         return self.box.overlaps(test_box)
 
     def evaluate_node(self, test_box, overlapping_box_list):
+        '''
+
+        :param test_box: box to be tested
+        :param overlapping_box_list: stores overlapping AABBs upon completion of the function
+        :return:
+        '''
         if self.in_this_box(test_box):   #leaf branch
             overlapping_box_list.append(self.box)
 

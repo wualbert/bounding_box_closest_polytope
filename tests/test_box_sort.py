@@ -1,8 +1,8 @@
 import random
 import unittest
 
-from boxsort.box import *
-from boxsort.box_sort import *
+from lib.box import *
+from lib.box_tree import *
 from visualization.visualize import *
 
 
@@ -69,14 +69,14 @@ class BoxTreeTestCase(unittest.TestCase):
         u = (xs[0], ys[0])
         v = (xs[1], ys[1])
         test_box = AABB([u, v])
-        print('test boxsort: ', test_box)
+        print('test lib: ', test_box)
         root.evaluate_node(test_box,overlapping_box_list)
         print('overlaps with', overlapping_box_list)
         for box in box_list:
             #FIXME: slow implementation
             if box in overlapping_box_list:
-                # print(boxsort)
-                # print(box_to_box_distance(test_box, boxsort))
+                # print(lib)
+                # print(box_to_box_distance(test_box, lib))
                 self.assertTrue(box_to_box_distance(test_box,box)==0)
             else:
                 self.assertTrue(box_to_box_distance(test_box, box)>0)

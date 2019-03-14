@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from boxsort.box import *
+from lib.box import *
 from visualization.visualize import *
 import matplotlib.pyplot as plt
 

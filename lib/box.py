@@ -10,9 +10,9 @@ from pypolycontain.lib.polytope import polytope
 from pypolycontain.lib.inclusion_encodings import constraints_AB_eq_CD
 
 class AABB:
-    def __init__(self, vertices):
+    def __init__(self, vertices, color=None):
         '''
-        Creates an axis-aligned bounding boxsort from two diagonal vertices
+        Creates an axis-aligned bounding lib from two diagonal vertices
         :param vertices: a list of defining vertices with shape (2, dimensions)
         '''
         try:
@@ -27,20 +27,48 @@ class AABB:
         for d in range(self.dimension):
             if vertices[0][d]>vertices[1][d]:
                 self.v[d], self.u[d] = vertices[0][d], vertices[1][d]
+        #for visualizing
+        if color is None:
+            self.color=(np.random.random(),np.random.random(),np.random.random())
+        else:
+            self.color=color
 
     def __repr__(self):
         return "R^%d AABB with vertices "%(self.dimension) + np.array2string(self.u) +\
                ","+np.array2string(self.v)
 
+    def __eq__(self, other):
+        return (self.u==other.u).all()and\
+               (self.v==other.v).all()and\
+               (self.dimension==other.dimension)
+
+    def __ne__(self, other):
+        return not(self.__eq__(other))
+
+    def __hash__(self):
+        tpl = str((self.u,self.v,self.dimension))
+        return hash(tpl)
+
     def overlaps(self, b2):
         '''
         U: lower corner. V: upper corner
-        :param b2: boxsort to compare to
+        :param b2: lib to compare to
         :return:
         '''
         u1_leq_v2 = np.less_equal(self.u,b2.v)
         u2_leq_v1 = np.less_equal(b2.u, self.v)
         return u1_leq_v2.all() and u2_leq_v1.all()
+
+def AABB_centroid_edge(c, edge_lengths):
+    '''
+    Creates an AABB with centroid c and edge lengths
+    :param centroid:
+    :param edge_lengthes:
+    :return:
+    '''
+    u = c-edge_lengths/2
+    v = c+edge_lengths/2
+    return AABB([u,v])
 
 
 def overlaps(a,b):
@@ -85,7 +113,6 @@ def zonotope_to_box(z):
     constraints_AB_eq_CD(model,np.eye(dim),x-z.x,z.G,p)
 
     for d in range(dim):
-        print(d)
         x[d,0].Obj = 1
         #find minimum
         model.ModelSense = 1
@@ -93,7 +120,6 @@ def zonotope_to_box(z):
         model.optimize()
         assert(model.Status==2)
         results[0][d] = x[d,0].X
-        print(results)
         #find maximum
         model.ModelSense = -1
         model.update()
@@ -102,5 +128,4 @@ def zonotope_to_box(z):
         results[1][d] = x[d,0].X
         #reset coefficient
         x[d,0].obj = 0
-        print(results)
-    return AABB(results)
+    return AABB(results, color=z.color)
