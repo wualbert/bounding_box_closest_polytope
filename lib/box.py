@@ -10,7 +10,7 @@ from pypolycontain.lib.polytope import polytope
 from pypolycontain.lib.inclusion_encodings import constraints_AB_eq_CD
 
 class AABB:
-    def __init__(self, vertices, color=None):
+    def __init__(self, vertices, color=None, zonotope=None):
         '''
         Creates an axis-aligned bounding lib from two diagonal vertices
         :param vertices: a list of defining vertices with shape (2, dimensions)
@@ -23,7 +23,8 @@ class AABB:
         self.dimension = len(vertices[0])
         self.u = np.asarray(vertices[0])
         self.v = np.asarray(vertices[1])
-
+        #FIXME: use derived class
+        self.zonotope = zonotope
         for d in range(self.dimension):
             if vertices[0][d]>vertices[1][d]:
                 self.v[d], self.u[d] = vertices[0][d], vertices[1][d]
@@ -45,9 +46,12 @@ class AABB:
     def __ne__(self, other):
         return not(self.__eq__(other))
 
-    def __hash__(self):
-        tpl = str((self.u,self.v,self.dimension))
-        return hash(tpl)
+    # def __hash__(self):
+    #     tpl = str((self.u,self.v,self.dimension))
+    #     return hash(tpl)
+
+    def set_zonotope(self, zonotope):
+        self.zonotope = zonotope
 
     def overlaps(self, b2):
         '''
@@ -68,7 +72,7 @@ def AABB_centroid_edge(c, edge_lengths):
     '''
     u = c-edge_lengths/2
     v = c+edge_lengths/2
-    return AABB([u,v])
+    return AABB([np.ndarray.flatten(u),np.ndarray.flatten(v)])
 
 
 def overlaps(a,b):
@@ -99,7 +103,7 @@ def box_to_box_distance(query_box, box):
 
 def zonotope_to_box(z):
     model = Model("zonotope_AABB")
-
+    model.setParam('OutputFlag', False)
     dim=z.x.shape[0]
     p=np.empty((z.G.shape[1],1),dtype='object')
     #find extremum on each dimension
@@ -128,4 +132,5 @@ def zonotope_to_box(z):
         results[1][d] = x[d,0].X
         #reset coefficient
         x[d,0].obj = 0
-    return AABB(results, color=z.color)
+    box = AABB(results, color=z.color,zonotope=z)
+    return box

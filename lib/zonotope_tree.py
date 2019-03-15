@@ -13,45 +13,47 @@ class ZonotopeTree:
         self.zonotopes = zonotopes
         # Create box data structure from zonotopes
         self.box_nodes = []
-        self.box_node_to_zonotope_map = dict()
         for z in self.zonotopes:
             box = zonotope_to_box(z)
             bn = BoxNode(box)
             self.box_nodes.append(bn)
-            if box in self.box_node_to_zonotope_map.keys():
-                self.box_node_to_zonotope_map[box].append(z)
-            else:
-                self.box_node_to_zonotope_map[box] = [z]
+        assert(len(self.box_nodes)==len(self.zonotopes))
         self.root = binary_split(self.box_nodes)
         # Create kd-tree data structure from zonotopes
         self.centroid_tree = build_centroid_kd_tree(self.zonotopes)
 
     def find_closest_zonotopes(self,query_point):
         #find closest centroid
-        _x, ind = self.centroid_tree.query(query_point)
+        try:
+            query_point.shape[1]
+            #FIXME: Choose between d*1 (2D) or d (1D) represntation of query_point
+        except:
+            raise ValueError('Query point should be d*1 numpy array')
+        _x, ind = self.centroid_tree.query(np.ndarray.flatten(query_point))
         closest_centroid = self.centroid_tree.data[ind]
-        #calculate distance from closest centroid
-        edge_length = 2*np.linalg.norm(closest_centroid-query_point)
+        # print('Closest centroid', closest_centroid)
+        vector_diff = np.subtract(np.ndarray.flatten(closest_centroid),\
+                                  np.ndarray.flatten(query_point))
+        # print(vector_diff)
+        edge_length = 2*np.linalg.norm(vector_diff)
+        # print('Edge_length', edge_length)
         #create query box
         query_box = AABB_centroid_edge(query_point,edge_length)
         #find candidate box nodes
         candidate_boxes = []
         self.root.evaluate_node(query_box,candidate_boxes)
+        # print(query_box)
         #map back to zonotopes
         closest_zonotopes = []
         closest_distance = np.inf
         for cb in candidate_boxes:
-            z_list = self.box_node_to_zonotope_map[cb]
-            for z in z_list:
-                if len(query_point.shape)==1:
-                    query_point = np.reshape(query_point,(2,1))
-                candidate_d = zonotope_distance_point(z, query_point)
-                if closest_distance>candidate_d:
-                    closest_distance = candidate_d
-                    closest_zonotopes = [z]
-                elif closest_distance==candidate_d:
-                    closest_zonotopes.append(z)
-        return closest_zonotopes
+            candidate_d = zonotope_distance_point(cb.zonotope, query_point)
+            if closest_distance>candidate_d:
+                closest_distance = candidate_d
+                closest_zonotopes = [cb.zonotope]
+            elif closest_distance==candidate_d:
+                closest_zonotopes.append(cb.zonotope)
+        return closest_zonotopes, candidate_boxes, query_box
 
 
 def build_centroid_kd_tree(zonotopes):

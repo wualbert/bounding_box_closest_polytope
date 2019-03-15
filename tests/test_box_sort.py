@@ -52,20 +52,18 @@ class BoxTreeTestCase(unittest.TestCase):
     def test_closest_box(self):
         box_list = []
         box_node_list = []
-        for i in range(10):
-            xs = random.sample(range(100), 2)
-            ys = random.sample(range(100),2)
-            u = (xs[0],ys[0])
-            v = (xs[1],ys[1])
-            box = AABB([u,v])
+        for i in range(30):
+            centroid = np.asarray(random.sample(range(-80,80), 2))
+            edges = np.asarray(random.sample(range(1,40),2))
+            box = AABB_centroid_edge(centroid,edges)
             box_list.append(box)
             box_node_list.append(BoxNode(box))
 
         overlapping_box_list = []
         closest_distance = np.inf
         root = binary_split(box_node_list)
-        xs = random.sample(range(100), 2)
-        ys = random.sample(range(100), 2)
+        xs = random.sample(range(-80,80), 2)
+        ys = random.sample(range(-80,80), 2)
         u = (xs[0], ys[0])
         v = (xs[1], ys[1])
         test_box = AABB([u, v])
@@ -80,6 +78,12 @@ class BoxTreeTestCase(unittest.TestCase):
                 self.assertTrue(box_to_box_distance(test_box,box)==0)
             else:
                 self.assertTrue(box_to_box_distance(test_box, box)>0)
+        axlim = [-100,100]
+        fig, ax = visualize_box_nodes(box_node_list,xlim = axlim,ylim=axlim,alpha =0.2,linewidth=0.5)
+        fig, ax = visualize_boxes(overlapping_box_list,fig=fig,ax=ax,alpha =1,linewidth=2)
+        fig, ax = visualize_boxes([test_box], fig=fig, ax=ax, alpha=1,fill=True,linewidth=0.5)
+
+        plt.show()
 
 if __name__=='__main__':
     unittest.main()
