@@ -184,3 +184,6 @@ class ZonotopeTreeTestCase(unittest.TestCase):
     #     # plt.scatter(query_point[0],query_point[1],s=20,color='k')
     #     # print('Closest Zonotope: ', closest_zonotope)
     #     plt.show()
+
+if __name__=='__main__':
+    unittest.main()
