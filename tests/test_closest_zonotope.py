@@ -96,6 +96,34 @@ class ZonotopeTreeTestCase(unittest.TestCase):
             print('Completed iteration ',itr)
             # plt.show()
 
+    def test_many_zonotopes_line(self):
+        zonotope_count = 50
+        zonotopes = []
+        centroid_range = zonotope_count
+        generator_range = 3
+        for i in range(zonotope_count):
+            m = np.random.random_integers(4,10)
+            G = (np.random.rand(2,m)-0.5)*generator_range*1
+            x = np.asarray([(np.random.rand(1)-0.5)*2*centroid_range,
+                            np.random.rand(1)-0.5])
+            zonotopes.append(zonotope(x,G))
+        zt = ZonotopeTree(zonotopes)
+
+        query_point = np.asarray([np.random.random_integers(-centroid_range,centroid_range),
+                       np.random.rand(1)-0.5])
+        query_point = query_point.reshape(-1,1)
+        closest_zonotope, candidate_boxes,query_box = zt.find_closest_zonotopes(query_point)
+        print('Query point: ', query_point)
+        ax_lim = np.asarray([-centroid_range,centroid_range,-centroid_range,centroid_range])*1.1
+        fig, ax = visZ(zonotopes, title="", alpha=0.2,axis_limit=ax_lim)
+        fig, ax = visZ(closest_zonotope, title="",fig=fig,ax=ax,alpha=1,axis_limit=ax_lim)
+        fig, ax = visualize_box_nodes(zt.box_nodes,fig=fig,ax=ax,alpha =0.4,linewidth=0.5)
+        fig, ax = visualize_boxes(candidate_boxes,fig=fig,ax=ax,alpha =1)
+        print('Candidate boxes: ', candidate_boxes)
+        fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.3,fill=True)
+        plt.scatter(query_point[0],query_point[1],s=20,color='k')
+        print('Closest Zonotope: ', closest_zonotope)
+        plt.show()
     # def test_zonotope_boxes(self):
     #     '''
     #     for debugging
