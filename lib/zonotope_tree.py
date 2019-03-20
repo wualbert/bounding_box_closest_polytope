@@ -66,14 +66,16 @@ class ZonotopeTree:
         closest_zonotopes = []
         closest_distance = np.inf
         if candidate_boxes is None:
-            '''
-            When a heuristic less than centroid distance is used,
-            a candidate box does not necessarily exist. In this case,
-            use the zonotope from which the heuristic is generated.
-            '''
-            closest_zonotopes = edge_zonotope
-            closest_distance = edge_length
-            return closest_zonotopes, candidate_boxes, query_box
+            # This should never happen
+            raise ValueError('No closest zonotope found!')
+            # When a heuristic less than centroid distance is used,
+            # a candidate box does not necessarily exist. In this case,
+            # use the zonotope from which the heuristic is generated.
+            # '''
+            #
+            # closest_zonotopes = edge_zonotope
+            # closest_distance = edge_length
+            # return closest_zonotopes, candidate_boxes, query_box
         else:
             for cb in candidate_boxes:
                 candidate_d = zonotope_distance_point(cb.zonotope, query_point)
