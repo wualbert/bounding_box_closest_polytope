@@ -124,6 +124,34 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         plt.scatter(query_point[0],query_point[1],s=20,color='k')
         print('Closest Zonotope: ', closest_zonotope)
         plt.show()
+
+    def test_with_dataset(self):
+        from utils.PWA_Control_utils import polytree_to_zonotope_tree
+        import pickle
+        with open("zonotope_datasets/inverted_pendulum.pkl", "rb") as f:
+            state_tree = pickle.load(f)
+        f.close()
+        #extract zonotopes
+        zonotope_tree = polytree_to_zonotope_tree(state_tree)
+        zonotope_count = len(zonotope_tree.zonotopes)
+
+        query_point = np.asarray([(np.random.rand(1) - 0.5),
+                                  (np.random.rand(1) - 0.5)*2])
+        print(query_point)
+        query_point = query_point.reshape(-1, 1)
+        closest_zonotope, candidate_boxes, query_box = zonotope_tree.find_closest_zonotopes(query_point)
+        print('Query point: ', query_point)
+        ax_lim = np.asarray([-zonotope_count, zonotope_count, -zonotope_count, zonotope_count]) * 1.1
+        fig, ax = visZ(zonotope_tree.zonotopes, title="", alpha=0.2, axis_limit=ax_lim)
+        fig, ax = visZ(closest_zonotope, title="", fig=fig, ax=ax, alpha=1, axis_limit=ax_lim)
+        fig, ax = visualize_box_nodes(zonotope_tree.box_nodes, fig=fig, ax=ax, alpha=0.4, linewidth=0.5)
+        fig, ax = visualize_boxes(candidate_boxes, fig=fig, ax=ax, alpha=1)
+        print('Evaluating %d zonotopes out of %d' %(len(candidate_boxes),len(zonotope_tree.zonotopes)))
+        fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.3, fill=True)
+        plt.scatter(query_point[0], query_point[1], s=20, color='k')
+        print('Closest Zonotope: ', closest_zonotope)
+        plt.show()
+
     # def test_zonotope_boxes(self):
     #     '''
     #     for debugging
