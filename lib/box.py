@@ -5,9 +5,9 @@
 '''
 import numpy as np
 from gurobipy import Model, GRB
-from pypolycontain.lib.zonotope import zonotope
-from pypolycontain.lib.polytope import polytope
-from pypolycontain.lib.inclusion_encodings import constraints_AB_eq_CD
+# from pypolycontain.lib.zonotope import zonotope
+# from pypolycontain.lib.polytope import polytope
+# from pypolycontain.lib.inclusion_encodings import constraints_AB_eq_CD
 
 class AABB:
     def __init__(self, vertices, color=None, zonotope=None):
