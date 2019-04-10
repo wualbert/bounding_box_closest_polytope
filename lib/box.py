@@ -117,7 +117,8 @@ def zonotope_to_box(z):
     results = [np.empty(z.x.shape[0]), np.empty(z.x.shape[0])]
     x = np.empty((z.x.shape[0],1),dtype='object')
     for row in range(p.shape[0]):
-        p[row,0]=model.addVar(lb=-1,ub=1)
+        p[row,0]=model.addVar(lb=-1,ub=1) #TODO: Generalize to AH polytopes. Use linear constraints on p.
+        # See AH_polytope.py in pypolycontain.lib: constraints_list_of_tuples(model,[(self.P.H,p),(-np.eye(self.P.h.shape[0]),self.P.h)],sign="<")
     model.update()
     for d in range(dim):
         x[d] = model.addVar(obj=0,lb=-GRB.INFINITY,ub=GRB.INFINITY)

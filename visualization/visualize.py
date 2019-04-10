@@ -4,11 +4,10 @@ import matplotlib.patches as patches
 from matplotlib.collections import PatchCollection
 
 
-def visualize_boxes(box_list, dim_x = 0, dim_y = 1, xlim=(0,10), ylim=(0,10), ax = None, fig = None,alpha=None,fill=False,linewidth=3):
+def visualize_boxes(box_list, dim_x = 0, dim_y = 1, xlim=None, ylim=None, ax = None, fig = None,alpha=None,fill=False,linewidth=3):
     if ax is None:
         fig, ax = plt.subplots(1)
-        ax.set_xlim(xlim[0], xlim[1])
-        ax.set_ylim(ylim[0], ylim[1])
+
     for box in box_list:
         x = box.u[dim_x]
         y = box.u[dim_y]
@@ -20,10 +19,13 @@ def visualize_boxes(box_list, dim_x = 0, dim_y = 1, xlim=(0,10), ylim=(0,10), ax
         else:
             rect = patches.Rectangle((x, y), width, height, linewidth=linewidth, edgecolor=box.color, facecolor='none',alpha=alpha)
         ax.add_patch(rect)
-
+    if xlim is not None:
+        ax.set_xlim(xlim[0], xlim[1])
+    if ylim is not None:
+        ax.set_ylim(ylim[0], ylim[1])
     return fig,ax
 
-def visualize_box_nodes(box_nodes_list, dim_x = 0, dim_y = 1, xlim=(0,10), ylim=(0,10), ax = None, fig = None,alpha=None,fill=False,linewidth=3):
+def visualize_box_nodes(box_nodes_list, dim_x = 0, dim_y = 1, xlim=None, ylim=None, ax = None, fig = None,alpha=None,fill=False,linewidth=3):
     box_list = []
     for box_node in box_nodes_list:
         box_list.append(box_node.box)

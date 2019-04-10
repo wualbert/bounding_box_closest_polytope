@@ -60,7 +60,11 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         fig, ax = visualize_box_nodes(zt.box_nodes,fig=fig,ax=ax,alpha =0.4,linewidth=0.5)
         fig, ax = visualize_boxes(candidate_boxes,fig=fig,ax=ax,alpha =1)
         print('Candidate boxes: ', candidate_boxes)
-        fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.3,fill=True)
+        fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.3,fill=True,
+                                  xlim=[-centroid_range,centroid_range],ylim=[-centroid_range,centroid_range])
+        # ax.set_xlim(-centroid_range,centroid_range)
+        # ax.set_ylim(-centroid_range,centroid_range)
+
         plt.scatter(query_point[0],query_point[1],s=20,color='k')
         print('Closest Zonotope: ', closest_zonotope)
         plt.show()
@@ -135,7 +139,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         zonotope_tree = polytree_to_zonotope_tree(state_tree)
         zonotope_count = len(zonotope_tree.zonotopes)
 
-        query_point = np.asarray([(np.random.rand(1) - 0.5),
+        query_point = np.asarray([(np.random.rand(1) - 0.5)*0.24,
                                   (np.random.rand(1) - 0.5)*2])
         print(query_point)
         query_point = query_point.reshape(-1, 1)
