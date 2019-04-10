@@ -2,4 +2,5 @@
 */__pycache__/*
 */gurobi.log
 gurobi.log
+*.pyc
 */*.pyc

@@ -78,6 +78,13 @@ def AABB_centroid_edge(c, edge_lengths):
 def overlaps(a,b):
     return a.overlaps(b)
 
+def point_in_box(point,box):
+    for dim in range(box.dimension):
+        if box.u[dim] > point[dim] or box.v[dim] < point[dim]:
+            return False
+    else:
+        return True
+
 def point_to_box_distance(point, box):
     out_range_dim = []
     for dim in range(box.dimension):
