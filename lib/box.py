@@ -79,8 +79,7 @@ def overlaps(a,b):
     return a.overlaps(b)
 
 def point_in_box(point,box):
-    for dim in range(box.dimension):
-        if box.u[dim] > point[dim] or box.v[dim] < point[dim]:
+    if np.any(box.u>point) or np.any(box.v<point):
             return False
     else:
         return True
