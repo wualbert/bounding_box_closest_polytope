@@ -33,9 +33,9 @@ class BoxNode:
             right_child_rep = self.right_child.box.__repr__()
 
         return '\nBoxNode: ' + '\n' + self.box.__repr__() +'\n'+\
-                '   parent lib: ' + parent_rep +'\n'+\
-                '   left child lib: ' + left_child_rep +'\n'+\
-                '   right child lib: ' + right_child_rep +'\n'+\
+                '   parent bounding_box: ' + parent_rep +'\n'+\
+                '   left child bounding_box: ' + left_child_rep +'\n'+\
+                '   right child bounding_box: ' + right_child_rep +'\n'+\
                 '   left child range '+ str((self.left_child_min_u, self.left_child_max_v))+ '\n'+\
                 '   right child range ' + str((self.right_child_min_u, self.right_child_max_v))+ '\n'+\
                 '   split by dim ' + str(self.key_dim) + ' at ' + str(self.key_value) + '\n'

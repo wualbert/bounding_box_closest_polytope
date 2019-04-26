@@ -1,8 +1,8 @@
 import random
-import time
+import timeit
 
-from lib.box import *
-from lib.box_tree import *
+from bounding_box.box import *
+from bounding_box.box_tree import *
 from visualization.visualize import *
 
 space_size = 10000
@@ -16,15 +16,15 @@ def time_construct_box_tree(box_count, dim):
         for j in range(dim):
             uv[j,0] = xs[j]
             # uv[j,1] = ys[j]
-            uv[j,1] = xs[j]+abs(np.random.normal(scale=5)+10) #FIXME: Random lib generation
+            uv[j,1] = xs[j]+abs(np.random.normal(scale=5)+10) #FIXME: Random bounding_box generation
 
         box = AABB([uv[:,0],uv[:,1]])
-        # print(lib)
+        # print(bounding_box)
         box_list.append(box)
         box_node_list.append(BoxNode(box))
-    start_time = time.time()
+    start_time = timeit.default_timer()
     root = binary_split(box_node_list)
-    end_time = time.time()
+    end_time = timeit.default_timer()
     return end_time-start_time, root, box_node_list
 
 def test_closest_box(root, num_of_queries):
@@ -37,15 +37,15 @@ def test_closest_box(root, num_of_queries):
         for j in range(dim):
             uv[j,0] = xs[j]
             # uv[j,1] = ys[j]
-            uv[j,1] = xs[j]+abs(np.random.normal(scale=5)+10) #FIXME: Random lib generation
+            uv[j,1] = xs[j]+abs(np.random.normal(scale=5)+10) #FIXME: Random bounding_box generation
 
         box = AABB([uv[:,0],uv[:,1]])
         query_boxes.append(box)
-    start_time = time.time()
+    start_time = timeit.default_timer()
     for box in query_boxes:
         l = []
         root.evaluate_node(box,l)
-    end_time = time.time()
+    end_time = timeit.default_timer()
     return end_time-start_time
 
 def box_construction_over_box_count():
@@ -63,7 +63,7 @@ def box_construction_over_box_count():
     runtime_stdev = np.zeros((num,1))
 
     for i, bc in enumerate(box_counts):
-        print('Starting lib count ', bc)
+        print('Starting bounding_box count ', bc)
         for r in range(repeats):
             print('Repeat ', r)
             runtime[i, r],_root,_bnl = time_construct_box_tree(int(bc),dimensions)
@@ -73,12 +73,12 @@ def box_construction_over_box_count():
     plt.semilogx(box_counts, runtime_avg)
     plt.xlabel('$log$ Number of boxes')
     plt.ylabel('Runtime(s)')
-    plt.title('Runtime vs $log$ lib count in $R^{%d}$' % dimensions)
+    plt.title('Runtime vs $log$ bounding_box count in $R^{%d}$' % dimensions)
     plt.subplot(2,1,2)
     plt.loglog(box_counts, runtime_avg)
     plt.xlabel('$log$ Number of boxes')
     plt.ylabel('$log$ Runtime(s)')
-    plt.title('$log$ Runtime vs $log$ lib count in $R^{%d}$' % dimensions)
+    plt.title('$log$ Runtime vs $log$ bounding_box count in $R^{%d}$' % dimensions)
     plt.show()
 
 def box_construction_over_runtime_dimensions():
@@ -128,7 +128,7 @@ def box_query_over_box_count():
     runtime_stdev = np.zeros((num,1))
 
     for i, bc in enumerate(box_counts):
-        print('Starting lib count ', bc)
+        print('Starting bounding_box count ', bc)
         for r in range(repeats):
             print('Repeat ', r)
             _rt,root,bnl = time_construct_box_tree(int(bc),dimensions)
@@ -139,7 +139,7 @@ def box_query_over_box_count():
     plt.semilogx(box_counts, runtime_avg)
     plt.xlabel('$log$ Number of boxes')
     plt.ylabel('Runtime(s)')
-    plt.title('Runtime for %d queries vs $log$ lib count in $R^{%d}$' % (queries, dimensions))
+    plt.title('Runtime for %d queries vs $log$ bounding_box count in $R^{%d}$' % (queries, dimensions))
     plt.subplot(2,1,2)
     plt.loglog(box_counts, runtime_avg)
     plt.xlabel('$log$ Number of boxes')

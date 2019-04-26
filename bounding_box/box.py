@@ -12,7 +12,7 @@ from pypolycontain.lib.inclusion_encodings import constraints_AB_eq_CD
 class AABB:
     def __init__(self, vertices, color=None, zonotope=None):
         '''
-        Creates an axis-aligned bounding lib from two diagonal vertices
+        Creates an axis-aligned bounding bounding_box from two diagonal vertices
         :param vertices: a list of defining vertices with shape (2, dimensions)
         '''
         try:
@@ -56,7 +56,7 @@ class AABB:
     def overlaps(self, b2):
         '''
         U: lower corner. V: upper corner
-        :param b2: lib to compare to
+        :param b2: bounding_box to compare to
         :return:
         '''
         u1_leq_v2 = np.less_equal(self.u,b2.v)
@@ -118,7 +118,7 @@ def zonotope_to_box(z):
     x = np.empty((z.x.shape[0],1),dtype='object')
     for row in range(p.shape[0]):
         p[row,0]=model.addVar(lb=-1,ub=1) #TODO: Generalize to AH polytopes. Use linear constraints on p.
-        # See AH_polytope.py in pypolycontain.lib: constraints_list_of_tuples(model,[(self.P.H,p),(-np.eye(self.P.h.shape[0]),self.P.h)],sign="<")
+        # See AH_polytope.py in pypolycontain.bounding_box: constraints_list_of_tuples(model,[(self.P.H,p),(-np.eye(self.P.h.shape[0]),self.P.h)],sign="<")
     model.update()
     for d in range(dim):
         x[d] = model.addVar(obj=0,lb=-GRB.INFINITY,ub=GRB.INFINITY)

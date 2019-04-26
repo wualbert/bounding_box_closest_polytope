@@ -5,8 +5,8 @@
 '''
 from box_tree import *
 from box import *
-from scipy.spatial import KDTree
 from pypolycontain.lib.zonotope import zonotope_distance_point
+from utils.utils import build_centroid_kd_tree
 
 class ZonotopeTree:
     def __init__(self,zonotopes):
@@ -85,12 +85,3 @@ class ZonotopeTree:
                 elif closest_distance==candidate_d:
                     closest_zonotopes.append(cb.zonotope)
             return closest_zonotopes, candidate_boxes, query_box
-
-
-def build_centroid_kd_tree(zonotopes):
-    n = len(zonotopes)
-    k = zonotopes[0].x.shape[0]
-    centroids = np.zeros((n,k))
-    for i, z in enumerate(zonotopes):
-        centroids[i,:] = zonotopes[i].x[:,0]
-    return KDTree(centroids)

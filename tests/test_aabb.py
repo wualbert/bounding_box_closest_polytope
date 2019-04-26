@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from lib.box import *
+from bounding_box.box import *
 from visualization.visualize import *
 from pypolycontain.lib.zonotope import zonotope
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ

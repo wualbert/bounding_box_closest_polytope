@@ -1,7 +1,7 @@
 import random
-import time
+import timeit
 
-from lib.zonotope_tree import *
+from bounding_box.zonotope_tree import *
 from visualization.visualize import *
 
 space_size = 10000
@@ -14,9 +14,9 @@ def time_construct_zonotope_tree(zonotope_count, dim):
         G = (np.random.rand(dim, m) - 0.5) * generator_range
         x = (np.random.rand(dim, 1) - 0.5) * centroid_range
         zonotopes.append(zonotope(x, G))
-    start_time = time.time()
+    start_time = timeit.default_timer()
     zt = ZonotopeTree(zonotopes)
-    end_time = time.time()
+    end_time = timeit.default_timer()
 
     return end_time-start_time, zt
 
@@ -31,10 +31,10 @@ def time_query_zonotope_tree(zonotope_count, dim, num_of_queries):
         zonotopes.append(zonotope(x, G))
     zt = ZonotopeTree(zonotopes)
     query_points = (np.random.rand(num_of_queries,dim)-0.5)*centroid_range
-    start_time = time.time()
+    start_time = timeit.default_timer()
     for q in query_points:
         zt.find_closest_zonotopes(q)
-    end_time = time.time()
+    end_time = timeit.default_timer()
     return end_time-start_time
 
 def time_query_zonotope_tree_line(zonotope_count, dim, num_of_queries):
@@ -53,7 +53,7 @@ def time_query_zonotope_tree_line(zonotope_count, dim, num_of_queries):
     query_points = (np.random.rand(dim-1,num_of_queries)-0.5)
     query_points = np.vstack([query_points, (np.random.rand(1, num_of_queries) - 0.5) * centroid_range])
     # print(query_points)
-    start_time = time.time()
+    start_time = timeit.default_timer()
     for q in query_points.T:
         zt.find_closest_zonotopes(q)
     end_time = time.time()
@@ -75,7 +75,7 @@ def query_time_over_zonotope_count():
     runtime_stdev = np.zeros((num,1))
 
     for i, bc in enumerate(zonotope_count):
-        print('Starting lib count ', bc)
+        print('Starting bounding_box count ', bc)
         for r in range(repeats):
             print('Repeat ', r)
             runtime[i, r] = time_query_zonotope_tree_line(int(bc),dimensions,queries_count)
@@ -140,7 +140,7 @@ def query_time_over_zonotope_count():
 #     runtime_stdev = np.zeros((num,1))
 #
 #     for i, bc in enumerate(box_counts):
-#         print('Starting lib count ', bc)
+#         print('Starting bounding_box count ', bc)
 #         for r in range(repeats):
 #             print('Repeat ', r)
 #             _rt,root,bnl = time_construct_box_tree(int(bc),dimensions)
@@ -151,7 +151,7 @@ def query_time_over_zonotope_count():
 #     plt.semilogx(box_counts, runtime_avg)
 #     plt.xlabel('$log$ Number of boxes')
 #     plt.ylabel('Runtime(s)')
-#     plt.title('Runtime for %d queries vs $log$ lib count in $R^{%d}$' % (queries, dimensions))
+#     plt.title('Runtime for %d queries vs $log$ bounding_box count in $R^{%d}$' % (queries, dimensions))
 #     plt.subplot(2,1,2)
 #     plt.loglog(box_counts, runtime_avg)
 #     plt.xlabel('$log$ Number of boxes')
