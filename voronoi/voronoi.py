@@ -80,7 +80,7 @@ class VoronoiClosestPolytope:
     def build_cell_AHpolytope_map(self):
         for AHpolytope in self.polytopes:
             #check each vertex and see if it is contained by the AHpolytope
-            #FIXME
+            #TODO
             for vertex in self.centroid_voronoi.points:
                 if AHpolytope.is_inside(vertex):
                     associated_centroid_ids = self.vertex_to_voronoi_centroid_index[str(vertex)]

@@ -20,6 +20,7 @@ def test_voronoi_closest_zonotope():
 
     #visualize polytopes
     ax = fig.add_subplot(111)
+    fig, ax = visZ(closest_zonotope, title="", fig=fig, ax=ax, alpha=1)
     fig, ax = visZ(zonotopes, title="", alpha=0.2, fig=fig, ax=ax)
     plt.scatter(query_point[0],query_point[1])
 
