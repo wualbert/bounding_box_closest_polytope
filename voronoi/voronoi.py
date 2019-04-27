@@ -2,7 +2,7 @@ import numpy as np
 from scipy.spatial import Voronoi
 from pypolycontain.lib.zonotope import zonotope
 from collections import deque
-from utils.utils import build_centroid_kd_tree, build_AH_polyotpe_centroid_voronoi_diagram
+from utils.utils import build_centroid_kd_tree, build_polyotpe_centroid_voronoi_diagram
 from pypolycontain.lib.AH_polytope import AH_polytope,distance_point,to_AH_polytope
 from pypolycontain.lib.polytope import polytope
 
@@ -20,19 +20,25 @@ from pypolycontain.lib.polytope import polytope
 #     def __hash__(self):
 #         return self.id
 
-class VoronoiClosestAHPolytope:
-    def __init__(self, AHpolytopes):
-        self.AHpolytopes = AHpolytopes
-        self.centroid_voronoi = build_AH_polyotpe_centroid_voronoi_diagram(self.AHpolytopes)
-        self.centroid_to_AHpolytope_map = dict()  #stores the potential closest polytopes associated with each Voronoi (centroid)
-        for p in self.AHpolytopes:
-            hashable = str(p.t.flatten())
-            if hashable in self.centroid_to_AHpolytope_map:
-                print('Warning: found polytope with identical centroids!')
-                self.centroid_to_AHpolytope_map[hashable].append(p)
-                print(self.centroid_to_AHpolytope_map[hashable])
+class VoronoiClosestPolytope:
+    def __init__(self, polytopes):
+        self.polytopes = polytopes
+        self.type = self.polytopes[0].type
+        self.centroid_voronoi = build_polyotpe_centroid_voronoi_diagram(self.polytopes)
+        self.centroid_to_polytope_map = dict()  #stores the potential closest polytopes associated with each Voronoi (centroid)
+        for p in self.polytopes:
+            if self.type == 'AH_polytope':
+                hashable = str(p.t.flatten())
+            elif self.type == 'zonotope':
+                hashable = str(p.x.flatten())
             else:
-                self.centroid_to_AHpolytope_map[hashable]=[p]
+                raise NotImplementedError
+            if hashable in self.centroid_to_polytope_map:
+                print('Warning: found polytope with identical centroids!')
+                self.centroid_to_polytope_map[hashable].append(p)
+                print(self.centroid_to_polytope_map[hashable])
+            else:
+                self.centroid_to_polytope_map[hashable]=[p]
         self.centroid_to_voronoi_centroid_index = dict() #maps each centroid to its internal index in Voronoi
         self.vertex_to_voronoi_vertex_index = dict()   #maps each vertex to its internal index in Voronoi
         self.vertex_to_voronoi_centroid_index = dict()  #maps each vertex to the list of centroids using it
@@ -40,7 +46,7 @@ class VoronoiClosestAHPolytope:
         self.parse_voronoi_diagram()
 
         #build kd-tree for centroids
-        self.centroid_tree = build_centroid_kd_tree(self.AHpolytopes)
+        self.centroid_tree = build_centroid_kd_tree(self.polytopes)
         self.build_sphere_around_vertices()
 
     def parse_voronoi_diagram(self):
@@ -72,7 +78,7 @@ class VoronoiClosestAHPolytope:
         return
 
     def build_cell_AHpolytope_map(self):
-        for AHpolytope in self.AHpolytopes:
+        for AHpolytope in self.polytopes:
             #check each vertex and see if it is contained by the AHpolytope
             #FIXME
             for vertex in self.centroid_voronoi.points:
@@ -80,14 +86,14 @@ class VoronoiClosestAHPolytope:
                     associated_centroid_ids = self.vertex_to_voronoi_centroid_index[str(vertex)]
                     for centroid_id in associated_centroid_ids:
                         centroid = self.centroid_voronoi.points[centroid_id]
-                        self.centroid_to_AHpolytope_map[str(centroid)].append(AHpolytope)
+                        self.centroid_to_polytope_map[str(centroid)].append(AHpolytope)
 
     def find_closest_AHpolytopes(self, query_point, k_closest = 1):
         #find the closest centroid
         d,i = self.centroid_tree.query(query_point)
         closest_centroid = self.centroid_tree.data[i]
-        print(self.centroid_to_AHpolytope_map.keys())
-        closest_AHpolytope_candidates = self.centroid_to_AHpolytope_map[str(closest_centroid)]
+        print(self.centroid_to_polytope_map.keys())
+        closest_AHpolytope_candidates = self.centroid_to_polytope_map[str(closest_centroid)]
         #check the AHpolytopes for the closest
         sorted_AHpolytopes = sorted(closest_AHpolytope_candidates, key = lambda p: distance_point(p, query_point))
         return sorted_AHpolytopes[0: min(k_closest, len(sorted_AHpolytopes))]

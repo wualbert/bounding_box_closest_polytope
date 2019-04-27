@@ -1,5 +1,5 @@
 import numpy as np
-from voronoi.voronoi import VoronoiClosestAHPolytope
+from voronoi.voronoi import VoronoiClosestPolytope
 from pypolycontain.lib.zonotope import zonotope
 from visualization.visualize import *
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
@@ -15,7 +15,7 @@ def test_zonotope_to_voronoi():
         x = (np.random.rand(2, 1) - 0.5) * centroid_range
         zonotopes.append(zonotope(x, G))
 
-    vcp = VoronoiClosestAHPolytope(zonotopes)
+    vcp = VoronoiClosestPolytope(zonotopes)
     visualize_2d_voronoi(vcp)
 
 if __name__=='__main__':
