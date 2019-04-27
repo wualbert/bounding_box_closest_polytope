@@ -4,6 +4,7 @@ from visualization.visualize import *
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
 
 def test_with_dataset():
+    #FIXME: Import issues
     from utils.PWA_Control_utils import polytree_to_zonotope_tree
     import pickle
     with open("zonotope_datasets/inverted_pendulum.pkl", "rb") as f:
@@ -17,7 +18,7 @@ def test_with_dataset():
                               (np.random.rand(1) - 0.5) * 2])
     print(query_point)
     query_point = query_point.reshape(-1, 1)
-    closest_zonotope, candidate_boxes, query_box = zonotope_tree.find_closest_zonotopes(query_point)
+    closest_zonotope, candidate_boxes, query_box = zonotope_tree.find_closest_AHpolytopes(query_point)
     print('Query point: ', query_point)
     ax_lim = np.asarray([-zonotope_count, zonotope_count, -zonotope_count, zonotope_count]) * 1.1
     fig, ax = visZ(zonotope_tree.zonotopes, title="", alpha=0.2, axis_limit=ax_lim)

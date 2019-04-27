@@ -35,6 +35,4 @@ def visualize_box_nodes(box_nodes_list, dim_x = 0, dim_y = 1, xlim=None, ylim=No
 
 def visualize_2d_voronoi(VoronoiClosestPolytope, dim_x = 0, dim_y = 1, xlim=None, ylim=None, ax = None, fig = None,alpha=None,fill=False,linewidth=3):
     fig = voronoi_plot_2d(VoronoiClosestPolytope.centroid_voronoi)
-    ax = fig.add_subplot(111)
-    fig, ax = visZ(VoronoiClosestPolytope.zonotopes, title="Voronoi Diagram of Polytope Centroids", fig=fig, ax=ax, alpha=0.3)
-    plt.show()
+    return fig
