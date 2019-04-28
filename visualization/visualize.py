@@ -33,6 +33,3 @@ def visualize_box_nodes(box_nodes_list, dim_x = 0, dim_y = 1, xlim=None, ylim=No
         box_list.append(box_node.box)
     return visualize_boxes(box_list,dim_x = dim_x, dim_y = dim_y,linewidth=linewidth, xlim=xlim, ylim=ylim, ax = ax, fig = fig,alpha=alpha, fill=fill)
 
-def visualize_2d_voronoi(VoronoiClosestPolytope, dim_x = 0, dim_y = 1, xlim=None, ylim=None, ax = None, fig = None,alpha=None,fill=False,linewidth=3):
-    fig = voronoi_plot_2d(VoronoiClosestPolytope.centroid_voronoi)
-    return fig
