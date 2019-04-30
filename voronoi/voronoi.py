@@ -12,20 +12,6 @@ from gurobipy import Model, GRB
 from timeit import default_timer
 
 
-
-# class VoronoiCell:
-#     def __init__(self, centroid, vertices, ridges):
-#         self.centroid = centroid
-#         self.vertices = vertices
-#         self.polytopes = deque()
-#         self.id = hash(str(self.centroid))
-#
-#     def add_polytopes(self, polytopes):
-#         self.polytopes.append(polytopes)
-#
-#     def __hash__(self):
-#         return self.id
-
 class VoronoiClosestPolytope:
     def __init__(self, polytopes):
         self.start_time = default_timer()
@@ -63,6 +49,7 @@ class VoronoiClosestPolytope:
             self.vertex_to_voronoi_vertex_index[str(vertex)] = vertex_index
         for centroid in self.centroid_voronoi.points:
             vertex_indices = self.get_voronoi_vertex_indices_of_centroid(centroid)
+            # print(centroid, vertex_indices.shape)
             for vertex_index in np.atleast_1d(vertex_indices):
                 vertex = self.centroid_voronoi.vertices[vertex_index]
                 hashable = str(vertex)
@@ -75,12 +62,17 @@ class VoronoiClosestPolytope:
     def get_voronoi_vertex_indices_of_centroid(self, centroid):
         assert(str(centroid) in self.centroid_to_voronoi_centroid_index)
         region_index = self.centroid_voronoi.point_region[self.centroid_to_voronoi_centroid_index[str(centroid)]]
-        vertex_indices = self.centroid_voronoi.regions[region_index]
-        return vertex_indices
+        vertex_indices = np.asarray(self.centroid_voronoi.regions[region_index])
+        valid_vertex_indices = vertex_indices[np.where(vertex_indices!=-1)]
+
+        return valid_vertex_indices
 
     def build_sphere_around_vertices(self):
         for vertex in self.centroid_voronoi.vertices:
-            vertex_to_centroid_distance = np.linalg.norm(vertex-self.vertex_to_voronoi_centroid_index[str(vertex)][0])
+            closest_centroid_index = self.vertex_to_voronoi_centroid_index[str(vertex)][0]
+            # print('cci', closest_centroid_index)
+            # print('centroid', self.centroid_voronoi.points[closest_centroid_index])
+            vertex_to_centroid_distance = np.linalg.norm(vertex-self.centroid_voronoi.points[closest_centroid_index])
             #construct ball around the vertex
             self.vertex_balls[str(vertex)] = vertex_to_centroid_distance
         return
@@ -142,13 +134,13 @@ class VoronoiClosestPolytope:
         print('Completed precomputation in %f seconds' %(default_timer()-self.start_time))
         return
 
-    def find_closest_AHpolytopes(self, query_point, k_closest = 1):
+    def find_closest_polytopes(self, query_point, k_closest = 1):
         #find the closest centroid
         start_time = default_timer()
         d,i = self.centroid_tree.query(query_point)
-        closest_centroid = self.centroid_tree.data[i]
-        closest_AHpolytope_candidates = self.centroid_to_polytope_map[str(closest_centroid)]
+        closest_voronoi_centroid = self.centroid_tree.data[i]
+        closest_AHpolytope_candidates = self.centroid_to_polytope_map[str(closest_voronoi_centroid)]
         #check the AHpolytopes for the closest
         sorted_AHpolytopes = sorted(closest_AHpolytope_candidates, key = lambda p: distance_point(p, query_point))
-        print('Found closest polytope in %f seconds' %(default_timer()-start_time))
+        # print('Found closest polytope in %f seconds' %(default_timer()-start_time))
         return sorted_AHpolytopes[0: min(k_closest, len(sorted_AHpolytopes))]

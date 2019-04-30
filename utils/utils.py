@@ -18,6 +18,7 @@ def build_centroid_kd_tree(polytopes):
             centroids[i,:] = polytopes[i].x[:, 0]
         else:
             raise NotImplementedError
+    # print('centroids ' + str(centroids))
     return KDTree(centroids)
 
 def build_polyotpe_centroid_voronoi_diagram(polytopes):

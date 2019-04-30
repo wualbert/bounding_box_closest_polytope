@@ -143,7 +143,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
                                   (np.random.rand(1) - 0.5)*2])
         print(query_point)
         query_point = query_point.reshape(-1, 1)
-        closest_zonotope, candidate_boxes, query_box = zonotope_tree.find_closest_AHpolytopes(query_point)
+        closest_zonotope, candidate_boxes, query_box = zonotope_tree.find_closest_polytopes(query_point)
         print('Query point: ', query_point)
         ax_lim = np.asarray([-zonotope_count, zonotope_count, -zonotope_count, zonotope_count]) * 1.1
         fig, ax = visZ(zonotope_tree.zonotopes, title="", alpha=0.2, axis_limit=ax_lim)

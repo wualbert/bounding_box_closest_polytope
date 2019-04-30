@@ -16,7 +16,6 @@ def test_zonotope_to_voronoi():
         zonotopes.append(zonotope(x, G))
 
     vcp = VoronoiClosestPolytope(zonotopes)
-    visualize_2d_voronoi(vcp)
 
 if __name__=='__main__':
     test_zonotope_to_voronoi()
