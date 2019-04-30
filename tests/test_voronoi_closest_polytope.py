@@ -52,15 +52,15 @@ def test_voronoi_closest_zonotope(zonotope_count = 30):
 
     #visualize polytopes
     fig, ax = visZ(evaluated_zonotopes, title="", fig=fig, ax=ax, alpha=0.3, color='pink')
-    fig, ax = visZ(evaluated_zonotopes[0:1], title="", fig=fig, ax=ax, alpha=0.8,color='brown+')
-    fig, ax = visZ(zonotopes, title="", alpha=0.05, fig=fig, ax=ax, color='gray')
+    fig, ax = visZ(evaluated_zonotopes[0:1], title="", fig=fig, ax=ax, alpha=0.8,color='brown')
+    fig, ax = visZ(zonotopes, title="", alpha=0.07, fig=fig, ax=ax, color='gray')
     plt.scatter(query_point[0],query_point[1], facecolor='red', s=6)
 
     plt.xlabel('$x$')
     plt.ylabel('$y$')
     plt.title('Closest Zonotope with Voronoi Diagram')
     print('Closest Zonotope: ', evaluated_zonotopes[0])
-    # plt.savefig('closest_zonotope'+str(default_timer())+'.png', dpi=300)
+    plt.savefig('closest_zonotope'+str(default_timer())+'.png', dpi=300)
     plt.show()
 
 def test_voronoi_closest_zonotope_nd(zonotope_count = 30,dim = 2):

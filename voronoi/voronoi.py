@@ -13,7 +13,7 @@ from timeit import default_timer
 
 
 class VoronoiClosestPolytope:
-    def __init__(self, polytopes):
+    def __init__(self, polytopes, compute_with_vertex = False):
         self.start_time = default_timer()
         self.polytopes = polytopes
         self.type = self.polytopes[0].type
@@ -31,18 +31,19 @@ class VoronoiClosestPolytope:
                 self.centroid_to_polytope_map[hashable].add(p)
             else:
                 self.centroid_to_polytope_map[hashable]={p}
-        self.centroid_to_voronoi_centroid_index = dict() #maps each centroid to its internal index in Voronoi
-        self.vertex_to_voronoi_vertex_index = dict()   #maps each vertex to its internal index in Voronoi
-        self.vertex_to_voronoi_centroid_index = dict()  #maps each vertex to the list of centroids using it
-        self.vertex_balls = dict() #maps each vertex to a ball radius around it
-        self.parse_voronoi_diagram()
+        if compute_with_vertex:
+            self.centroid_to_voronoi_centroid_index = dict()  # maps each centroid to its internal index in Voronoi
+            self.vertex_to_voronoi_vertex_index = dict()  # maps each vertex to its internal index in Voronoi
+            self.vertex_to_voronoi_centroid_index = dict()  # maps each vertex to the list of centroids using it
+            self.vertex_balls = dict()  # maps each vertex to a ball radius around it
+            self.parse_voronoi_diagram_vertex()
+            self.build_sphere_around_vertices()
+            self.build_cell_AHpolytope_map_vertex()
 
         #build kd-tree for centroids
         self.centroid_tree = build_centroid_kd_tree(self.polytopes)
-        self.build_sphere_around_vertices()
-        self.build_cell_AHpolytope_map()
 
-    def parse_voronoi_diagram(self):
+    def parse_voronoi_diagram_vertex(self):
         for centroid_index, centroid in enumerate(self.centroid_voronoi.points):
             self.centroid_to_voronoi_centroid_index[str(centroid)] = centroid_index
         for vertex_index, vertex in enumerate(self.centroid_voronoi.vertices):
@@ -77,7 +78,7 @@ class VoronoiClosestPolytope:
             self.vertex_balls[str(vertex)] = vertex_to_centroid_distance
         return
 
-    def build_cell_AHpolytope_map(self):
+    def build_cell_AHpolytope_map_vertex(self):
         # check Voronoi overlap with polytope through convex hull
         for centroid in self.centroid_voronoi.points:
             vertex_ids = self.get_voronoi_vertex_indices_of_centroid(centroid)
