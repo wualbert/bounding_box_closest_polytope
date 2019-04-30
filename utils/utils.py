@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.spatial import KDTree
+from scipy.spatial import cKDTree as KDTree
 from scipy.spatial import Voronoi
 
 def build_centroid_kd_tree(polytopes):

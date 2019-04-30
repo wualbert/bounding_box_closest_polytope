@@ -7,17 +7,25 @@ from pypolycontain.lib.AH_polytope import AH_polytope,distance_point,to_AH_polyt
 from pypolycontain.lib.polytope import polytope
 from pypolycontain.lib.zonotope import zonotope_distance_point
 from pypolycontain.lib.containment_encodings import subset_generic,constraints_AB_eq_CD,add_Var_matrix
-from gurobipy import Model, GRB
+from gurobipy import Model, GRB, QuadExpr
 
 from timeit import default_timer
 
 
 class VoronoiClosestPolytope:
     def __init__(self, polytopes, compute_with_vertex = False):
-        self.start_time = default_timer()
+        '''
+        Compute the closest polytope using Voronoi cells
+        :param polytopes:
+        :param compute_with_vertex:
+        '''
+        self.init_start_time = default_timer()
+        self.section_start_time = self.init_start_time
         self.polytopes = polytopes
         self.type = self.polytopes[0].type
         self.centroid_voronoi = build_polyotpe_centroid_voronoi_diagram(self.polytopes)
+        print('Built Voronoi diagram in %f seconds' % (default_timer() - self.section_start_time))
+        self.section_start_time = default_timer()
         self.centroid_to_polytope_map = dict()  #stores the potential closest polytopes associated with each Voronoi (centroid)
         for p in self.polytopes:
             if self.type == 'AH_polytope':
@@ -31,17 +39,88 @@ class VoronoiClosestPolytope:
                 self.centroid_to_polytope_map[hashable].add(p)
             else:
                 self.centroid_to_polytope_map[hashable]={p}
+        self.centroid_to_voronoi_centroid_index = dict()  # maps each centroid to its internal index in Voronoi
+        self.vertex_to_voronoi_vertex_index = dict()  # maps each vertex to its internal index in Voronoi
+        self.vertex_to_voronoi_centroid_index = dict()  # maps each vertex to the list of centroids using it
+        self.parse_voronoi_diagram_vertex()
         if compute_with_vertex:
-            self.centroid_to_voronoi_centroid_index = dict()  # maps each centroid to its internal index in Voronoi
-            self.vertex_to_voronoi_vertex_index = dict()  # maps each vertex to its internal index in Voronoi
-            self.vertex_to_voronoi_centroid_index = dict()  # maps each vertex to the list of centroids using it
             self.vertex_balls = dict()  # maps each vertex to a ball radius around it
-            self.parse_voronoi_diagram_vertex()
             self.build_sphere_around_vertices()
             self.build_cell_AHpolytope_map_vertex()
+        else:
+            self.cell_dmax = dict()
+            self.compute_cell_dmax()
+            print('Computed dmax\'s in %f seconds' %(default_timer()-self.section_start_time))
+            self.section_start_time = default_timer()
+            self.build_cell_AHpolytope_map()
+            print('Mapped polytopes in %f seconds' %(default_timer()-self.section_start_time))
+            self.section_start_time = default_timer()
 
         #build kd-tree for centroids
         self.centroid_tree = build_centroid_kd_tree(self.polytopes)
+        print('Completed precomputation in %f seconds' % (default_timer() - self.init_start_time))
+
+    def compute_cell_dmax(self):
+        #find the largest distance from the centroid in a voronoi cell
+        for centroid_index, centroid in enumerate(self.centroid_voronoi.points):
+            vertex_indices = np.asarray(self.get_voronoi_vertex_indices_of_centroid(centroid))
+            vertices = self.centroid_voronoi.vertices[vertex_indices]
+            norms = np.linalg.norm(np.subtract(vertices,centroid),axis=1)
+            current_max = np.amax(norms)
+            self.cell_dmax[str(centroid)]=current_max
+
+    def build_cell_AHpolytope_map(self):
+        #for each polytope-voronoi cell combination, check if the cell should be discarded
+        for centroid_index, centroid in enumerate(self.centroid_voronoi.points):
+            vertex_indices = np.asarray(self.get_voronoi_vertex_indices_of_centroid(centroid))
+            vertices = self.centroid_voronoi.vertices[vertex_indices]
+            for polytope in self.polytopes:
+                if self.type == 'zonotope':
+                    model = Model("voronoi_polytope_dmin")
+                    # vertex constraint
+                    lambda_i = np.empty((1, vertices.shape[0]), dtype='object')
+                    for column in range(lambda_i.shape[1]):
+                        lambda_i[0, column] = model.addVar(lb=0)
+                    constraints_AB_eq_CD(model, lambda_i, np.ones([lambda_i.shape[1], 1]), np.ones([1, 1]),
+                                         np.ones([1, 1]))
+                    model.update()
+                    # convex hull of the Voronoi cell
+                    d = vertices.shape[1]
+                    voronoi_point = np.empty((d, 1), dtype='object')
+                    for row in range(voronoi_point.shape[0]):
+                        voronoi_point[row, 0] = model.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY)
+                    constraints_AB_eq_CD(model, np.eye(voronoi_point.shape[0]), voronoi_point, vertices.T, lambda_i.T)
+                    model.update()
+                    #polytope constraint
+                    n = polytope.x.shape[0]
+                    p = np.empty((polytope.G.shape[1], 1), dtype='object')
+                    polytope_point = np.empty((polytope.x.shape[0], 1), dtype='object')
+                    for row in range(p.shape[0]):
+                        p[row, 0] = model.addVar(lb=-1, ub=1)
+                    model.update()
+                    for row in range(polytope_point.shape[0]):
+                        polytope_point[row, 0] = model.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY)
+                    constraints_AB_eq_CD(model, np.eye(n), polytope_point - polytope.x, polytope.G, p)
+                    #l2 distance objective
+                    J = QuadExpr()
+                    for dim in range(d):
+                        J.add((voronoi_point[dim, 0]-polytope_point[dim,0])* (voronoi_point[dim, 0]-polytope_point[dim,0]))
+                    model.setObjective(J, GRB.MINIMIZE)
+                    model.setParam('OutputFlag', 0)
+                    model.update()
+                    model.optimize()
+                    if model.Status == 2:  # found optimal solution
+                        # print('centroid, polytope: ', centroid, polytope.x)
+                        # print('cost ',np.sqrt(max(0.,J.getValue())))
+                        if self.cell_dmax[str(centroid)] > np.sqrt(max(0.,J.getValue())):
+                            #add the polytope
+                            self.centroid_to_polytope_map[str(centroid)].add(polytope)
+                    else:
+                        raise Exception
+
+                else:
+                    raise NotImplementedError
+
 
     def parse_voronoi_diagram_vertex(self):
         for centroid_index, centroid in enumerate(self.centroid_voronoi.points):
@@ -61,11 +140,15 @@ class VoronoiClosestPolytope:
         return
 
     def get_voronoi_vertex_indices_of_centroid(self, centroid):
+        '''
+        Get the vertex indices assiciated with the given centroid
+        :param centroid:
+        :return:
+        '''
         assert(str(centroid) in self.centroid_to_voronoi_centroid_index)
         region_index = self.centroid_voronoi.point_region[self.centroid_to_voronoi_centroid_index[str(centroid)]]
         vertex_indices = np.asarray(self.centroid_voronoi.regions[region_index])
         valid_vertex_indices = vertex_indices[np.where(vertex_indices!=-1)]
-
         return valid_vertex_indices
 
     def build_sphere_around_vertices(self):
@@ -107,6 +190,7 @@ class VoronoiClosestPolytope:
                         x[row, 0] = model.addVar()
                     constraints_AB_eq_CD(model, np.eye(n), x - polytope.x, polytope.G, p)
                     constraints_AB_eq_CD(model, np.eye(x.shape[0]), x, vertices.T, lambda_i.T)
+                    model.update()
                     model.setParam('OutputFlag', 0)
                     model.optimize()
                     if model.Status == 2: #found optimal solution
@@ -132,16 +216,30 @@ class VoronoiClosestPolytope:
                         for centroid_id in associated_centroid_ids:
                             centroid = self.centroid_voronoi.points[centroid_id]
                             self.centroid_to_polytope_map[str(centroid)].add(polytope)
-        print('Completed precomputation in %f seconds' %(default_timer()-self.start_time))
         return
 
-    def find_closest_polytopes(self, query_point, k_closest = 1):
+    def find_k_closest_polytopes(self,query_point, k_closest=1):
         #find the closest centroid
-        start_time = default_timer()
         d,i = self.centroid_tree.query(query_point)
         closest_voronoi_centroid = self.centroid_tree.data[i]
         closest_AHpolytope_candidates = self.centroid_to_polytope_map[str(closest_voronoi_centroid)]
         #check the AHpolytopes for the closest
         sorted_AHpolytopes = sorted(closest_AHpolytope_candidates, key = lambda p: distance_point(p, query_point))
-        # print('Found closest polytope in %f seconds' %(default_timer()-start_time))
         return sorted_AHpolytopes[0: min(k_closest, len(sorted_AHpolytopes))]
+
+    def find_closest_polytope(self, query_point, return_intermediate_info = False):
+        #find the closest centroid
+        d,i = self.centroid_tree.query(query_point)
+        closest_voronoi_centroid = self.centroid_tree.data[i]
+        closest_AHpolytope_candidates = self.centroid_to_polytope_map[str(closest_voronoi_centroid)]
+        #check the AHpolytopes for the closest
+        best_polytope = None
+        best_distance = np.inf
+        for polytope in closest_AHpolytope_candidates:
+            dist = distance_point(polytope, query_point)
+            if best_distance>dist:
+                best_distance = dist
+                best_polytope = polytope
+        if return_intermediate_info:
+            return best_polytope, best_distance, closest_AHpolytope_candidates
+        return best_polytope

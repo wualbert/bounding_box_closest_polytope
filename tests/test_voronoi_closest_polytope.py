@@ -10,9 +10,9 @@ from matplotlib.patches import Circle
 plt.rcParams["font.family"] = "Times New Roman"
 
 
-def test_voronoi_closest_zonotope(zonotope_count = 30):
+def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None):
     zonotopes = get_uniform_random_zonotopes(zonotope_count, dim=2, generator_range=zonotope_count*1.5,return_type='zonotope',\
-                                             centroid_range=zonotope_count*6)
+                                             centroid_range=zonotope_count*15, seed=seed)
     #precompute
     vca = VoronoiClosestPolytope(zonotopes)
     #build query point
@@ -21,8 +21,7 @@ def test_voronoi_closest_zonotope(zonotope_count = 30):
     np.reshape(query_point,(query_point.shape[0],1))
 
     #query
-    evaluated_zonotopes = vca.find_closest_polytopes(query_point, k_closest=np.inf)
-    print('Checked %d zonotopes' %len(evaluated_zonotopes))
+    closest_polytope = vca.find_closest_polytope(query_point)
 
     #visualize voronoi
     fig = voronoi_plot_2d(vca.centroid_voronoi, point_size=2,show_vertices=False, line_alpha=0.4, line_width=1)
@@ -30,6 +29,11 @@ def test_voronoi_closest_zonotope(zonotope_count = 30):
 
     dist, voronoi_centroid_index = vca.centroid_tree.query(query_point)
 
+    #get other stuff
+    d, i = vca.centroid_tree.query(query_point)
+    closest_voronoi_centroid = vca.centroid_tree.data[i]
+    closest_AHpolytope_candidates = vca.centroid_to_polytope_map[str(closest_voronoi_centroid)]
+    print('Checked %d polytopes' %len(closest_AHpolytope_candidates))
     #visualize vertex circles
     # #sanity check
     # vertex = vca.centroid_voronoi.vertices[15]
@@ -43,23 +47,23 @@ def test_voronoi_closest_zonotope(zonotope_count = 30):
     # print('Voronoi Centroid index ' + str(voronoi_centroid_index))
     # print('Closest Voronoi centroid ' + str(vca.centroid_tree.data[voronoi_centroid_index,:]))
     # print('Closest polytope centroid ' + str(evaluated_zonotopes[0].x))
-    plt.scatter(voronoi_centroid[0], voronoi_centroid[1], facecolor='blue', s=6)
+    # plt.scatter(voronoi_centroid[0], voronoi_centroid[1], facecolor='blue', s=6)
     for vertex in vca.centroid_voronoi.vertices:
         if voronoi_centroid_index in vca.vertex_to_voronoi_centroid_index[str(vertex)]:
-            # print('Found vertex' + str(vertex))
-            ax.add_patch(Circle(vertex, vca.vertex_balls[str(vertex)],alpha=0.15,facecolor='green'))
+    #         # print('Found vertex' + str(vertex))
+    #         ax.add_patch(Circle(vertex, vca.vertex_balls[str(vertex)],alpha=0.15,facecolor='green'))
             plt.scatter(vertex[0], vertex[1], facecolor='c', s=6, alpha=1)
 
     #visualize polytopes
-    fig, ax = visZ(evaluated_zonotopes, title="", fig=fig, ax=ax, alpha=0.3, color='pink')
-    fig, ax = visZ(evaluated_zonotopes[0:1], title="", fig=fig, ax=ax, alpha=0.8,color='brown')
+    fig, ax = visZ(closest_AHpolytope_candidates, title="", fig=fig, ax=ax, alpha=0.3, color='pink')
+    fig, ax = visZ([closest_polytope], title="", fig=fig, ax=ax, alpha=0.8,color='brown')
     fig, ax = visZ(zonotopes, title="", alpha=0.07, fig=fig, ax=ax, color='gray')
     plt.scatter(query_point[0],query_point[1], facecolor='red', s=6)
 
     plt.xlabel('$x$')
     plt.ylabel('$y$')
     plt.title('Closest Zonotope with Voronoi Diagram')
-    print('Closest Zonotope: ', evaluated_zonotopes[0])
+    print('Closest Zonotope: ', closest_polytope)
     plt.savefig('closest_zonotope'+str(default_timer())+'.png', dpi=300)
     plt.show()
 
@@ -72,9 +76,9 @@ def test_voronoi_closest_zonotope_nd(zonotope_count = 30,dim = 2):
     np.reshape(query_point,(query_point.shape[0],1))
 
     #query
-    evaluated_zonotopes = vca.find_closest_polytopes(query_point, k_closest=np.inf)
+    best_polytope, best_distance, evaluated_zonotopes = vca.find_closest_polytope(query_point, return_intermediate_info=True)
     print('Checked %d of %d zonotopes' %(len(evaluated_zonotopes), zonotope_count))
-    print('Closest zonotope is ', evaluated_zonotopes[0])
+    print('Closest zonotope is ', best_polytope)
 
 def time_against_count(dim=2, counts = np.arange(3, 16, 3)*10, construction_repeats = 1, queries=100):
 
@@ -94,7 +98,7 @@ def time_against_count(dim=2, counts = np.arange(3, 16, 3)*10, construction_repe
             for query_index in range(queries):
                 query_point = (np.random.rand(dim) - 0.5) * count * 5 #random query point
                 query_start_time = default_timer()
-                evaluated_zonotopes = vcp.find_closest_polytopes(query_point, k_closest=np.inf)
+                best_zonotope, best_distance, evaluated_zonotopes = vcp.find_closest_polytope(query_point, return_intermediate_info=True)
                 query_times[count_index,cr_index*queries+query_index] = default_timer()-query_start_time
                 query_reduction_percentages[count_index, cr_index*queries+query_index] = len(evaluated_zonotopes)*100./count
 
@@ -144,13 +148,13 @@ def time_against_count(dim=2, counts = np.arange(3, 16, 3)*10, construction_repe
     plt.subplot(211)
     plt.errorbar(counts,query_reduction_percentages_avg,query_reduction_percentages_std,marker='.',ecolor='r',elinewidth=0.3,capsize=2,linewidth=0.5,markersize=7)
     plt.xlabel('Zonotope Count')
-    plt.ylabel('Zonotope Reduction %')
+    plt.ylabel('% of Zonotopes Evaluated')
     plt.title('Voronoi Closest Zonotope Reduction Percentage in %d-D' %dim)
 
     plt.subplot(212)
     plt.plot(np.log(counts),np.log(query_reduction_percentages_avg))
     plt.xlabel('$log$ Zonotope Count')
-    plt.ylabel('$log$ Zonotope Reduction %')
+    plt.ylabel('$log$ % of Zonotopes Evaluated')
     plt.title('$log$ Voronoi Closest Zonotope Reduction Percentage in %d-D' %dim)
 
 
@@ -172,7 +176,7 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
             for query_index in range(queries):
                 query_point = (np.random.rand(dim) - 0.5) * count * 5 #random query point
                 query_start_time = default_timer()
-                evaluated_zonotopes = vcp.find_closest_polytopes(query_point, k_closest=np.inf)
+                best_zonotope, best_distance, evaluated_zonotopes = vcp.find_closest_polytope(query_point, return_intermediate_info=True)
                 query_times[dim_index,cr_index*queries+query_index] = default_timer()-query_start_time
                 query_reduction_percentages[dim_index, cr_index*queries+query_index] = len(evaluated_zonotopes)*100./count
 
@@ -222,19 +226,19 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
     plt.subplot(211)
     plt.errorbar(dims,query_reduction_percentages_avg,query_reduction_percentages_std,marker='.',ecolor='r',elinewidth=0.3,capsize=2,linewidth=0.5,markersize=7)
     plt.xlabel('State Dimension')
-    plt.ylabel('Zonotope Reduction %')
+    plt.ylabel('% of Zonotopes Evaluated')
     plt.title('Voronoi Closest Zonotope Reduction Percentage with %d Zonotopes' %count)
 
     plt.subplot(212)
     plt.plot(np.log(dims),np.log(query_reduction_percentages_avg))
     plt.xlabel('$log$ State Dimension')
-    plt.ylabel('$log$ Zonotope Reduction %')
+    plt.ylabel('$log$ % of Zonotopes Evaluated')
     plt.title('$log$ Voronoi Closest Zonotope Reduction Percentage with %d Zonotopes' %count)
     plt.show()
 
 if __name__ == '__main__':
-    # print('time_against_count(dim=3, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=100)')
-    # time_against_count(dim=3, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=100)
+    # print('time_against_count(dim=3, counts=np.arange(2, 11, 2) * 10, construction_repeats=1, queries=100)')
+    # time_against_count(dim=3, counts=np.arange(2, 11, 2) * 10, construction_repeats=1, queries=100)
     # print('time_against_dim(count=100, dims=np.arange(2, 7, 1), construction_repeats=3, queries=100)')
-    # time_against_dim(count=100, dims=np.arange(2, 7, 1), construction_repeats=3, queries=100)
-    test_voronoi_closest_zonotope(30)
+    # time_against_dim(count=50, dims=np.arange(2, 7, 1), construction_repeats=1, queries=100)
+    test_voronoi_closest_zonotope(100)
