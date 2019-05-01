@@ -46,7 +46,12 @@ class VoronoiClosestPolytope:
         if compute_with_vertex:
             self.vertex_balls = dict()  # maps each vertex to a ball radius around it
             self.build_sphere_around_vertices()
+            print('Computed spheres around vertices in %f seconds' % (default_timer() - self.section_start_time))
+            self.section_start_time = default_timer()
             self.build_cell_AHpolytope_map_vertex()
+            print('Mapped polytopes in %f seconds' % (default_timer() - self.section_start_time))
+            self.section_start_time = default_timer()
+
         else:
             self.cell_dmax = dict()
             self.compute_cell_dmax()
@@ -116,7 +121,11 @@ class VoronoiClosestPolytope:
                             #add the polytope
                             self.centroid_to_polytope_map[str(centroid)].add(polytope)
                     else:
-                        raise Exception
+                        print('Warning: Failed to solve minimum distance between polytope and cell. This should never happen.')
+                        print('Failed to solve polytope: ', polytope, 'with centroid at ', polytope.x, 'against Voronoi centroid ', centroid)
+                        print('System will always check for this polytope.')
+                        self.centroid_to_polytope_map[str(centroid)].add(polytope)
+
 
                 else:
                     raise NotImplementedError

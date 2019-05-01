@@ -10,7 +10,7 @@ from matplotlib.patches import Circle
 plt.rcParams["font.family"] = "Times New Roman"
 
 
-def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None):
+def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None,save=True):
     zonotopes = get_uniform_random_zonotopes(zonotope_count, dim=2, generator_range=zonotope_count*1.5,return_type='zonotope',\
                                              centroid_range=zonotope_count*15, seed=seed)
     #precompute
@@ -59,13 +59,15 @@ def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None):
     fig, ax = visZ([closest_polytope], title="", fig=fig, ax=ax, alpha=0.8,color='brown')
     fig, ax = visZ(zonotopes, title="", alpha=0.07, fig=fig, ax=ax, color='gray')
     plt.scatter(query_point[0],query_point[1], facecolor='red', s=6)
-
+    plt.axes().set_aspect('equal')
     plt.xlabel('$x$')
     plt.ylabel('$y$')
     plt.title('Closest Zonotope with Voronoi Diagram')
     print('Closest Zonotope: ', closest_polytope)
-    plt.savefig('closest_zonotope'+str(default_timer())+'.png', dpi=300)
-    plt.show()
+    if save:
+        plt.savefig('closest_zonotope'+str(default_timer())+'.png', dpi=500)
+    else:
+        plt.show()
 
 def test_voronoi_closest_zonotope_nd(zonotope_count = 30,dim = 2):
     zonotopes = get_uniform_random_zonotopes(zonotope_count, dim=dim, generator_range=zonotope_count*1.2,return_type='zonotope')
@@ -80,7 +82,7 @@ def test_voronoi_closest_zonotope_nd(zonotope_count = 30,dim = 2):
     print('Checked %d of %d zonotopes' %(len(evaluated_zonotopes), zonotope_count))
     print('Closest zonotope is ', best_polytope)
 
-def time_against_count(dim=2, counts = np.arange(3, 16, 3)*10, construction_repeats = 1, queries=100):
+def time_against_count(dim=2, counts = np.arange(3, 16, 3)*10, construction_repeats = 1, queries=100,save=True):
 
     precomputation_times = np.zeros([len(counts), construction_repeats])
     query_times = np.zeros([len(counts), construction_repeats*queries])
@@ -126,7 +128,9 @@ def time_against_count(dim=2, counts = np.arange(3, 16, 3)*10, construction_repe
     plt.xlabel('$log$ Zonotope Count')
     plt.ylabel('$log$ Precomputation Time (s)')
     plt.title('$log$ Voronoi Closest Zonotope Precomputation Time in %d-D' %dim)
-
+    plt.tight_layout()
+    if save:
+        plt.savefig('precomputation_time' + str(default_timer()) + '.png', dpi=500)
 
     plt.figure(fig_index)
     fig_index+=1
@@ -137,11 +141,13 @@ def time_against_count(dim=2, counts = np.arange(3, 16, 3)*10, construction_repe
     plt.title('Voronoi Closest Zonotope Single Query Time in %d-D' %dim)
 
     plt.subplot(212)
-    plt.plot(np.log(counts),np.log(query_times_std))
+    plt.plot(np.log(counts),np.log(query_times_avg))
     plt.xlabel('$log$ Zonotope Count')
     plt.ylabel('$log$ Query Time (s)')
     plt.title('$log$ Voronoi Closest Zonotope Single Query Time in %d-D' %dim)
-
+    plt.tight_layout()
+    if save:
+        plt.savefig('query_time' + str(default_timer()) + '.png', dpi=500)
 
     plt.figure(fig_index)
     fig_index+=1
@@ -156,11 +162,14 @@ def time_against_count(dim=2, counts = np.arange(3, 16, 3)*10, construction_repe
     plt.xlabel('$log$ Zonotope Count')
     plt.ylabel('$log$ % of Zonotopes Evaluated')
     plt.title('$log$ Voronoi Closest Zonotope Reduction Percentage in %d-D' %dim)
+    plt.tight_layout()
+    if save:
+        plt.savefig('reduction_percentage' + str(default_timer()) + '.png', dpi=500)
 
+    else:
+        plt.show()
 
-    plt.show()
-
-def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeats = 1, queries=100):
+def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeats = 1, queries=100,save=True):
     precomputation_times = np.zeros([len(dims), construction_repeats])
     query_times = np.zeros([len(dims), construction_repeats*queries])
     query_reduction_percentages = np.zeros([len(dims), construction_repeats*queries])
@@ -168,9 +177,9 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
         print('Repetition %d' %cr_index)
         for dim_index, dim in enumerate(dims):
             print('Testing zonotopes in %d-D...' % dim)
-            zonotopes = get_uniform_random_zonotopes(count, dim=dim, generator_range=count * 1.2,return_type='zonotope')
+            zonotopes = get_uniform_random_zonotopes(count, dim=dim, generator_range=count * 1.2,centroid_range=count*10, return_type='zonotope')
             construction_start_time = default_timer()
-            vcp = VoronoiClosestPolytope(zonotopes)
+            vcp = VoronoiClosestPolytope(zonotopes,compute_with_vertex=True)
             precomputation_times[dim_index, cr_index] = default_timer()-construction_start_time
             #query
             for query_index in range(queries):
@@ -200,11 +209,14 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
     plt.title('Voronoi Closest Zonotope Precomputation Time with %d Zonotopes' %count)
 
     plt.subplot(212)
-    plt.plot(np.log(dims),np.log(precomputation_times_avg))
+    plt.plot(dims,np.log(precomputation_times_avg))
     plt.xlabel('$log$ State Dimension')
     plt.ylabel('$log$ Precomputation Time (s)')
-    plt.title('$log$ Voronoi Closest Zonotope Precomputation Time with %d Zonotopes' %count)
+    # plt.title('Voronoi Closest Zonotope Precomputation Time with %d Zonotopes' %count)
+    plt.tight_layout()
 
+    if save:
+        plt.savefig('precomputation_time' + str(default_timer()) + '.png', dpi=500)
 
     plt.figure(fig_index)
     fig_index+=1
@@ -215,10 +227,14 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
     plt.title('Voronoi Closest Zonotope Single Query Time with %d Zonotopes' %count)
 
     plt.subplot(212)
-    plt.plot(np.log(dims),np.log(query_times_std))
+    plt.plot(np.log(dims),np.log(query_times_avg))
     plt.xlabel('$log$ State Dimension')
     plt.ylabel('$log$ Query Time (s)')
-    plt.title('$log$ Voronoi Closest Zonotope Single Query Time with %d Zonotopes' %count)
+    # plt.title('$log$ Voronoi Closest Zonotope Single Query Time with %d Zonotopes' %count)
+    plt.tight_layout()
+
+    if save:
+        plt.savefig('query_time' + str(default_timer()) + '.png', dpi=500)
 
 
     plt.figure(fig_index)
@@ -233,12 +249,17 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
     plt.plot(np.log(dims),np.log(query_reduction_percentages_avg))
     plt.xlabel('$log$ State Dimension')
     plt.ylabel('$log$ % of Zonotopes Evaluated')
-    plt.title('$log$ Voronoi Closest Zonotope Reduction Percentage with %d Zonotopes' %count)
-    plt.show()
+    # plt.title('$log$ Voronoi Closest Zonotope Reduction Percentage with %d Zonotopes' %count)
+    plt.tight_layout()
+
+    if save:
+        plt.savefig('reduction_percentage' + str(default_timer()) + '.png', dpi=500)
+    else:
+        plt.show()
 
 if __name__ == '__main__':
-    # print('time_against_count(dim=3, counts=np.arange(2, 11, 2) * 10, construction_repeats=1, queries=100)')
-    # time_against_count(dim=3, counts=np.arange(2, 11, 2) * 10, construction_repeats=1, queries=100)
-    # print('time_against_dim(count=100, dims=np.arange(2, 7, 1), construction_repeats=3, queries=100)')
-    # time_against_dim(count=50, dims=np.arange(2, 7, 1), construction_repeats=1, queries=100)
-    test_voronoi_closest_zonotope(100)
+    # print('time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)')
+    # time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)
+    print('vertex based time_against_dim(count=100, dims=np.arange(2, 7, 1), construction_repeats=3, queries=100)')
+    time_against_dim(count=100, dims=np.arange(2, 7, 1), construction_repeats=3, queries=100)
+    # test_voronoi_closest_zonotope(100, save=True)
