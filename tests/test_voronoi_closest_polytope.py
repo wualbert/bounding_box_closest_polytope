@@ -24,9 +24,9 @@ def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None,save=True):
     closest_polytope, best_distance, closest_AHpolytope_candidates = vca.find_closest_polytope(query_point,return_intermediate_info=True)
 
     #visualize voronoi
-    fig = voronoi_plot_2d(vca.centroid_voronoi, point_size=2,show_vertices=False, line_alpha=0.4, line_width=1)
+    # fig = voronoi_plot_2d(vca.centroid_voronoi, point_size=2,show_vertices=False, line_alpha=0.4, line_width=1)
+    fig = plt.figure()
     ax = fig.add_subplot(111)
-
     # dist, voronoi_centroid_index = vca.centroid_tree.query(query_point)
 
     print('Checked %d polytopes' %len(closest_AHpolytope_candidates))
@@ -44,11 +44,9 @@ def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None,save=True):
     # print('Closest Voronoi centroid ' + str(vca.centroid_tree.data[voronoi_centroid_index,:]))
     # print('Closest polytope centroid ' + str(evaluated_zonotopes[0].x))
     # plt.scatter(voronoi_centroid[0], voronoi_centroid[1], facecolor='blue', s=6)
-    # for vertex in vca.centroid_voronoi.vertices:
-    #     if voronoi_centroid_index in vca.vertex_to_voronoi_centroid_index[str(vertex)]:
-    #         # print('Found vertex' + str(vertex))
-    #         ax.add_patch(Circle(vertex, vca.vertex_balls[str(vertex)],alpha=0.15,facecolor='green'))
-    #         plt.scatter(vertex[0], vertex[1], facecolor='c', s=6, alpha=1)
+    #visualize centroids
+    for vertex in vca.centroids:
+        plt.scatter(vertex[0], vertex[1], facecolor='c', s=2, alpha=1)
 
     #visualize polytopes
     fig, ax = visZ(closest_AHpolytope_candidates, title="", fig=fig, ax=ax, alpha=0.3, color='pink')
@@ -256,6 +254,6 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
 if __name__ == '__main__':
     # print('time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)')
     # time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)
-    # print('time_against_dim(count=300, dims=np.arange(2, 9, 1), construction_repeats=3, queries=100)')
-    # time_against_dim(count=300, dims=np.arange(2, 9, 1), construction_repeats=3, queries=100)
-    test_voronoi_closest_zonotope(100, save=True)
+    print('time_against_dim(count=300, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100)')
+    time_against_dim(count=300, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100)
+    # test_voronoi_closest_zonotope(100, save=False)
