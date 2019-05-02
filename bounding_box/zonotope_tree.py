@@ -5,7 +5,7 @@
 '''
 from box_tree import *
 from box import *
-from pypolycontain.lib.zonotope import zonotope_distance_point
+from pypolycontain.lib.zonotope import zonotope_distance_point, distance_point
 from utils.utils import build_centroid_kd_tree
 
 class ZonotopeTree:
@@ -29,7 +29,7 @@ class ZonotopeTree:
         self.root = binary_split(self.box_nodes)
         # Create kd-tree data structure from zonotopes
 
-    def find_closest_zonotopes(self,query_point):
+    def find_closest_zonotopes(self,query_point, return_intermediate_info=False):
         #find closest centroid
         try:
             query_point.shape[1]
@@ -78,10 +78,15 @@ class ZonotopeTree:
             # return closest_zonotopes, candidate_boxes, query_box
         else:
             for cb in candidate_boxes:
-                candidate_d = zonotope_distance_point(cb.zonotope, query_point)
-                if closest_distance>candidate_d:
-                    closest_distance = candidate_d
-                    closest_zonotopes = [cb.zonotope]
-                elif closest_distance==candidate_d:
-                    closest_zonotopes.append(cb.zonotope)
-            return closest_zonotopes, candidate_boxes, query_box
+                closest_zonotopes.append(cb.zonotope)
+            #find the closest zonotope
+            best_polytope = None
+            best_distance = np.inf
+            for p in closest_zonotopes:
+                dist = zonotope_distance_point(p, query_point)
+                if best_distance > dist:
+                    best_distance = dist
+                    best_polytope = p
+            if return_intermediate_info:
+                return best_polytope, best_distance, closest_zonotopes
+            return best_polytope
