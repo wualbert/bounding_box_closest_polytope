@@ -74,9 +74,11 @@ class VoronoiClosestPolytope:
             print('Mapped polytopes in %f seconds' %(default_timer()-self.section_start_time))
             self.section_start_time = default_timer()
 
-        else:
+        elif preprocess_algorithm=='default':
             self.build_cell_polytope_map_default()
 
+        else:
+            raise NotImplementedError
         #build kd-tree for centroids
         self.centroid_tree = build_centroid_kd_tree(self.polytopes)
         print('Completed precomputation in %f seconds' % (default_timer() - self.init_start_time))

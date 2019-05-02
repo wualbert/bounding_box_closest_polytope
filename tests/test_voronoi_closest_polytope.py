@@ -12,7 +12,7 @@ plt.rcParams["font.family"] = "Times New Roman"
 
 def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None,save=True):
     zonotopes = get_uniform_random_zonotopes(zonotope_count, dim=2, generator_range=zonotope_count*1.5,return_type='zonotope',\
-                                             centroid_range=zonotope_count*5, seed=seed)
+                                             centroid_range=zonotope_count*10, seed=seed)
     #precompute
     vca = VoronoiClosestPolytope(zonotopes)
     #build query point
@@ -175,7 +175,7 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
             print('Testing zonotopes in %d-D...' % dim)
             zonotopes = get_uniform_random_zonotopes(count, dim=dim, generator_range=count * 1.2,centroid_range=count*10, return_type='zonotope')
             construction_start_time = default_timer()
-            vcp = VoronoiClosestPolytope(zonotopes, preprocess_algorithm=True)
+            vcp = VoronoiClosestPolytope(zonotopes)
             precomputation_times[dim_index, cr_index] = default_timer()-construction_start_time
             #query
             for query_index in range(queries):
@@ -256,6 +256,6 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
 if __name__ == '__main__':
     # print('time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)')
     # time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)
-    # print('vertex based time_against_dim(count=100, dims=np.arange(2, 7, 1), construction_repeats=3, queries=100)')
-    # time_against_dim(count=100, dims=np.arange(2, 7, 1), construction_repeats=3, queries=100)
-    test_voronoi_closest_zonotope(20, save=False)
+    # print('time_against_dim(count=300, dims=np.arange(2, 9, 1), construction_repeats=3, queries=100)')
+    # time_against_dim(count=300, dims=np.arange(2, 9, 1), construction_repeats=3, queries=100)
+    test_voronoi_closest_zonotope(100, save=True)
