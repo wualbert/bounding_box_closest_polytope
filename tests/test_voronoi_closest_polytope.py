@@ -270,8 +270,8 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
         plt.show()
 
 if __name__ == '__main__':
-    # print('time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)')
-    # time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)
+    print('time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)')
+    time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=1, queries=100)
     # print('time_against_dim(count=300, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100)')
     # time_against_dim(count=300, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100)
-    test_voronoi_closest_zonotope(100, save=False, seed = int(time()))
+    # test_voronoi_closest_zonotope(100, save=False, seed = int(time()))

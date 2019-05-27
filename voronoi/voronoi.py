@@ -8,8 +8,18 @@ from pypolycontain.lib.zonotope import zonotope_distance_point
 from pypolycontain.lib.containment_encodings import subset_generic,constraints_AB_eq_CD,add_Var_matrix
 from gurobipy import Model, GRB, QuadExpr
 
+import itertools
+from multiprocessing import Pool, Array
+
 from timeit import default_timer
 
+
+def set_polytope_pair_distance(arguments):
+    centroids, centroid_to_polytope_map, polytope_index, centroid_index = arguments
+    centroid = centroids[centroid_index]
+    centroid_string = str(centroid)
+    polytope = centroid_to_polytope_map[centroid_string]['polytopes'][polytope_index]
+    return distance_point(to_AH_polytope(polytope), centroid)
 
 class VoronoiClosestPolytope:
     def __init__(self, polytopes, preprocess_algorithm = 'default'):
@@ -49,42 +59,23 @@ class VoronoiClosestPolytope:
         self.centroid_tree = KDTree(self.centroids)
         print('Completed precomputation in %f seconds' % (default_timer() - self.init_start_time))
 
-    def build_cell_polytope_map_default(self):
+    def build_cell_polytope_map_default(self, process_count = 8):
+        polytope_centroid_indices = np.array(np.meshgrid(np.arange(self.polytopes.shape[0]),np.arange(self.centroids.shape[0]))).T.reshape(-1, 2)
+        arguments = []
+        for i in polytope_centroid_indices:
+            arguments.append((self.centroids, self.centroid_to_polytope_map, i[0],i[1]))
+        p = Pool(process_count)
+        pca = p.map(set_polytope_pair_distance, arguments)
+        polytope_centroid_arrays=np.asarray(pca).reshape((self.polytopes.shape[0]),self.centroids.shape[0])
+        # print(polytope_centroid_arrays)
         # compute pairwise distances of the centroids and the polytopes
+        #fixme
         for centroid_index, centroid in enumerate(self.centroids):
             centroid_string = str(centroid)
             for polytope_index, polytope in enumerate(self.centroid_to_polytope_map[centroid_string]['polytopes']):
-                self.centroid_to_polytope_map[str(centroid)].distances[polytope_index] = distance_point(to_AH_polytope(polytope), centroid)
-                # if self.type == 'zonotope':
-                #     model = Model("centroid_polytope_distance")
-                #     #polytope constraint
-                #     n = polytope.x.shape[0]
-                #     p = np.empty((polytope.G.shape[1], 1), dtype='object')
-                #     polytope_point = np.empty((polytope.x.shape[0], 1), dtype='object')
-                #     for row in range(p.shape[0]):
-                #         p[row, 0] = model.addVar(lb=-1, ub=1)
-                #     for row in range(polytope_point.shape[0]):
-                #         polytope_point[row, 0] = model.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY)
-                #     constraints_AB_eq_CD(model, np.eye(n), polytope_point - polytope.x, polytope.G, p)
-                #     model.update()
-                #     #l2 distance objective
-                #     J = QuadExpr()
-                #     for dim in range(polytope_point.shape[0]):
-                #         J.add((polytope_point[dim,0]-centroid[dim])*(polytope_point[dim,0]-centroid[dim]))
-                #     model.setObjective(J, GRB.MINIMIZE)
-                #     model.setParam('OutputFlag', 0)
-                #     model.update()
-                #     model.optimize()
-                #     if model.Status == 2:  # found optimal solution
-                #         self.centroid_to_polytope_map[str(centroid)].distances[polytope_index] = max(J.getValue(),0.)
-                #     else:
-                #         print('Warning: Failed to solve minimum distance between polytope and cell. This should never happen.')
-                #         print('Failed to solve polytope: ', polytope, 'with centroid at ', polytope.x, 'against Voronoi centroid ', centroid)
-                #         print('System will always check for this polytope.')
-                #         self.centroid_to_polytope_map[centroid_string].distances[polytope_index] = 0
-                # else:
-                #     raise NotImplementedError
+                self.centroid_to_polytope_map[str(centroid)].distances[polytope_index] = polytope_centroid_arrays[polytope_index, centroid_index]
             self.centroid_to_polytope_map[centroid_string].sort(order='distances')
+        # print(self.centroid_to_polytope_map[centroid_string])
 
     def find_closest_polytope(self, query_point, return_intermediate_info = False):
         #find the closest centroid
