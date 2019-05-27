@@ -3,6 +3,7 @@ from pypolycontain.utils.random_polytope_generator import *
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
 from scipy.spatial import voronoi_plot_2d
 from timeit import default_timer
+from time import time
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Circle
@@ -11,10 +12,12 @@ plt.rcParams["font.family"] = "Times New Roman"
 
 
 def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None,save=True):
+    AH_polytopes = get_uniform_random_zonotopes(zonotope_count, dim=2, generator_range=zonotope_count*1.5,return_type='AH_polytope',\
+                                             centroid_range=zonotope_count*10, seed=seed)
     zonotopes = get_uniform_random_zonotopes(zonotope_count, dim=2, generator_range=zonotope_count*1.5,return_type='zonotope',\
                                              centroid_range=zonotope_count*10, seed=seed)
     #precompute
-    vca = VoronoiClosestPolytope(zonotopes)
+    vca = VoronoiClosestPolytope(AH_polytopes)
     #build query point
     query_point = (np.random.rand(2)-0.5)*zonotope_count*5
     # print('Query point '+ str(query_point))
@@ -22,6 +25,20 @@ def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None,save=True):
 
     #query
     closest_polytope, best_distance, closest_AHpolytope_candidates = vca.find_closest_polytope(query_point,return_intermediate_info=True)
+
+    #find indices for plotting
+    candidate_indices = np.zeros(len(closest_AHpolytope_candidates), dtype='int')
+    closest_index = np.zeros(1, dtype='int')
+    for i, cac in enumerate(closest_AHpolytope_candidates):
+        for j in range(len(AH_polytopes)):
+            if cac == AH_polytopes[j]:
+                candidate_indices[i] = j
+                break
+    for j in range(len(AH_polytopes)):
+        if closest_polytope == AH_polytopes[j]:
+            closest_index[0] = j
+            break
+    # print(candidate_indices)
 
     #visualize voronoi
     # fig = voronoi_plot_2d(vca.centroid_voronoi, point_size=2,show_vertices=False, line_alpha=0.4, line_width=1)
@@ -49,8 +66,9 @@ def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None,save=True):
         plt.scatter(vertex[0], vertex[1], facecolor='c', s=2, alpha=1)
 
     #visualize polytopes
-    fig, ax = visZ(closest_AHpolytope_candidates, title="", fig=fig, ax=ax, alpha=0.3, color='pink')
-    fig, ax = visZ([closest_polytope], title="", fig=fig, ax=ax, alpha=0.8,color='brown')
+
+    fig, ax = visZ(zonotopes[candidate_indices], title="", fig=fig, ax=ax, alpha=0.3, color='pink')
+    fig, ax = visZ(zonotopes[closest_index], title="", fig=fig, ax=ax, alpha=0.8,color='brown')
     fig, ax = visZ(zonotopes, title="", alpha=0.07, fig=fig, ax=ax, color='gray')
     plt.scatter(query_point[0],query_point[1], facecolor='red', s=6)
     plt.axes().set_aspect('equal')
@@ -254,6 +272,6 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
 if __name__ == '__main__':
     # print('time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)')
     # time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)
-    print('time_against_dim(count=300, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100)')
-    time_against_dim(count=300, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100)
-    # test_voronoi_closest_zonotope(100, save=False)
+    # print('time_against_dim(count=300, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100)')
+    # time_against_dim(count=300, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100)
+    test_voronoi_closest_zonotope(100, save=False, seed = int(time()))

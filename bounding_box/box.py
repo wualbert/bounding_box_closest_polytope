@@ -7,10 +7,11 @@ import numpy as np
 from gurobipy import Model, GRB
 from pypolycontain.lib.zonotope import zonotope
 from pypolycontain.lib.polytope import polytope
-from pypolycontain.lib.inclusion_encodings import constraints_AB_eq_CD
+from pypolycontain.lib.AH_polytope import AH_polytope, to_AH_polytope
+from pypolycontain.lib.containment_encodings import constraints_AB_eq_CD
 
 class AABB:
-    def __init__(self, vertices, color=None, zonotope=None):
+    def __init__(self, vertices, color=None, polytope=None):
         '''
         Creates an axis-aligned bounding bounding_box from two diagonal vertices
         :param vertices: a list of defining vertices with shape (2, dimensions)
@@ -24,7 +25,7 @@ class AABB:
         self.u = np.asarray(vertices[0])
         self.v = np.asarray(vertices[1])
         #FIXME: use derived class
-        self.zonotope = zonotope
+        self.polytope = polytope
         for d in range(self.dimension):
             if vertices[0][d]>vertices[1][d]:
                 self.v[d], self.u[d] = vertices[0][d], vertices[1][d]
@@ -51,7 +52,7 @@ class AABB:
     #     return hash(tpl)
 
     def set_zonotope(self, zonotope):
-        self.zonotope = zonotope
+        self.polytope = zonotope
 
     def overlaps(self, b2):
         '''
@@ -140,5 +141,44 @@ def zonotope_to_box(z):
         results[1][d] = x[d,0].X
         #reset coefficient
         x[d,0].obj = 0
-    box = AABB(results, color=z.color,zonotope=z)
+    box = AABB(results, color=z.color, polytope=z)
+    return box
+
+def AH_polytope_to_box(ahp):
+    if ahp[0].type != 'AH_polytope':
+        print('Warning: Input is not AH-Polytope!')
+        for i in range(len(ahp)):
+            ahp[i] = to_AH_polytope(ahp[i])
+    model = Model("ah_polytope_AABB")
+    model.setParam('OutputFlag', False)
+    dim=ahp.t.shape[0]
+    #find extremum on each dimension
+    lu = np.zeros([ahp.t.shape[0], 2], dtype='float')
+    x = np.empty((ahp.T.shape[0], 1), dtype='object')
+    #construct decision variables l and u
+    model.update()
+    #construct decision variable x
+    for d in range(dim):
+        x[d] = model.addVar(obj=0,lb=-GRB.INFINITY,ub=GRB.INFINITY)
+
+    #add polytope constraint Hx<=h
+    for d in range(ahp.P.h.shape[0]):
+        model.addConstr(np.matmul(ahp.P.H[d,:], x) <= ahp.P.h)
+    model.update()
+
+    for d in range(dim):
+        #find minimum
+        model.setObjective((ahp.t+np.matmul(ahp.T, x))[d,0], GRB.MINIMIZE)
+        model.update()
+        model.optimize()
+        assert(model.Status==2)
+        lu[0,d] = x[d,0].X
+        #find maximum
+        model.setObjective((ahp.t+np.matmul(ahp.T, x))[d,0], GRB.MAXIMIZE)
+        model.update()
+        model.optimize()
+        assert(model.Status==2)
+        lu[1,d] = x[d,0].X
+
+    box = AABB(lu, polytope=ahp)
     return box

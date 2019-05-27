@@ -8,16 +8,22 @@ from box import *
 from pypolycontain.lib.zonotope import zonotope_distance_point, distance_point
 from utils.utils import build_centroid_kd_tree
 
-class ZonotopeTree:
-    def __init__(self,zonotopes):
-        self.zonotopes = zonotopes
+class PolytopeTree:
+    def __init__(self, polytopes):
+        self.polytopes = polytopes
         # Create box data structure from zonotopes
+        self.type = self.polytopes[0].type
         self.box_nodes = []
-        self.centroid_tree = build_centroid_kd_tree(self.zonotopes)
+        self.centroid_tree = build_centroid_kd_tree(self.polytopes)
         self.centroid_to_zonotope_map = dict()
 
-        for z in self.zonotopes:
-            box = zonotope_to_box(z)
+        for z in self.polytopes:
+            if self.type == 'zonotope':
+                box = zonotope_to_box(z)
+            elif self.type == 'AH_polytope' or 'H-polytope':
+                box = AH_polytope_to_box(z)
+            else:
+                raise NotImplementedError
             bn = BoxNode(box)
             self.box_nodes.append(bn)
             if z.x.tostring() in self.centroid_to_zonotope_map:
@@ -25,7 +31,7 @@ class ZonotopeTree:
                 self.centroid_to_zonotope_map[z.x.tostring()].append(z)
             else:
                 self.centroid_to_zonotope_map[z.x.tostring()]=[z]
-        assert(len(self.box_nodes)==len(self.zonotopes))
+        assert(len(self.box_nodes) == len(self.polytopes))
         self.root = binary_split(self.box_nodes)
         # Create kd-tree data structure from zonotopes
 

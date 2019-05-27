@@ -25,7 +25,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         x_r = np.array([5, 0]).reshape(2, 1)
         zono_l = zonotope(x_l, G_l)
         zono_r = zonotope(x_r, G_r)
-        zt = ZonotopeTree([zono_l,zono_r])
+        zt = PolytopeTree([zono_l, zono_r])
         query_point = np.asarray([0,-5])
         np.reshape(query_point,(query_point.shape[0],1))
         closest_zonotope = zt.find_closest_zonotopes(np.asarray(query_point))
@@ -47,7 +47,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
             G = (np.random.rand(2,m)-0.5)*generator_range
             x = (np.random.rand(2,1)-0.5)*centroid_range
             zonotopes.append(zonotope(x,G))
-        zt = ZonotopeTree(zonotopes)
+        zt = PolytopeTree(zonotopes)
 
         query_point = np.asarray([np.random.random_integers(-centroid_range,centroid_range),
                        np.random.random_integers(-centroid_range,centroid_range)])
@@ -80,7 +80,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
                 G = (np.random.rand(2, m) - 0.5) * generator_range
                 x = (np.random.rand(2, 1) - 0.5) * centroid_range
                 zonotopes.append(zonotope(x, G))
-            zt = ZonotopeTree(zonotopes)
+            zt = PolytopeTree(zonotopes)
 
             query_point = np.asarray([np.random.random_integers(-centroid_range, centroid_range),
                                       np.random.random_integers(-centroid_range, centroid_range)])
@@ -111,7 +111,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
             x = np.asarray([(np.random.rand(1)-0.5)*2*centroid_range,
                             np.random.rand(1)-0.5])
             zonotopes.append(zonotope(x,G))
-        zt = ZonotopeTree(zonotopes)
+        zt = PolytopeTree(zonotopes)
 
         query_point = np.asarray([np.random.random_integers(-centroid_range,centroid_range),
                        np.random.rand(1)-0.5])

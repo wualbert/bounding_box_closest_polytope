@@ -1,5 +1,5 @@
 from voronoi.voronoi import *
-from bounding_box.zonotope_tree import ZonotopeTree
+from bounding_box.zonotope_tree import PolytopeTree
 from pypolycontain.utils.random_polytope_generator import *
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
 from scipy.spatial import voronoi_plot_2d
@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Circle
 
-def test_uniform_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construction_repeats = 1, queries=100,save=True):
+def test_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construction_repeats = 1, queries=100,save=True, random_zonotope_generator = get_uniform_random_zonotopes):
 
     voronoi_precomputation_times = np.zeros([len(counts), construction_repeats])
     voronoi_query_times = np.zeros([len(counts), construction_repeats*queries])
@@ -23,7 +23,7 @@ def test_uniform_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, c
         print('Repetition %d' %cr_index)
         for count_index, count in enumerate(counts):
             print('Testing %d zonotopes...' % count)
-            zonotopes = get_uniform_random_zonotopes(count, dim=dim, generator_range=count * 1.2,return_type='zonotope')
+            zonotopes = random_zonotope_generator(count, dim=dim, generator_range=count * 1.2,return_type='zonotope')
 
             #test voronoi
             construction_start_time = default_timer()
@@ -39,7 +39,7 @@ def test_uniform_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, c
 
             #test aabb
             construction_start_time = default_timer()
-            zono_tree = ZonotopeTree(zonotopes)
+            zono_tree = PolytopeTree(zonotopes)
             aabb_precomputation_times[count_index, cr_index] = default_timer()-construction_start_time
             #query
             for query_index in range(queries):
@@ -136,7 +136,7 @@ def test_uniform_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, c
 
 
 
-def test_uniform_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_repeats=1, queries=100, save=True):
+def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_repeats=1, queries=100, save=True, random_zonotope_generator = get_uniform_random_zonotopes):
     voronoi_precomputation_times = np.zeros([len(dims), construction_repeats])
     voronoi_query_times = np.zeros([len(dims), construction_repeats * queries])
     voronoi_query_reduction_percentages = np.zeros([len(dims), construction_repeats * queries])
@@ -149,7 +149,7 @@ def test_uniform_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), constr
         for dim_index, dim in enumerate(dims):
             print('Testing zonotopes in %d-D...' % dim)
             # generate random zonotopes
-            zonotopes = get_uniform_random_zonotopes(count, dim=dim, generator_range=count * 1.2,
+            zonotopes = random_zonotope_generator(count, dim=dim, generator_range=count * 1.2,
                                                      centroid_range=count * 10, return_type='zonotope')
             #test voronoi
             construction_start_time = default_timer()
@@ -167,7 +167,7 @@ def test_uniform_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), constr
 
             #test aabb
             construction_start_time = default_timer()
-            zono_tree = ZonotopeTree(zonotopes)
+            zono_tree = PolytopeTree(zonotopes)
             aabb_precomputation_times[dim_index, cr_index] = default_timer() - construction_start_time
             # query
             for query_index in range(queries):
@@ -269,8 +269,8 @@ def test_uniform_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), constr
 
 
 if __name__ == '__main__':
-    # print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=100)')
-    # test_uniform_random_zonotope_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=100)
-    print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100)')
-    test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100)
+    print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
+    test_random_zonotope_count(dim=6, counts=np.arange(2, 6, 2) * 10, construction_repeats=1, queries=100, random_zonotope_generator=get_line_random_zonotopes)
+    # print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
+    # test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100, random_zonotope_generator=get_line_random_zonotopes)
     # test_voronoi_closest_zonotope(100, save=False)

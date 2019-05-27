@@ -54,35 +54,36 @@ class VoronoiClosestPolytope:
         for centroid_index, centroid in enumerate(self.centroids):
             centroid_string = str(centroid)
             for polytope_index, polytope in enumerate(self.centroid_to_polytope_map[centroid_string]['polytopes']):
-                if self.type == 'zonotope':
-                    model = Model("centroid_polytope_distance")
-                    #polytope constraint
-                    n = polytope.x.shape[0]
-                    p = np.empty((polytope.G.shape[1], 1), dtype='object')
-                    polytope_point = np.empty((polytope.x.shape[0], 1), dtype='object')
-                    for row in range(p.shape[0]):
-                        p[row, 0] = model.addVar(lb=-1, ub=1)
-                    for row in range(polytope_point.shape[0]):
-                        polytope_point[row, 0] = model.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY)
-                    constraints_AB_eq_CD(model, np.eye(n), polytope_point - polytope.x, polytope.G, p)
-                    model.update()
-                    #l2 distance objective
-                    J = QuadExpr()
-                    for dim in range(polytope_point.shape[0]):
-                        J.add((polytope_point[dim,0]-centroid[dim])*(polytope_point[dim,0]-centroid[dim]))
-                    model.setObjective(J, GRB.MINIMIZE)
-                    model.setParam('OutputFlag', 0)
-                    model.update()
-                    model.optimize()
-                    if model.Status == 2:  # found optimal solution
-                        self.centroid_to_polytope_map[str(centroid)].distances[polytope_index] = max(J.getValue(),0.)
-                    else:
-                        print('Warning: Failed to solve minimum distance between polytope and cell. This should never happen.')
-                        print('Failed to solve polytope: ', polytope, 'with centroid at ', polytope.x, 'against Voronoi centroid ', centroid)
-                        print('System will always check for this polytope.')
-                        self.centroid_to_polytope_map[centroid_string].distances[polytope_index] = 0
-                else:
-                    raise NotImplementedError
+                self.centroid_to_polytope_map[str(centroid)].distances[polytope_index] = distance_point(to_AH_polytope(polytope), centroid)
+                # if self.type == 'zonotope':
+                #     model = Model("centroid_polytope_distance")
+                #     #polytope constraint
+                #     n = polytope.x.shape[0]
+                #     p = np.empty((polytope.G.shape[1], 1), dtype='object')
+                #     polytope_point = np.empty((polytope.x.shape[0], 1), dtype='object')
+                #     for row in range(p.shape[0]):
+                #         p[row, 0] = model.addVar(lb=-1, ub=1)
+                #     for row in range(polytope_point.shape[0]):
+                #         polytope_point[row, 0] = model.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY)
+                #     constraints_AB_eq_CD(model, np.eye(n), polytope_point - polytope.x, polytope.G, p)
+                #     model.update()
+                #     #l2 distance objective
+                #     J = QuadExpr()
+                #     for dim in range(polytope_point.shape[0]):
+                #         J.add((polytope_point[dim,0]-centroid[dim])*(polytope_point[dim,0]-centroid[dim]))
+                #     model.setObjective(J, GRB.MINIMIZE)
+                #     model.setParam('OutputFlag', 0)
+                #     model.update()
+                #     model.optimize()
+                #     if model.Status == 2:  # found optimal solution
+                #         self.centroid_to_polytope_map[str(centroid)].distances[polytope_index] = max(J.getValue(),0.)
+                #     else:
+                #         print('Warning: Failed to solve minimum distance between polytope and cell. This should never happen.')
+                #         print('Failed to solve polytope: ', polytope, 'with centroid at ', polytope.x, 'against Voronoi centroid ', centroid)
+                #         print('System will always check for this polytope.')
+                #         self.centroid_to_polytope_map[centroid_string].distances[polytope_index] = 0
+                # else:
+                #     raise NotImplementedError
             self.centroid_to_polytope_map[centroid_string].sort(order='distances')
 
     def find_closest_polytope(self, query_point, return_intermediate_info = False):
