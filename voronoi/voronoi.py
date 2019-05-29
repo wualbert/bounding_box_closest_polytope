@@ -9,8 +9,7 @@ from pypolycontain.lib.containment_encodings import subset_generic,constraints_A
 from gurobipy import Model, GRB, QuadExpr
 
 import itertools
-from multiprocessing import Pool, Array
-
+from multiprocessing import Pool
 from timeit import default_timer
 
 
@@ -22,7 +21,7 @@ def set_polytope_pair_distance(arguments):
     return distance_point(to_AH_polytope(polytope), centroid)
 
 class VoronoiClosestPolytope:
-    def __init__(self, polytopes, preprocess_algorithm = 'default'):
+    def __init__(self, polytopes, preprocess_algorithm = 'default', process_count=8):
         '''
         Compute the closest polytope using Voronoi cells
         :param polytopes:
@@ -33,6 +32,7 @@ class VoronoiClosestPolytope:
         self.section_start_time = self.init_start_time
         self.polytopes = np.asarray(polytopes, dtype='object')
         self.type = self.polytopes[0].type
+        self.process_count = process_count
         if self.type == 'AH_polytope':
             self.dim = self.polytopes[0].t.shape[0]
         elif self.type == 'zonotope':
@@ -59,12 +59,12 @@ class VoronoiClosestPolytope:
         self.centroid_tree = KDTree(self.centroids)
         print('Completed precomputation in %f seconds' % (default_timer() - self.init_start_time))
 
-    def build_cell_polytope_map_default(self, process_count = 8):
+    def build_cell_polytope_map_default(self):
         polytope_centroid_indices = np.array(np.meshgrid(np.arange(self.polytopes.shape[0]),np.arange(self.centroids.shape[0]))).T.reshape(-1, 2)
         arguments = []
         for i in polytope_centroid_indices:
             arguments.append((self.centroids, self.centroid_to_polytope_map, i[0],i[1]))
-        p = Pool(process_count)
+        p = Pool(self.process_count)
         pca = p.map(set_polytope_pair_distance, arguments)
         polytope_centroid_arrays=np.asarray(pca).reshape((self.polytopes.shape[0]),self.centroids.shape[0])
         # print(polytope_centroid_arrays)
@@ -101,7 +101,7 @@ class VoronoiClosestPolytope:
             if best_distance>dist:
                 best_distance = dist
                 best_polytope = polytope
-        # print('best distance', best_distance)
+        print('best distance', best_distance)
         if return_intermediate_info:
             return best_polytope, best_distance, closest_polytope_candidates
         return best_polytope
