@@ -75,14 +75,21 @@ class VoronoiClosestPolytope:
             for polytope_index, polytope in enumerate(self.centroid_to_polytope_map[centroid_string]['polytopes']):
                 self.centroid_to_polytope_map[str(centroid)].distances[polytope_index] = polytope_centroid_arrays[polytope_index, centroid_index]
             self.centroid_to_polytope_map[centroid_string].sort(order='distances')
-        # print(self.centroid_to_polytope_map[centroid_string])
+            # print(self.centroid_to_polytope_map[centroid_string])
 
     def find_closest_polytope(self, query_point, return_intermediate_info = False):
         #find the closest centroid
         d,i = self.centroid_tree.query(query_point)
         closest_centroid = self.centroid_tree.data[i]
+        # print(closest_centroid)
+        closest_centroid_polytope = self.centroid_to_polytope_map[str(closest_centroid)]['polytopes'][0]
+        dist_query_centroid_polytope = distance_point(closest_centroid_polytope, query_point)
         dist_query_centroid = np.linalg.norm(query_point-closest_centroid)
-        cutoff_index = np.searchsorted(self.centroid_to_polytope_map[str(closest_centroid)].distances, 2*dist_query_centroid)
+        # print(dist_query_centroid, dist_query_centroid_polytope)
+        cutoff_index = np.searchsorted(self.centroid_to_polytope_map[str(closest_centroid)].distances, dist_query_centroid+dist_query_centroid_polytope)
+        # print(cutoff_index)
+        # print(self.centroid_to_polytope_map[str(closest_centroid)]['distances'][0:cutoff_index])
+        # print(self.centroid_to_polytope_map[str(closest_centroid)]['distances'][cutoff_index:])
         # print('dqc',dist_query_centroid)
         # print(self.centroid_to_polytope_map[str(closest_centroid)].distances)
         closest_polytope_candidates = self.centroid_to_polytope_map[str(closest_centroid)].polytopes[0:cutoff_index]
@@ -94,6 +101,7 @@ class VoronoiClosestPolytope:
             if best_distance>dist:
                 best_distance = dist
                 best_polytope = polytope
+        # print('best distance', best_distance)
         if return_intermediate_info:
             return best_polytope, best_distance, closest_polytope_candidates
         return best_polytope

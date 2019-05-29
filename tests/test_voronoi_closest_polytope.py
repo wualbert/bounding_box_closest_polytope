@@ -189,7 +189,7 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
         print('Repetition %d' %cr_index)
         for dim_index, dim in enumerate(dims):
             print('Testing zonotopes in %d-D...' % dim)
-            zonotopes = get_uniform_random_zonotopes(count, dim=dim, generator_range=count * 1.2,centroid_range=count*10, return_type='zonotope')
+            zonotopes = get_uniform_random_zonotopes(count, dim=dim, generator_range=count * 1.7,centroid_range=count*10, return_type='zonotope')
             construction_start_time = default_timer()
             vcp = VoronoiClosestPolytope(zonotopes)
             precomputation_times[dim_index, cr_index] = default_timer()-construction_start_time
@@ -270,8 +270,8 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
         plt.show()
 
 if __name__ == '__main__':
-    print('time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)')
-    time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=1, queries=100)
+    # print('time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=3, queries=100)')
+    # time_against_count(dim=5, counts=np.arange(2, 11, 2) * 50, construction_repeats=1, queries=100)
     # print('time_against_dim(count=300, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100)')
-    # time_against_dim(count=300, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100)
-    # test_voronoi_closest_zonotope(100, save=False, seed = int(time()))
+    # time_against_dim(count=300, dims=np.arange(2, 11, 2), construction_repeats=1, queries=100)
+    test_voronoi_closest_zonotope(500, save=False, seed = int(time()))
