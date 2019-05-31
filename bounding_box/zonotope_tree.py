@@ -6,7 +6,7 @@
 from box_tree import *
 from box import *
 from pypolycontain.lib.zonotope import zonotope_distance_point, distance_point
-from utils.utils import build_centroid_kd_tree
+from utils.utils import build_key_point_kd_tree
 
 class PolytopeTree:
     def __init__(self, polytopes):
@@ -14,9 +14,6 @@ class PolytopeTree:
         # Create box data structure from zonotopes
         self.type = self.polytopes[0].type
         self.box_nodes = []
-        self.centroid_tree = build_centroid_kd_tree(self.polytopes)
-        self.centroid_to_zonotope_map = dict()
-
         for z in self.polytopes:
             if self.type == 'zonotope':
                 box = zonotope_to_box(z)
@@ -26,12 +23,8 @@ class PolytopeTree:
                 raise NotImplementedError
             bn = BoxNode(box)
             self.box_nodes.append(bn)
-            if z.x.tostring() in self.centroid_to_zonotope_map:
-                assert(False)
-                self.centroid_to_zonotope_map[z.x.tostring()].append(z)
-            else:
-                self.centroid_to_zonotope_map[z.x.tostring()]=[z]
-        assert(len(self.box_nodes) == len(self.polytopes))
+        assert (len(self.box_nodes) == len(self.polytopes))
+        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes)
         self.root = binary_split(self.box_nodes)
         # Create kd-tree data structure from zonotopes
 
@@ -43,8 +36,8 @@ class PolytopeTree:
         except:
             # raise ValueError('Query point should be d*1 numpy array')
             query_point=query_point.reshape((-1,1))
-        _x, ind = self.centroid_tree.query(np.ndarray.flatten(query_point))
-        closest_centroid = self.centroid_tree.data[ind]
+        _x, ind = self.key_point_tree.query(np.ndarray.flatten(query_point))
+        closest_centroid = self.key_point_tree.data[ind]
         # print('Closest centroid', closest_centroid)
 
         #Use dist(centroid, query) as upper bound
@@ -53,7 +46,7 @@ class PolytopeTree:
         # pivot_distance = 2*np.linalg.norm(vector_diff)
 
         #Use dist(polytope, query) as upper bound
-        centroid_zonotopes = self.centroid_to_zonotope_map[closest_centroid.tostring()]
+        centroid_zonotopes = self.key_point_to_zonotope_map[closest_centroid.tostring()]
         best_distance = np.inf
         best_polytope = None
         for cz in centroid_zonotopes:

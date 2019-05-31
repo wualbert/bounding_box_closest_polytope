@@ -272,5 +272,5 @@ if __name__ == '__main__':
     # print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
     # test_random_zonotope_count(dim=6, counts=np.arange(2, 6, 2) * 10, construction_repeats=1, queries=100, random_zonotope_generator=get_line_random_zonotopes)
     print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
-    test_random_zonotope_dim(count=300, dims=np.arange(2, 11, 2), construction_repeats=1, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
+    test_random_zonotope_dim(count=400, dims=np.arange(2, 11, 2), construction_repeats=3, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
     # test_voronoi_closest_zonotope(100, save=False)

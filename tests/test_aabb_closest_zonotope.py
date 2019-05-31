@@ -10,6 +10,7 @@ import unittest
 from bounding_box.zonotope_tree import *
 from visualization.visualize import *
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
+from pypolycontain.utils.random_polytope_generator import *
 
 class CentroidKDTreeTestCase(unittest.TestCase):
     def test_kd_construction(self):
@@ -38,15 +39,10 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         plt.show()
 
     def test_many_zonotopes(self):
-        zonotope_count = 50
-        zonotopes = []
-        centroid_range = zonotope_count
-        generator_range = 3
-        for i in range(zonotope_count):
-            m = np.random.random_integers(4,10)
-            G = (np.random.rand(2,m)-0.5)*generator_range
-            x = (np.random.rand(2,1)-0.5)*centroid_range
-            zonotopes.append(zonotope(x,G))
+        zonotope_count = 20
+        centroid_range = zonotope_count*2
+        generator_range = zonotope_count
+        zonotopes = get_uniform_random_zonotopes(zonotope_count, 2, centroid_range, generator_range, return_type='zonotope')
         zt = PolytopeTree(zonotopes)
 
         query_point = np.asarray([np.random.random_integers(-centroid_range,centroid_range),
@@ -59,6 +55,9 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         fig, ax = visZ(zonotopes, title="", alpha=0.2,axis_limit=ax_lim)
         fig, ax = visZ(closest_zonotope, title="",fig=fig,ax=ax,alpha=1,axis_limit=ax_lim)
         fig, ax = visualize_box_nodes(zt.box_nodes,fig=fig,ax=ax,alpha =0.4,linewidth=0.5)
+        for vertex in zt.key_point_tree.data:
+            plt.scatter(vertex[0], vertex[1], facecolor='c', s=2, alpha=1)
+
         # fig, ax = visualize_boxes(candidate_boxes,fig=fig,ax=ax,alpha =1)
         # print('Candidate boxes: ', candidate_boxes)
         fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.3,fill=True,
