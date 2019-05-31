@@ -50,26 +50,26 @@ class PolytopeTree:
         #Use dist(centroid, query) as upper bound
         vector_diff = np.subtract(np.ndarray.flatten(closest_centroid),\
                                   np.ndarray.flatten(query_point))
-        # edge_length = 2*np.linalg.norm(vector_diff)
+        # pivot_distance = 2*np.linalg.norm(vector_diff)
 
         #Use dist(polytope, query) as upper bound
         centroid_zonotopes = self.centroid_to_zonotope_map[closest_centroid.tostring()]
-        edge_length = np.inf
-        edge_zonotope = None
+        best_distance = np.inf
+        best_polytope = None
         for cz in centroid_zonotopes:
             zd = zonotope_distance_point(cz,query_point)
-            if edge_length > zd:
-                edge_length=zd
-                edge_zonotope=cz
+            if best_distance > zd:
+                best_distance=zd
+                best_polytope=cz
 
         #create query box
-        query_box = AABB_centroid_edge(query_point,2*edge_length)
+        query_box = AABB_centroid_edge(query_point,2*best_distance)
         #find candidate box nodes
         candidate_boxes = []
         self.root.evaluate_node(query_box,candidate_boxes)
         # print('Evaluating %d zonotopes') %len(candidate_boxes)
         #map back to zonotopes
-        closest_zonotopes = []
+        evaluated_zonotopes = []
         closest_distance = np.inf
         if candidate_boxes is None:
             # This should never happen
@@ -79,20 +79,34 @@ class PolytopeTree:
             # use the zonotope from which the heuristic is generated.
             # '''
             #
-            # closest_zonotopes = edge_zonotope
-            # closest_distance = edge_length
-            # return closest_zonotopes, candidate_boxes, query_box
+            # evaluated_zonotopes = pivot_polytope
+            # closest_distance = pivot_distance
+            # return evaluated_zonotopes, candidate_boxes, query_box
         else:
-            for cb in candidate_boxes:
-                closest_zonotopes.append(cb.zonotope)
-            #find the closest zonotope
-            best_polytope = None
-            best_distance = np.inf
-            for p in closest_zonotopes:
-                dist = zonotope_distance_point(p, query_point)
-                if best_distance > dist:
-                    best_distance = dist
-                    best_polytope = p
+            # for cb in candidate_boxes:
+            #     print(cb)
+            #     evaluated_zonotopes.append(cb.polytope)
+            #find the closest zonotope with randomized approach
+            while(len(candidate_boxes)>1):
+                sample = np.random.randint(len(candidate_boxes))
+                #solve linear program for the sampled polytope
+                pivot_polytope = candidate_boxes[sample].polytope
+                if return_intermediate_info:
+                    evaluated_zonotopes.append(pivot_polytope)
+                pivot_distance = distance_point(pivot_polytope, query_point)
+                if pivot_distance>=best_distance:#fixme: >= or >?
+                    #get rid of this polytope
+                    candidate_boxes[sample], candidate_boxes[-1] = candidate_boxes[-1], candidate_boxes[sample]
+                    candidate_boxes = candidate_boxes[0:-1]
+                else:
+                    #reconstruct AABB
+                    # create query box
+                    query_box = AABB_centroid_edge(query_point, 2 * pivot_distance)
+                    # find candidate box nodes
+                    candidate_boxes = []
+                    self.root.evaluate_node(query_box, candidate_boxes)
+                    best_distance = pivot_distance
+                    best_polytope = pivot_polytope
             if return_intermediate_info:
-                return best_polytope, best_distance, closest_zonotopes
-            return best_polytope
+                return np.atleast_1d(best_polytope), best_distance, evaluated_zonotopes, query_box
+            return np.atleast_1d(best_polytope)

@@ -173,7 +173,7 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
             for query_index in range(queries):
                 query_point = (np.random.rand(dim) - 0.5) * count * 5  # random query point
                 query_start_time = default_timer()
-                best_zonotope, best_distance, evaluated_zonotopes = zono_tree.find_closest_zonotopes(query_point, return_intermediate_info=True)
+                best_zonotope, best_distance, evaluated_zonotopes, query_box = zono_tree.find_closest_zonotopes(query_point, return_intermediate_info=True)
                 aabb_query_times[dim_index, cr_index * queries + query_index] = default_timer() - query_start_time
                 aabb_query_reduction_percentages[dim_index, cr_index * queries + query_index] = len(evaluated_zonotopes) * 100. / count
 
@@ -269,8 +269,8 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
 
 
 if __name__ == '__main__':
-    print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
-    test_random_zonotope_count(dim=6, counts=np.arange(2, 6, 2) * 10, construction_repeats=1, queries=100, random_zonotope_generator=get_line_random_zonotopes)
-    # print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
-    # test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100, random_zonotope_generator=get_line_random_zonotopes)
+    # print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
+    # test_random_zonotope_count(dim=6, counts=np.arange(2, 6, 2) * 10, construction_repeats=1, queries=100, random_zonotope_generator=get_line_random_zonotopes)
+    print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
+    test_random_zonotope_dim(count=300, dims=np.arange(2, 11, 2), construction_repeats=1, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
     # test_voronoi_closest_zonotope(100, save=False)

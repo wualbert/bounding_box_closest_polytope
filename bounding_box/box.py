@@ -26,6 +26,7 @@ class AABB:
         self.v = np.asarray(vertices[1])
         #FIXME: use derived class
         self.polytope = polytope
+        self.hash = None
         for d in range(self.dimension):
             if vertices[0][d]>vertices[1][d]:
                 self.v[d], self.u[d] = vertices[0][d], vertices[1][d]
@@ -47,9 +48,11 @@ class AABB:
     def __ne__(self, other):
         return not(self.__eq__(other))
 
-    # def __hash__(self):
-    #     tpl = str((self.u,self.v,self.dimension))
-    #     return hash(tpl)
+    def __hash__(self):
+        if self.hash is None:
+            tpl = str((self.u, self.v, self.dimension))
+            self.hash = hash(tpl)
+        return self.hash
 
     def set_zonotope(self, zonotope):
         self.polytope = zonotope
