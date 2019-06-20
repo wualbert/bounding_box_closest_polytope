@@ -4,6 +4,7 @@ from visualization.visualize import *
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
 
 def test_with_dataset():
+    #FIXME: Import issues
     from utils.PWA_Control_utils import polytree_to_zonotope_tree
     import pickle
     with open("zonotope_datasets/inverted_pendulum.pkl", "rb") as f:
@@ -17,7 +18,7 @@ def test_with_dataset():
                               (np.random.rand(1) - 0.5) * 2])
     print(query_point)
     query_point = query_point.reshape(-1, 1)
-    closest_zonotope, candidate_boxes, query_box = zonotope_tree.find_closest_zonotopes(query_point)
+    closest_zonotope, candidate_boxes, query_box = zonotope_tree.find_closest_polytopes(query_point)
     print('Query point: ', query_point)
     ax_lim = np.asarray([-zonotope_count, zonotope_count, -zonotope_count, zonotope_count]) * 1.1
     fig, ax = visZ(zonotope_tree.zonotopes, title="", alpha=0.2, axis_limit=ax_lim)
@@ -41,7 +42,7 @@ def zonotope_reduction_line_nd(zonotope_count, dim, num_of_queries):
         x = np.vstack([2*(np.random.rand(1,1) - 0.5) * centroid_range,x])
         # print(x)
         zonotopes.append(zonotope(x, G))
-    zt = ZonotopeTree(zonotopes)
+    zt = PolytopeTree(zonotopes)
 
     query_points = (np.random.rand(dim-1,num_of_queries)-0.5)
     query_points = np.vstack([2*(np.random.rand(1, num_of_queries) - 0.5) * centroid_range,query_points])
@@ -52,7 +53,7 @@ def zonotope_reduction_line_nd(zonotope_count, dim, num_of_queries):
         reduction_ratios[i] = len(candidate_boxes)/(zonotope_count*1.)
 
     if dim ==2:
-        fig, ax = visZ(zt.zonotopes, title="", alpha=0.2)
+        fig, ax = visZ(zt.polytopes, title="", alpha=0.2)
         ax.scatter(query_points[0,:], query_points[1,:],s=3)
         ax.set_xlim([-centroid_range*1.2,centroid_range*1.2])
         ax.set_ylim([-centroid_range * 1.2, centroid_range * 1.2])
@@ -89,7 +90,7 @@ def zonotope_reduction_box_nd(zonotope_count, dim, num_of_queries):
         x = 2*(np.random.rand(dim,1) - 0.5)*centroid_range
         # print(x)
         zonotopes.append(zonotope(x, G))
-    zt = ZonotopeTree(zonotopes)
+    zt = PolytopeTree(zonotopes)
     #query points in a line
     # query_points = (np.random.rand(dim-1,num_of_queries)-0.5)
     # query_points = np.vstack([query_points, 2*(np.random.rand(1, num_of_queries) - 0.5) * centroid_range*2])
@@ -100,7 +101,7 @@ def zonotope_reduction_box_nd(zonotope_count, dim, num_of_queries):
         closest_zonotope, candidate_boxes, query_box = zt.find_closest_zonotopes(q)
         reduction_ratios[i] = len(candidate_boxes)/(zonotope_count*1.)
     if dim ==2:
-        fig, ax = visZ(zt.zonotopes, title="", alpha=0.2)
+        fig, ax = visZ(zt.polytopes, title="", alpha=0.2)
         ax.scatter(query_points[0,:], query_points[1,:],s=3)
         plt.xlabel('x')
         plt.ylabel('y')

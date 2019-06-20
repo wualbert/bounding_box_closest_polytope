@@ -4,3 +4,7 @@
 gurobi.log
 *.pyc
 */*.pyc
+tests/test_results/*
+*/*.png
+PWA_Control
+
