@@ -7,4 +7,4 @@ gurobi.log
 tests/test_results/*
 */*.png
 PWA_Control
-
+*.png

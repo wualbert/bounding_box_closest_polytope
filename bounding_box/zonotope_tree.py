@@ -52,7 +52,7 @@ class PolytopeTree:
         best_polytope = None
         for cz in centroid_zonotopes:
             evaluated_zonotopes.append(cz)
-            zd = zonotope_distance_point(cz,query_point)
+            zd = zonotope_distance_point(cz,query_point)[0]
             if best_distance > zd:
                 best_distance=zd
                 best_polytope=cz
@@ -87,7 +87,7 @@ class PolytopeTree:
                 pivot_polytope = candidate_boxes[sample].polytope
                 if return_intermediate_info:
                     evaluated_zonotopes.append(pivot_polytope)
-                pivot_distance = distance_point(pivot_polytope, query_point)
+                pivot_distance = distance_point(pivot_polytope, query_point)[0]
                 if pivot_distance>=best_distance:#fixme: >= or >?
                     #get rid of this polytope
                     candidate_boxes[sample], candidate_boxes[-1] = candidate_boxes[-1], candidate_boxes[sample]
