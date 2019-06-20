@@ -150,7 +150,7 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
             print('Testing zonotopes in %d-D...' % dim)
             # generate random zonotopes
             zonotopes = random_zonotope_generator(count, dim=dim, generator_range=count * 1.2,
-                                                     centroid_range=count * 10, return_type='zonotope')
+                                                     centroid_range=count * 3, return_type='zonotope')
             #test voronoi
             construction_start_time = default_timer()
             vcp = VoronoiClosestPolytope(zonotopes)
@@ -272,5 +272,5 @@ if __name__ == '__main__':
     # print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
     # test_random_zonotope_count(dim=6, counts=np.arange(2, 6, 2) * 10, construction_repeats=1, queries=100, random_zonotope_generator=get_line_random_zonotopes)
     print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
-    test_random_zonotope_dim(count=400, dims=np.arange(2, 11, 2), construction_repeats=3, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
+    test_random_zonotope_dim(count=700, dims=np.arange(2, 11, 1), construction_repeats=3, queries=200, random_zonotope_generator=get_uniform_random_zonotopes)
     # test_voronoi_closest_zonotope(100, save=False)

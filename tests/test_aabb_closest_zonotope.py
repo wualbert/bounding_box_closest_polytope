@@ -39,10 +39,10 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         plt.show()
 
     def test_many_zonotopes(self):
-        zonotope_count = 20
-        centroid_range = zonotope_count*2
-        generator_range = zonotope_count
-        zonotopes = get_uniform_random_zonotopes(zonotope_count, 2, centroid_range, generator_range, return_type='zonotope')
+        zonotope_count = 50
+        centroid_range = zonotope_count * 3
+        zonotopes = get_uniform_random_zonotopes(zonotope_count, dim=2, generator_range=zonotope_count * 1.2,
+                                              centroid_range=centroid_range, return_type='zonotope')
         zt = PolytopeTree(zonotopes)
 
         query_point = np.asarray([np.random.random_integers(-centroid_range,centroid_range),

@@ -46,10 +46,12 @@ class PolytopeTree:
         # pivot_distance = 2*np.linalg.norm(vector_diff)
 
         #Use dist(polytope, query) as upper bound
+        evaluated_zonotopes = []
         centroid_zonotopes = self.key_point_to_zonotope_map[closest_centroid.tostring()]
         best_distance = np.inf
         best_polytope = None
         for cz in centroid_zonotopes:
+            evaluated_zonotopes.append(cz)
             zd = zonotope_distance_point(cz,query_point)
             if best_distance > zd:
                 best_distance=zd
@@ -62,7 +64,6 @@ class PolytopeTree:
         self.root.evaluate_node(query_box,candidate_boxes)
         # print('Evaluating %d zonotopes') %len(candidate_boxes)
         #map back to zonotopes
-        evaluated_zonotopes = []
         closest_distance = np.inf
         if candidate_boxes is None:
             # This should never happen
