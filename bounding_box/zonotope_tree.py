@@ -69,15 +69,14 @@ class PolytopeTree:
                 best_distance=zd
                 best_polytope=cz
 
-        u = query_point - best_distance / 2
-        v = query_point + best_distance / 2
+        u = query_point - best_distance
+        v = query_point + best_distance
         heuristic_box_lu = np.concatenate([u, v])
         #create query box
         #find candidate box nodes
         candidate_ids = list(self.idx.intersection(heuristic_box_lu))
         # print('Evaluating %d zonotopes') %len(candidate_boxes)
         #map back to zonotopes
-        closest_distance = np.inf
         if candidate_ids is None:
             # This should never happen
             raise ValueError('No closest zonotope found!')
@@ -108,13 +107,14 @@ class PolytopeTree:
                 else:
                     #reconstruct AABB
                     # create query box
-                    u = query_point - pivot_distance / 2
-                    v = query_point + pivot_distance / 2
+                    u = query_point - pivot_distance
+                    v = query_point + pivot_distance
                     heuristic_box_lu = np.concatenate([u, v])
                     # find new candidates
                     candidate_ids = list(self.idx.intersection(heuristic_box_lu))
                     best_distance = pivot_distance
                     best_polytope = pivot_polytope
+            print('best distance', best_distance)
             if return_intermediate_info:
                 return np.atleast_1d(best_polytope), best_distance, evaluated_zonotopes, heuristic_box_lu
             return np.atleast_1d(best_polytope)
