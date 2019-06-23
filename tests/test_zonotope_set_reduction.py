@@ -49,7 +49,7 @@ def zonotope_reduction_line_nd(zonotope_count, dim, num_of_queries):
     # print(query_points)
     reduction_ratios = np.zeros([num_of_queries])
     for i, q in enumerate(query_points.T):
-        closest_zonotope, candidate_boxes, query_box = zt.find_closest_zonotopes(q)
+        closest_zonotope, candidate_boxes, query_box = zt.find_closest_polytopes(q)
         reduction_ratios[i] = len(candidate_boxes)/(zonotope_count*1.)
 
     if dim ==2:
@@ -98,7 +98,7 @@ def zonotope_reduction_box_nd(zonotope_count, dim, num_of_queries):
     query_points = 2 * (np.random.rand(dim, num_of_queries) - 0.5) * centroid_range * 2
     reduction_ratios = np.zeros([num_of_queries])
     for i, q in enumerate(query_points.T):
-        closest_zonotope, candidate_boxes, query_box = zt.find_closest_zonotopes(q)
+        closest_zonotope, candidate_boxes, query_box = zt.find_closest_polytopes(q)
         reduction_ratios[i] = len(candidate_boxes)/(zonotope_count*1.)
     if dim ==2:
         fig, ax = visZ(zt.polytopes, title="", alpha=0.2)

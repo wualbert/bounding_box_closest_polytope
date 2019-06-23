@@ -7,7 +7,7 @@
 import random
 import unittest
 
-from bounding_box.zonotope_tree import *
+from bounding_box.polytope_tree import *
 from visualization.visualize import *
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
 from pypolycontain.utils.random_polytope_generator import *
@@ -29,7 +29,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         zt = PolytopeTree([zono_l, zono_r])
         query_point = np.asarray([0,-5])
         np.reshape(query_point,(query_point.shape[0],1))
-        closest_zonotope, best_distance, evaluated_zonotopes, query_point = zt.find_closest_zonotopes(np.asarray(query_point),return_intermediate_info=True)
+        closest_zonotope, best_distance, evaluated_zonotopes, query_point = zt.find_closest_polytopes(np.asarray(query_point), return_intermediate_info=True)
         # print(closest_zonotope)
         fig, ax = visZ([zono_r,zono_l], title="", alpha=0.2)
         plt.scatter(query_point[0],query_point[1])
@@ -50,7 +50,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         query_point = np.asarray([np.random.random_integers(-centroid_range,centroid_range),
                        np.random.random_integers(-centroid_range,centroid_range)])
         query_point = query_point.reshape(-1,1)
-        closest_zonotope, best_distance,evaluated_zonotopes,query_box = zt.find_closest_zonotopes(query_point, return_intermediate_info=True)
+        closest_zonotope, best_distance,evaluated_zonotopes,query_box = zt.find_closest_polytopes(query_point, return_intermediate_info=True)
         print('Solved %d LP' %len(evaluated_zonotopes))
         print('Best distance: ', best_distance)
         print('Query point: ', query_point)
@@ -174,7 +174,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         query_point = np.asarray([np.random.random_integers(-centroid_range, centroid_range),
                                   np.random.random_integers(-centroid_range, centroid_range)])
         query_point = query_point.reshape(-1, 1)
-        closest_zonotope, best_distance, evaluated_zonotopes, query_box = zt.find_closest_zonotopes(query_point,
+        closest_zonotope, best_distance, evaluated_zonotopes, query_box = zt.find_closest_polytopes(query_point,
                                                                                                     return_intermediate_info=True)
         print('Solved %d LP' % len(evaluated_zonotopes))
         print('Best distance: ', best_distance)
@@ -199,7 +199,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
 
         #insert
         zt.insert(insert_zonotopes)
-        closest_zonotope, best_distance, evaluated_zonotopes, query_box = zt.find_closest_zonotopes(query_point,
+        closest_zonotope, best_distance, evaluated_zonotopes, query_box = zt.find_closest_polytopes(query_point,
                                                                                                     return_intermediate_info=True)
         print('Solved %d LP' % len(evaluated_zonotopes))
         print('Best distance: ', best_distance)

@@ -63,7 +63,7 @@ class PolytopeTree:
         # FIXME: Rebuilding a kDtree should not be necessary
         self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes)
 
-    def find_closest_zonotopes(self,query_point, return_intermediate_info=False):
+    def find_closest_polytopes(self, query_point, return_intermediate_info=False):
         #find closest centroid
         # try:
         #     query_point.shape[1]

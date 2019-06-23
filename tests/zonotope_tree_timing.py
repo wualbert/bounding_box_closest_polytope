@@ -33,7 +33,7 @@ def time_query_zonotope_tree(zonotope_count, dim, num_of_queries):
     query_points = (np.random.rand(num_of_queries,dim)-0.5)*centroid_range
     start_time = timeit.default_timer()
     for q in query_points:
-        zt.find_closest_zonotopes(q)
+        zt.find_closest_polytopes(q)
     end_time = timeit.default_timer()
     return end_time-start_time
 
@@ -55,7 +55,7 @@ def time_query_zonotope_tree_line(zonotope_count, dim, num_of_queries):
     # print(query_points)
     start_time = timeit.default_timer()
     for q in query_points.T:
-        zt.find_closest_zonotopes(q)
+        zt.find_closest_polytopes(q)
     end_time = time.time()
     return end_time-start_time
 
