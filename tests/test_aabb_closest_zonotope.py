@@ -159,6 +159,70 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         print('Closest Zonotope: ', closest_zonotope)
         plt.show()
 
+    def test_insertion(self):
+        zonotope_count = 10
+        insert_count = 5
+        centroid_range = zonotope_count * 6
+        seed = 1561312086  # int(time())
+        print('Seed: ', seed)
+        all_zonotopes = get_uniform_random_zonotopes(zonotope_count+insert_count, dim=2, generator_range=zonotope_count * 1,
+                                                 centroid_range=centroid_range, return_type='zonotope', seed=seed)
+        insert_zonotopes = all_zonotopes[zonotope_count:]
+        zonotopes = all_zonotopes[0:zonotope_count]
+        zt = PolytopeTree(zonotopes)
+
+        query_point = np.asarray([np.random.random_integers(-centroid_range, centroid_range),
+                                  np.random.random_integers(-centroid_range, centroid_range)])
+        query_point = query_point.reshape(-1, 1)
+        closest_zonotope, best_distance, evaluated_zonotopes, query_box = zt.find_closest_zonotopes(query_point,
+                                                                                                    return_intermediate_info=True)
+        print('Solved %d LP' % len(evaluated_zonotopes))
+        print('Best distance: ', best_distance)
+        print('Query point: ', query_point)
+        ax_lim = np.asarray([-centroid_range, centroid_range, -centroid_range, centroid_range]) * 1.1
+        fig, ax = visZ(zonotopes, title="", alpha=0.2, axis_limit=ax_lim)
+        fig, ax = visZ(closest_zonotope, title="", fig=fig, ax=ax, alpha=1, axis_limit=ax_lim)
+        # fig, ax = visualize_box_nodes(zt.box_nodes,fig=fig,ax=ax,alpha =0.4,linewidth=0.5)
+        for vertex in zt.key_point_tree.data:
+            plt.scatter(vertex[0], vertex[1], facecolor='c', s=2, alpha=1)
+
+        # fig, ax = visualize_boxes(candidate_boxes,fig=fig,ax=ax,alpha =1)
+        # print('Candidate boxes: ', candidate_boxes)
+        fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.1,
+                                  xlim=[-centroid_range, centroid_range], ylim=[-centroid_range, centroid_range])
+        # ax.set_xlim(-centroid_range,centroid_range)
+        # ax.set_ylim(-centroid_range,centroid_range)
+
+        ax.scatter(query_point[0], query_point[1], s=10, color='k')
+        print('Closest Zonotope: ', closest_zonotope)
+        plt.show()
+
+        #insert
+        zt.insert(insert_zonotopes)
+        closest_zonotope, best_distance, evaluated_zonotopes, query_box = zt.find_closest_zonotopes(query_point,
+                                                                                                    return_intermediate_info=True)
+        print('Solved %d LP' % len(evaluated_zonotopes))
+        print('Best distance: ', best_distance)
+        print('Query point: ', query_point)
+        ax_lim = np.asarray([-centroid_range, centroid_range, -centroid_range, centroid_range]) * 1.1
+        fig, ax = visZ(all_zonotopes, title="", alpha=0.2, axis_limit=ax_lim)
+        fig, ax = visZ(closest_zonotope, title="", fig=fig, ax=ax, alpha=1, axis_limit=ax_lim)
+        # fig, ax = visualize_box_nodes(zt.box_nodes,fig=fig,ax=ax,alpha =0.4,linewidth=0.5)
+        for vertex in zt.key_point_tree.data:
+            plt.scatter(vertex[0], vertex[1], facecolor='c', s=2, alpha=1)
+        print(len(zt.key_point_tree.data))
+        # fig, ax = visualize_boxes(candidate_boxes,fig=fig,ax=ax,alpha =1)
+        # print('Candidate boxes: ', candidate_boxes)
+        fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.1,
+                                  xlim=[-centroid_range, centroid_range], ylim=[-centroid_range, centroid_range])
+        # ax.set_xlim(-centroid_range,centroid_range)
+        # ax.set_ylim(-centroid_range,centroid_range)
+
+        ax.scatter(query_point[0], query_point[1], s=10, color='k')
+        print('Closest Zonotope: ', closest_zonotope)
+        plt.show()
+
+
     # def test_zonotope_boxes(self):
     #     '''
     #     for debugging

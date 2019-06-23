@@ -38,11 +38,36 @@ class PolytopeTree:
         # build key point tree for query box size guess
         self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes)
 
+    def insert(self, new_polytopes):
+        '''
+        Inserts a new polytope to the tree structure
+        :param new_polytope:
+        :return:
+        '''
+        # insert into rtree
+        for new_polytope in new_polytopes:
+            if new_polytope.type == 'zonotope':
+                lu = zonotope_to_box(new_polytope)
+            elif new_polytope.type == 'AH_polytope' or 'H-polytope':
+                lu = AH_polytope_to_box(new_polytope)
+            else:
+                raise NotImplementedError
+            self.idx.insert(hash(new_polytope), lu)
+            assert (hash(new_polytope) not in self.index_to_polytope_map)
+            self.index_to_polytope_map[hash(new_polytope)] = new_polytope
+        if isinstance(self.polytopes, np.ndarray):
+            self.polytopes = np.concatenate((self.polytopes,np.array(new_polytopes)))
+        else:
+            self.polytopes.append(new_polytope)
+            # insert into kdtree
+        # FIXME: Rebuilding a kDtree should not be necessary
+        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes)
+
     def find_closest_zonotopes(self,query_point, return_intermediate_info=False):
         #find closest centroid
         # try:
         #     query_point.shape[1]
-        #     #FIXME: Choose between d*1 (2D) or d (1D) represntation of query_point
+        #     #FIXME: Choose between d*1 (2D) or d (1D) representation of query_point
         # except:
         #     # raise ValueError('Query point should be d*1 numpy array')
         #     query_point=query_point.reshape((-1,1))
@@ -114,7 +139,6 @@ class PolytopeTree:
                     candidate_ids = list(self.idx.intersection(heuristic_box_lu))
                     best_distance = pivot_distance
                     best_polytope = pivot_polytope
-            print('best distance', best_distance)
             if return_intermediate_info:
                 return np.atleast_1d(best_polytope), best_distance, evaluated_zonotopes, heuristic_box_lu
             return np.atleast_1d(best_polytope)
