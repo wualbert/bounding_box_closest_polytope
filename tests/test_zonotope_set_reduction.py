@@ -42,7 +42,7 @@ def zonotope_reduction_line_nd(zonotope_count, dim, num_of_queries):
         x = np.vstack([2*(np.random.rand(1,1) - 0.5) * centroid_range,x])
         # print(x)
         zonotopes.append(zonotope(x, G))
-    zt = PolytopeTree(zonotopes)
+    zt = PolytopeTree_Old(zonotopes)
 
     query_points = (np.random.rand(dim-1,num_of_queries)-0.5)
     query_points = np.vstack([2*(np.random.rand(1, num_of_queries) - 0.5) * centroid_range,query_points])
@@ -90,7 +90,7 @@ def zonotope_reduction_box_nd(zonotope_count, dim, num_of_queries):
         x = 2*(np.random.rand(dim,1) - 0.5)*centroid_range
         # print(x)
         zonotopes.append(zonotope(x, G))
-    zt = PolytopeTree(zonotopes)
+    zt = PolytopeTree_Old(zonotopes)
     #query points in a line
     # query_points = (np.random.rand(dim-1,num_of_queries)-0.5)
     # query_points = np.vstack([query_points, 2*(np.random.rand(1, num_of_queries) - 0.5) * centroid_range*2])

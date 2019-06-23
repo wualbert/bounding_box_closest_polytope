@@ -1,5 +1,5 @@
 from voronoi.voronoi import *
-from bounding_box.zonotope_tree import PolytopeTree
+from bounding_box.zonotope_tree import PolytopeTree_Old
 from pypolycontain.utils.random_polytope_generator import *
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
 from scipy.spatial import voronoi_plot_2d
@@ -39,7 +39,7 @@ def test_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construct
 
             #test aabb
             construction_start_time = default_timer()
-            zono_tree = PolytopeTree(zonotopes)
+            zono_tree = PolytopeTree_Old(zonotopes)
             aabb_precomputation_times[count_index, cr_index] = default_timer()-construction_start_time
             #query
             for query_index in range(queries):
@@ -167,7 +167,7 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
 
             #test aabb
             construction_start_time = default_timer()
-            zono_tree = PolytopeTree(zonotopes)
+            zono_tree = PolytopeTree_Old(zonotopes)
             aabb_precomputation_times[dim_index, cr_index] = default_timer() - construction_start_time
             # query
             for query_index in range(queries):
