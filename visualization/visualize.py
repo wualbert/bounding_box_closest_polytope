@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from bounding_box.box import AABB
 from matplotlib.collections import PatchCollection
 from scipy.spatial import voronoi_plot_2d
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
@@ -12,26 +11,16 @@ def visualize_boxes(box_list, dim_x = 0, dim_y = 1, xlim=None, ylim=None, ax = N
         fig, ax = plt.subplots(1)
 
     for box in box_list:
-        if isinstance(box, AABB):
-            x = box.u[dim_x]
-            y = box.u[dim_y]
-            width = box.v[dim_x] - box.u[dim_x]
-            height = box.v[dim_y] - box.u[dim_y]
-        else:
-            # lower corner - upper corner representation
-            flattened_box = np.ndarray.flatten(box)
-            print(flattened_box)
-            dim = flattened_box.shape[0]/2
-            width = abs(flattened_box[dim_x] - flattened_box[dim_x+dim])
-            height = abs(flattened_box[dim_y] - flattened_box[dim_y+dim])
-            x = (flattened_box[dim_x] + flattened_box[dim_x+dim])/2-width/2
-            y = (flattened_box[dim_y] + flattened_box[dim_y+dim])/2-height/2
+        x = box.u[dim_x]
+        y = box.u[dim_y]
+        width = box.v[dim_x] - box.u[dim_x]
+        height = box.v[dim_y] - box.u[dim_y]
+        ec = np.random.rand(3,)
         if fill:
-            rect = patches.Rectangle((x,y), width, height,linewidth=linewidth, alpha=alpha)
+            rect = patches.Rectangle((x,y), width, height,linewidth=linewidth,edgecolor=box.color,facecolor=box.color,alpha=alpha)
         else:
-            rect = patches.Rectangle((x, y), width, height, linewidth=linewidth, facecolor='black',alpha=alpha)
+            rect = patches.Rectangle((x, y), width, height, linewidth=linewidth, edgecolor=box.color, facecolor='none',alpha=alpha)
         ax.add_patch(rect)
-        print(ax.patches)
     if xlim is not None:
         ax.set_xlim(xlim[0], xlim[1])
     if ylim is not None:

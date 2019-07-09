@@ -112,7 +112,7 @@ def box_to_box_distance(query_box, box):
                                  min(abs(box.u[dim]-query_box.v[dim]), abs(box.v[dim]-query_box.v[dim]))))
     return np.linalg.norm(out_range_dim)
 
-def zonotope_to_box(z, return_AABB = False):
+def zonotope_to_box(z):
     model = Model("zonotope_AABB")
     model.setParam('OutputFlag', False)
     dim=z.x.shape[0]
@@ -144,13 +144,10 @@ def zonotope_to_box(z, return_AABB = False):
         results[1][d] = x[d,0].X
         #reset coefficient
         x[d,0].obj = 0
-    if return_AABB:
-        box = AABB(results, color=z.color, polytope=z)
-        return box
-    else:
-        return np.ndarray.flatten(np.asarray(results))
+    box = AABB(results, color=z.color, polytope=z)
+    return box
 
-def AH_polytope_to_box(ahp, return_AABB = False):
+def AH_polytope_to_box(ahp):
     if ahp[0].type != 'AH_polytope':
         print('Warning: Input is not AH-Polytope!')
         for i in range(len(ahp)):
@@ -186,8 +183,5 @@ def AH_polytope_to_box(ahp, return_AABB = False):
         assert(model.Status==2)
         lu[1,d] = x[d,0].X
 
-    if return_AABB:
-        box = AABB(lu, polytope=ahp)
-        return box
-    else:
-        return np.ndarray.flatten(lu)
+    box = AABB(lu, polytope=ahp)
+    return box
