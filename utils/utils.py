@@ -27,9 +27,6 @@ def build_key_point_kd_tree(polytopes, key_vertex_count = 2):
             key_points[i*(1+2**key_vertex_count),:] = p.x[:, 0]
             key_point_to_zonotope_map[p.x[:, 0].tostring()]=[p]
             other_key_points = get_k_random_edge_points_in_zonotope(p, key_vertex_count)
-            print(other_key_points.shape)
-            print(other_key_points)
-            print(key_vertex_count)
             key_points[i * (2 ** key_vertex_count + 1) + 1:(i + 1) * (2 ** key_vertex_count + 1),
             :] = other_key_points
             for kp in other_key_points:
