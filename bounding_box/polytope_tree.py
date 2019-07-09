@@ -7,7 +7,10 @@ from box_tree import *
 from box import *
 from pypolycontain.lib.zonotope import zonotope_distance_point
 from pypolycontain.lib.operations import distance_point_polytope
-from utils.utils import build_key_point_kd_tree
+try:
+    from utils.utils import build_key_point_kd_tree
+except:
+    from closest_polytope.utils.utils import build_key_point_kd_tree
 from rtree import index
 
 class PolytopeTree:
