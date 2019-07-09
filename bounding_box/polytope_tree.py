@@ -5,12 +5,16 @@
 '''
 from box_tree import *
 from box import *
-from pypolycontain.lib.zonotope import zonotope_distance_point, distance_point
-from utils.utils import build_key_point_kd_tree
+from pypolycontain.lib.operations import distance_point_polytope
+#FIXME
+try:
+    from closest_polytope.utils.utils import build_key_point_kd_tree
+except:
+    from utils.utils import build_key_point_kd_tree
 from rtree import index
 
 class PolytopeTree:
-    def __init__(self, polytopes):
+    def __init__(self, polytopes, key_vertex_count=2):
         '''
         Updated implementation using rtree
         :param polytopes:
@@ -24,6 +28,7 @@ class PolytopeTree:
         print('Rtree dimension is %d-D' % self.rtree_p.dimension)
         self.idx = index.Index(properties=self.rtree_p)
         self.index_to_polytope_map = {}
+        self.key_vertex_count = key_vertex_count
         for z in self.polytopes:
             if self.type == 'zonotope':
                 lu = zonotope_to_box(z)
@@ -36,7 +41,7 @@ class PolytopeTree:
             self.index_to_polytope_map[hash(z)] = z
 
         # build key point tree for query box size guess
-        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes)
+        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes, key_vertex_count=self.key_vertex_count)
 
     def insert(self, new_polytopes):
         '''
@@ -61,7 +66,7 @@ class PolytopeTree:
             self.polytopes.append(new_polytope)
             # insert into kdtree
         # FIXME: Rebuilding a kDtree should not be necessary
-        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes)
+        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes, key_vertex_count=self.key_vertex_count)
 
     def find_closest_polytopes(self, query_point, return_intermediate_info=False):
         #find closest centroid
@@ -89,7 +94,7 @@ class PolytopeTree:
         best_polytope = None
         for cz in centroid_zonotopes:
             evaluated_zonotopes.append(cz)
-            zd = zonotope_distance_point(cz,query_point)[0]
+            zd = distance_point_polytope(cz,query_point)[0]
             if best_distance > zd:
                 best_distance=zd
                 best_polytope=cz
@@ -124,7 +129,7 @@ class PolytopeTree:
                 pivot_polytope = self.index_to_polytope_map[candidate_ids[sample]]
                 if return_intermediate_info:
                     evaluated_zonotopes.append(pivot_polytope)
-                pivot_distance = distance_point(pivot_polytope, query_point)[0]
+                pivot_distance = distance_point_polytope(pivot_polytope, query_point)[0]
                 if pivot_distance>=best_distance:#fixme: >= or >?
                     #get rid of this polytope
                     candidate_ids[sample], candidate_ids[-1] = candidate_ids[-1], candidate_ids[sample]
@@ -190,7 +195,7 @@ class PolytopeTree_Old:
         best_polytope = None
         for cz in centroid_zonotopes:
             evaluated_zonotopes.append(cz)
-            zd = zonotope_distance_point(cz,query_point)[0]
+            zd = distance_point_polytope(cz,query_point)[0]
             if best_distance > zd:
                 best_distance=zd
                 best_polytope=cz
@@ -225,7 +230,7 @@ class PolytopeTree_Old:
                 pivot_polytope = candidate_boxes[sample].polytope
                 if return_intermediate_info:
                     evaluated_zonotopes.append(pivot_polytope)
-                pivot_distance = distance_point(pivot_polytope, query_point)[0]
+                pivot_distance = distance_point_polytope(pivot_polytope, query_point)[0]
                 if pivot_distance>=best_distance:#fixme: >= or >?
                     #get rid of this polytope
                     candidate_boxes[sample], candidate_boxes[-1] = candidate_boxes[-1], candidate_boxes[sample]

@@ -4,7 +4,10 @@ from scipy.spatial import Voronoi
 from pypolycontain.utils.random_polytope_generator import get_k_random_edge_points_in_zonotope
 
 def build_key_point_kd_tree(polytopes, key_vertex_count = 2):
-    n = len(polytopes)*(1+2**key_vertex_count)
+    if key_vertex_count == 0:
+        n = len(polytopes)
+    else:
+        n = len(polytopes)*(1+2**key_vertex_count)
     if polytopes[0].type=='AH_polytope':
         k = polytopes[0].t.shape[0]
     elif polytopes[0].type=='zonotope':
@@ -21,13 +24,17 @@ def build_key_point_kd_tree(polytopes, key_vertex_count = 2):
             key_points[i,:] = p.x[:, 0]
             key_point_to_zonotope_map[p.x[:, 0].tostring()]=[p]
         elif p.type=='zonotope':
-            key_points[i*(1+2**key_vertex_count),:] = p.x[:, 0]
+            if key_vertex_count == 0:
+                key_points[i,:] = p.x[:, 0]
+            else:
+                key_points[i * (1 + 2 ** key_vertex_count), :] = p.x[:, 0]
             key_point_to_zonotope_map[p.x[:, 0].tostring()]=[p]
+            if key_vertex_count==0:
+                continue
             other_key_points = get_k_random_edge_points_in_zonotope(p, key_vertex_count)
             # print(other_key_points.shape)
             # print(other_key_points)
-            key_points[i * (2 ** key_vertex_count + 1) + 1:(i + 1) * (2 ** key_vertex_count + 1),
-            :] = other_key_points
+            key_points[i * (2 ** key_vertex_count + 1) + 1:(i + 1) * (2 ** key_vertex_count + 1),:] = other_key_points
             for kp in other_key_points:
                 key_point_to_zonotope_map[kp.tostring()] = [p]
         else:
