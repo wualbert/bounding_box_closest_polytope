@@ -15,7 +15,7 @@ def time_construct_zonotope_tree(zonotope_count, dim):
         x = (np.random.rand(dim, 1) - 0.5) * centroid_range
         zonotopes.append(zonotope(x, G))
     start_time = timeit.default_timer()
-    zt = PolytopeTree(zonotopes)
+    zt = PolytopeTree_Old(zonotopes)
     end_time = timeit.default_timer()
 
     return end_time-start_time, zt
@@ -29,11 +29,11 @@ def time_query_zonotope_tree(zonotope_count, dim, num_of_queries):
         G = (np.random.rand(dim, m) - 0.5) * generator_range
         x = (np.random.rand(dim, 1) - 0.5) * centroid_range
         zonotopes.append(zonotope(x, G))
-    zt = PolytopeTree(zonotopes)
+    zt = PolytopeTree_Old(zonotopes)
     query_points = (np.random.rand(num_of_queries,dim)-0.5)*centroid_range
     start_time = timeit.default_timer()
     for q in query_points:
-        zt.find_closest_zonotopes(q)
+        zt.find_closest_polytopes(q)
     end_time = timeit.default_timer()
     return end_time-start_time
 
@@ -48,14 +48,14 @@ def time_query_zonotope_tree_line(zonotope_count, dim, num_of_queries):
         x = np.vstack([x, (np.random.rand(1,1) - 0.5) * centroid_range])
         # print(x)
         zonotopes.append(zonotope(x, G))
-    zt = PolytopeTree(zonotopes)
+    zt = PolytopeTree_Old(zonotopes)
 
     query_points = (np.random.rand(dim-1,num_of_queries)-0.5)
     query_points = np.vstack([query_points, (np.random.rand(1, num_of_queries) - 0.5) * centroid_range])
     # print(query_points)
     start_time = timeit.default_timer()
     for q in query_points.T:
-        zt.find_closest_zonotopes(q)
+        zt.find_closest_polytopes(q)
     end_time = time.time()
     return end_time-start_time
 

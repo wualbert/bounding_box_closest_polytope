@@ -1,5 +1,5 @@
 from voronoi.voronoi import *
-from bounding_box.zonotope_tree import PolytopeTree
+from bounding_box.zonotope_tree import PolytopeTree_Old
 from pypolycontain.utils.random_polytope_generator import *
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
 from scipy.spatial import voronoi_plot_2d
@@ -39,13 +39,13 @@ def test_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construct
 
             #test aabb
             construction_start_time = default_timer()
-            zono_tree = PolytopeTree(zonotopes)
+            zono_tree = PolytopeTree_Old(zonotopes)
             aabb_precomputation_times[count_index, cr_index] = default_timer()-construction_start_time
             #query
             for query_index in range(queries):
                 query_point = (np.random.rand(dim) - 0.5) * count * 5 #random query point
                 query_start_time = default_timer()
-                best_zonotope, best_distance, evaluated_zonotopes = zono_tree.find_closest_zonotopes(query_point, return_intermediate_info=True)
+                best_zonotope, best_distance, evaluated_zonotopes = zono_tree.find_closest_polytopes(query_point, return_intermediate_info=True)
                 aabb_query_times[count_index,cr_index*queries+query_index] = default_timer()-query_start_time
                 aabb_query_reduction_percentages[count_index, cr_index*queries+query_index] = len(evaluated_zonotopes)*100./count
 
@@ -167,13 +167,13 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
 
             #test aabb
             construction_start_time = default_timer()
-            zono_tree = PolytopeTree(zonotopes)
+            zono_tree = PolytopeTree_Old(zonotopes)
             aabb_precomputation_times[dim_index, cr_index] = default_timer() - construction_start_time
             # query
             for query_index in range(queries):
                 query_point = (np.random.rand(dim) - 0.5) * count * 5  # random query point
                 query_start_time = default_timer()
-                best_zonotope, best_distance, evaluated_zonotopes, query_box = zono_tree.find_closest_zonotopes(query_point, return_intermediate_info=True)
+                best_zonotope, best_distance, evaluated_zonotopes, query_box = zono_tree.find_closest_polytopes(query_point, return_intermediate_info=True)
                 aabb_query_times[dim_index, cr_index * queries + query_index] = default_timer() - query_start_time
                 aabb_query_reduction_percentages[dim_index, cr_index * queries + query_index] = len(evaluated_zonotopes) * 100. / count
 

@@ -2,7 +2,8 @@ import numpy as np
 from scipy.spatial import cKDTree as KDTree
 from pypolycontain.lib.zonotope import zonotope
 from collections import deque
-from pypolycontain.lib.AH_polytope import AH_polytope,distance_point,to_AH_polytope
+from pypolycontain.lib.AH_polytope import AH_polytope,to_AH_polytope
+from pypolycontain.lib.operations import distance_point_polytope
 from pypolycontain.lib.polytope import polytope
 from pypolycontain.lib.zonotope import zonotope_distance_point
 from pypolycontain.lib.containment_encodings import subset_generic,constraints_AB_eq_CD,add_Var_matrix
@@ -19,7 +20,7 @@ def set_polytope_pair_distance(arguments):
     key_point = key_points[key_point_index]
     key_point_string = str(key_point)
     polytope = key_point_to_polytope_map[key_point_string]['polytopes'][polytope_index]
-    return distance_point(to_AH_polytope(polytope), key_point)[0]
+    return distance_point_polytope(to_AH_polytope(polytope), key_point)[0]
 
 class VoronoiClosestPolytope:
     def __init__(self, polytopes, key_vertices_count=0, process_count=8):
@@ -95,7 +96,7 @@ class VoronoiClosestPolytope:
         # print('closest key point', closest_key_point)
         closest_key_point_polytope = self.key_point_to_polytope_map[str(closest_key_point)]['polytopes'][0]
         # print('closest polytope centroid' + str(closest_key_point_polytope.x))
-        dist_query_centroid_polytope = distance_point(closest_key_point_polytope, query_point)[0]
+        dist_query_centroid_polytope = distance_point_polytope(closest_key_point_polytope, query_point)[0]
         dist_query_key_point = np.linalg.norm(query_point-closest_key_point)
         # print(dist_query_key_point, dist_query_centroid_polytope)
         cutoff_index = np.searchsorted(self.key_point_to_polytope_map[str(closest_key_point)].distances, dist_query_key_point + dist_query_centroid_polytope)
@@ -109,7 +110,7 @@ class VoronoiClosestPolytope:
         best_polytope = None
         best_distance = np.inf
         for polytope in closest_polytope_candidates:
-            dist = distance_point(polytope, query_point)[0]
+            dist = distance_point_polytope(polytope, query_point)[0]
             if best_distance>dist:
                 best_distance = dist
                 best_polytope = polytope

@@ -42,14 +42,14 @@ def zonotope_reduction_line_nd(zonotope_count, dim, num_of_queries):
         x = np.vstack([2*(np.random.rand(1,1) - 0.5) * centroid_range,x])
         # print(x)
         zonotopes.append(zonotope(x, G))
-    zt = PolytopeTree(zonotopes)
+    zt = PolytopeTree_Old(zonotopes)
 
     query_points = (np.random.rand(dim-1,num_of_queries)-0.5)
     query_points = np.vstack([2*(np.random.rand(1, num_of_queries) - 0.5) * centroid_range,query_points])
     # print(query_points)
     reduction_ratios = np.zeros([num_of_queries])
     for i, q in enumerate(query_points.T):
-        closest_zonotope, candidate_boxes, query_box = zt.find_closest_zonotopes(q)
+        closest_zonotope, candidate_boxes, query_box = zt.find_closest_polytopes(q)
         reduction_ratios[i] = len(candidate_boxes)/(zonotope_count*1.)
 
     if dim ==2:
@@ -90,7 +90,7 @@ def zonotope_reduction_box_nd(zonotope_count, dim, num_of_queries):
         x = 2*(np.random.rand(dim,1) - 0.5)*centroid_range
         # print(x)
         zonotopes.append(zonotope(x, G))
-    zt = PolytopeTree(zonotopes)
+    zt = PolytopeTree_Old(zonotopes)
     #query points in a line
     # query_points = (np.random.rand(dim-1,num_of_queries)-0.5)
     # query_points = np.vstack([query_points, 2*(np.random.rand(1, num_of_queries) - 0.5) * centroid_range*2])
@@ -98,7 +98,7 @@ def zonotope_reduction_box_nd(zonotope_count, dim, num_of_queries):
     query_points = 2 * (np.random.rand(dim, num_of_queries) - 0.5) * centroid_range * 2
     reduction_ratios = np.zeros([num_of_queries])
     for i, q in enumerate(query_points.T):
-        closest_zonotope, candidate_boxes, query_box = zt.find_closest_zonotopes(q)
+        closest_zonotope, candidate_boxes, query_box = zt.find_closest_polytopes(q)
         reduction_ratios[i] = len(candidate_boxes)/(zonotope_count*1.)
     if dim ==2:
         fig, ax = visZ(zt.polytopes, title="", alpha=0.2)
