@@ -14,12 +14,13 @@ except:
 from rtree import index
 
 class PolytopeTree:
-    def __init__(self, polytopes):
+    def __init__(self, polytopes, key_vertex_count = 1):
         '''
         Updated implementation using rtree
         :param polytopes:
         '''
         self.polytopes = polytopes
+        self.key_vertex_count = key_vertex_count
         # Create box data structure from zonotopes
         self.type = self.polytopes[0].type
         # Initialize rtree structure
@@ -40,7 +41,7 @@ class PolytopeTree:
             self.index_to_polytope_map[hash(z)] = z
 
         # build key point tree for query box size guess
-        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes)
+        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes, self.key_vertex_count)
 
     def insert(self, new_polytopes):
         '''
@@ -65,7 +66,7 @@ class PolytopeTree:
             self.polytopes.append(new_polytope)
             # insert into kdtree
         # FIXME: Rebuilding a kDtree should not be necessary
-        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes)
+        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes, self.key_vertex_count)
 
     def find_closest_polytopes(self, query_point, return_intermediate_info=False):
         #find closest centroid
