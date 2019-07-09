@@ -5,7 +5,8 @@
 '''
 from box_tree import *
 from box import *
-from pypolycontain.lib.zonotope import zonotope_distance_point, distance_point
+from pypolycontain.lib.zonotope import zonotope_distance_point
+from pypolycontain.lib.operations import distance_point_polytope
 from utils.utils import build_key_point_kd_tree
 from rtree import index
 
@@ -124,7 +125,7 @@ class PolytopeTree:
                 pivot_polytope = self.index_to_polytope_map[candidate_ids[sample]]
                 if return_intermediate_info:
                     evaluated_zonotopes.append(pivot_polytope)
-                pivot_distance = distance_point(pivot_polytope, query_point)[0]
+                pivot_distance = distance_point_polytope(pivot_polytope, query_point)[0]
                 if pivot_distance>=best_distance:#fixme: >= or >?
                     #get rid of this polytope
                     candidate_ids[sample], candidate_ids[-1] = candidate_ids[-1], candidate_ids[sample]
@@ -225,7 +226,7 @@ class PolytopeTree_Old:
                 pivot_polytope = candidate_boxes[sample].polytope
                 if return_intermediate_info:
                     evaluated_zonotopes.append(pivot_polytope)
-                pivot_distance = distance_point(pivot_polytope, query_point)[0]
+                pivot_distance = distance_point_polytope(pivot_polytope, query_point)[0]
                 if pivot_distance>=best_distance:#fixme: >= or >?
                     #get rid of this polytope
                     candidate_boxes[sample], candidate_boxes[-1] = candidate_boxes[-1], candidate_boxes[sample]
