@@ -98,6 +98,20 @@ def point_to_box_distance(point, box):
             out_range_dim.append(min(abs(box.u[dim]-point[dim]), abs(box.v[dim]-point[dim])))
     return np.linalg.norm(out_range_dim)
 
+def point_to_box_dmax(point, box):
+    '''
+    Computes the largest distance between point and x where x is in the box
+    :param point:
+    :param box:
+    :return:
+    '''
+    farthest_point = np.zeros(box.dimension)
+    for dim in range(box.dimension):
+        if abs(box.u[dim]-point[dim])<abs(box.v[dim]-point[dim]):
+            farthest_point[dim] = box.v[dim]
+        else:
+            farthest_point[dim] = box.u[dim]
+    return np.linalg.norm(farthest_point-np.asarray(point))
 
 def box_to_box_distance(query_box, box):
     out_range_dim = []
@@ -151,7 +165,9 @@ def zonotope_to_box(z, return_AABB = False):
         return np.ndarray.flatten(np.asarray(results))
 
 def AH_polytope_to_box(ahp, return_AABB = False):
-    if ahp[0].type != 'AH_polytope':
+    if ahp.type == 'zonotope':
+        return zonotope_to_box(ahp, return_AABB=return_AABB)
+    if ahp.type != 'AH_polytope':
         print('Warning: Input is not AH-Polytope!')
         for i in range(len(ahp)):
             ahp[i] = to_AH_polytope(ahp[i])
@@ -167,20 +183,23 @@ def AH_polytope_to_box(ahp, return_AABB = False):
     for d in range(dim):
         x[d] = model.addVar(obj=0,lb=-GRB.INFINITY,ub=GRB.INFINITY)
 
+    #Force model update
+    model.update()
+
     #add polytope constraint Hx<=h
     for d in range(ahp.P.h.shape[0]):
-        model.addConstr(np.matmul(ahp.P.H[d,:], x) <= ahp.P.h)
+        model.addConstr(np.dot(ahp.P.H[d,:], x)[0] <= ahp.P.h[d])
     model.update()
 
     for d in range(dim):
         #find minimum
-        model.setObjective((ahp.t+np.matmul(ahp.T, x))[d,0], GRB.MINIMIZE)
+        model.setObjective((ahp.t+np.dot(ahp.T, x))[d,0], GRB.MINIMIZE)
         model.update()
         model.optimize()
         assert(model.Status==2)
         lu[0,d] = x[d,0].X
         #find maximum
-        model.setObjective((ahp.t+np.matmul(ahp.T, x))[d,0], GRB.MAXIMIZE)
+        model.setObjective((ahp.t+np.dot(ahp.T, x))[d,0], GRB.MAXIMIZE)
         model.update()
         model.optimize()
         assert(model.Status==2)

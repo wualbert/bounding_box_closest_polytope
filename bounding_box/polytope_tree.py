@@ -58,7 +58,7 @@ class PolytopeTree:
             else:
                 raise NotImplementedError
             self.idx.insert(hash(new_polytope), lu)
-            assert (hash(new_polytope) not in self.index_to_polytope_map)
+            # assert (hash(new_polytope) not in self.index_to_polytope_map)
             self.index_to_polytope_map[hash(new_polytope)] = new_polytope
         if isinstance(self.polytopes, np.ndarray):
             self.polytopes = np.concatenate((self.polytopes,np.array(new_polytopes)))
