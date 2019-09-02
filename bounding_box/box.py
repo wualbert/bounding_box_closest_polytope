@@ -175,17 +175,16 @@ def AH_polytope_to_box(ahp, return_AABB = False):
     model.setParam('OutputFlag', False)
     dim=ahp.t.shape[0]
     #find extremum on each dimension
-    lu = np.zeros([ahp.t.shape[0], 2], dtype='float')
-    x = np.empty((ahp.T.shape[0], 1), dtype='object')
+    lu = np.zeros([2, ahp.t.shape[0]], dtype='float')
+    x = np.empty((ahp.P.H.shape[1], 1), dtype='object')
     #construct decision variables l and u
     model.update()
     #construct decision variable x
-    for d in range(dim):
+    for d in range(x.shape[0]):
         x[d] = model.addVar(obj=0,lb=-GRB.INFINITY,ub=GRB.INFINITY)
 
     #Force model update
     model.update()
-
     #add polytope constraint Hx<=h
     for d in range(ahp.P.h.shape[0]):
         model.addConstr(np.dot(ahp.P.H[d,:], x)[0] <= ahp.P.h[d])
@@ -197,13 +196,17 @@ def AH_polytope_to_box(ahp, return_AABB = False):
         model.update()
         model.optimize()
         assert(model.Status==2)
-        lu[0,d] = x[d,0].X
+        lu[0,d] = ahp.t[d,0]
+        for i in range(x.shape[0]):
+            lu[0,d]+=ahp.T[d,i]*x[i,0].X
         #find maximum
         model.setObjective((ahp.t+np.dot(ahp.T, x))[d,0], GRB.MAXIMIZE)
         model.update()
         model.optimize()
         assert(model.Status==2)
-        lu[1,d] = x[d,0].X
+        lu[1,d] = ahp.t[d,0]
+        for i in range(x.shape[0]):
+            lu[1,d]+=ahp.T[d,i]*x[i,0].X
 
     if return_AABB:
         box = AABB(lu, polytope=ahp)
