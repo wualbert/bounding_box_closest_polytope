@@ -36,8 +36,10 @@ class PolytopeTree:
                 lu = AH_polytope_to_box(z)
             else:
                 raise NotImplementedError
-            self.idx.insert(hash(z), lu)
             assert(hash(z) not in self.index_to_polytope_map)
+            #FIXME
+            # if hash(z) not in self.index_to_polytope_map:
+            self.idx.insert(hash(z), lu)
             self.index_to_polytope_map[hash(z)] = z
 
         # build key point tree for query box size guess
