@@ -6,11 +6,16 @@
 
 import random
 import unittest
-
+import matplotlib
+from time import time
 from bounding_box.polytope_tree import *
 from visualization.visualize import *
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
 from pypolycontain.utils.random_polytope_generator import *
+from matplotlib.ticker import (AutoMinorLocator, MultipleLocator)
+
+matplotlib.rcParams['font.family'] = "Times New Roman"
+matplotlib.rcParams.update({'font.size': 15})
 
 class CentroidKDTreeTestCase(unittest.TestCase):
     def test_kd_construction(self):
@@ -39,11 +44,11 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         plt.show()
 
     def test_many_zonotopes(self):
-        zonotope_count = 10
-        centroid_range = zonotope_count * 6
-        seed = 1561312086#int(time())
-        print('Seed: ', seed)
-        zonotopes = get_uniform_random_zonotopes(zonotope_count, dim=2, generator_range=zonotope_count * 1,
+        zonotope_count = 30
+        centroid_range = zonotope_count * 1.5
+        seed = int(time())
+        seed = np.random.random_integers(0,10000000,1)  # int(time())
+        zonotopes = get_uniform_random_zonotopes(zonotope_count, dim=2, generator_range=zonotope_count * 0.3,
                                               centroid_range=centroid_range, return_type='zonotope', seed=seed)
         zt = PolytopeTree(zonotopes)
 
@@ -55,22 +60,28 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         print('Best distance: ', best_distance)
         print('Query point: ', query_point)
         ax_lim = np.asarray([-centroid_range,centroid_range,-centroid_range,centroid_range])*1.1
+
         fig, ax = visZ(zonotopes, title="", alpha=0.2,axis_limit=ax_lim)
+        fig, ax = visualize_boxes([zonotope_to_box(p, return_AABB=False) for p in zt.polytopes],fig=fig,ax=ax,alpha =0.05,linewidth=0.5)
         fig, ax = visZ(closest_zonotope, title="",fig=fig,ax=ax,alpha=1,axis_limit=ax_lim)
-        # fig, ax = visualize_box_nodes(zt.box_nodes,fig=fig,ax=ax,alpha =0.4,linewidth=0.5)
         for vertex in zt.key_point_tree.data:
             plt.scatter(vertex[0], vertex[1], facecolor='c', s=2, alpha=1)
-
         # fig, ax = visualize_boxes(candidate_boxes,fig=fig,ax=ax,alpha =1)
         # print('Candidate boxes: ', candidate_boxes)
-        fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.1,
+        fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.3,
                                   xlim=[-centroid_range,centroid_range],ylim=[-centroid_range,centroid_range])
-        # ax.set_xlim(-centroid_range,centroid_range)
-        # ax.set_ylim(-centroid_range,centroid_range)
-
+        lim = 60
+        ax.set_xlim(-lim,lim)
+        ax.set_ylim(-lim,lim)
+        ax.xaxis.set_major_locator(MultipleLocator(15))
+        ax.yaxis.set_major_locator(MultipleLocator(15))
+        ax.set_title('Nearest Polytope Querying with AABB')
+        plt.gca().set_aspect('equal', adjustable='box')
+        plt.tight_layout()
         ax.scatter(query_point[0],query_point[1],s=10,color='k')
         print('Closest Zonotope: ', closest_zonotope)
-        plt.show()
+        plt.savefig('closest_zonotope.png', dpi=300)
+
 
     def test_many_zonotopes_repeat(self):
         for itr in range(100):
@@ -163,7 +174,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         zonotope_count = 10
         insert_count = 5
         centroid_range = zonotope_count * 6
-        seed = 1561312086  # int(time())
+        seed = np.random.random_integers(0,10000000,1)  # int(time())
         print('Seed: ', seed)
         all_zonotopes = get_uniform_random_zonotopes(zonotope_count+insert_count, dim=2, generator_range=zonotope_count * 1,
                                                  centroid_range=centroid_range, return_type='zonotope', seed=seed)

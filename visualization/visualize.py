@@ -20,7 +20,7 @@ def visualize_boxes(box_list, dim_x = 0, dim_y = 1, xlim=None, ylim=None, ax = N
         else:
             # lower corner - upper corner representation
             flattened_box = np.ndarray.flatten(box)
-            print(flattened_box)
+            # print(flattened_box)
             dim = flattened_box.shape[0]/2
             width = abs(flattened_box[dim_x] - flattened_box[dim_x+dim])
             height = abs(flattened_box[dim_y] - flattened_box[dim_y+dim])
@@ -31,7 +31,6 @@ def visualize_boxes(box_list, dim_x = 0, dim_y = 1, xlim=None, ylim=None, ax = N
         else:
             rect = patches.Rectangle((x, y), width, height, linewidth=linewidth, facecolor='black',alpha=alpha)
         ax.add_patch(rect)
-        print(ax.patches)
     if xlim is not None:
         ax.set_xlim(xlim[0], xlim[1])
     if ylim is not None:
