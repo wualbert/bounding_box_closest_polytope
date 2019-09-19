@@ -7,7 +7,7 @@ from scipy.spatial import voronoi_plot_2d
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
 
 
-def visualize_boxes(box_list, dim_x = 0, dim_y = 1, xlim=None, ylim=None, ax = None, fig = None,alpha=None,fill=False,linewidth=3):
+def visualize_boxes(box_list, dim_x = 0, dim_y = 1, xlim=None, ylim=None, ax = None, fig = None,alpha=None,linewidth=3, facecolor='black'):
     if ax is None:
         fig, ax = plt.subplots(1)
 
@@ -26,10 +26,11 @@ def visualize_boxes(box_list, dim_x = 0, dim_y = 1, xlim=None, ylim=None, ax = N
             height = abs(flattened_box[dim_y] - flattened_box[dim_y+dim])
             x = (flattened_box[dim_x] + flattened_box[dim_x+dim])/2-width/2
             y = (flattened_box[dim_y] + flattened_box[dim_y+dim])/2-height/2
-        if fill:
-            rect = patches.Rectangle((x,y), width, height,linewidth=linewidth, alpha=alpha)
-        else:
-            rect = patches.Rectangle((x, y), width, height, linewidth=linewidth, facecolor='black',alpha=alpha)
+        # if not fill:
+            #FIXME: not working
+            # rect = patches.Rectangle((x,y), width, height,linewidth=linewidth, alpha=alpha, facecolor=facecolor)
+
+        rect = patches.Rectangle((x, y), width, height, linewidth=linewidth, facecolor=facecolor,alpha=alpha)
         ax.add_patch(rect)
     if xlim is not None:
         ax.set_xlim(xlim[0], xlim[1])

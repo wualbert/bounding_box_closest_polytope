@@ -15,7 +15,7 @@ from pypolycontain.utils.random_polytope_generator import *
 from matplotlib.ticker import (AutoMinorLocator, MultipleLocator)
 
 matplotlib.rcParams['font.family'] = "Times New Roman"
-matplotlib.rcParams.update({'font.size': 15})
+matplotlib.rcParams.update({'font.size': 14})
 
 class CentroidKDTreeTestCase(unittest.TestCase):
     def test_kd_construction(self):
@@ -62,8 +62,8 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         ax_lim = np.asarray([-centroid_range,centroid_range,-centroid_range,centroid_range])*1.1
 
         fig, ax = visZ(zonotopes, title="", alpha=0.2,axis_limit=ax_lim)
-        fig, ax = visualize_boxes([zonotope_to_box(p, return_AABB=False) for p in zt.polytopes],fig=fig,ax=ax,alpha =0.05,linewidth=0.5)
-        fig, ax = visualize_boxes([zonotope_to_box(p, return_AABB=False) for p in evaluated_zonotopes],fig=fig,ax=ax,alpha =0.15,linewidth=0.5)
+        fig, ax = visualize_boxes([zonotope_to_box(p, return_AABB=False) for p in zt.polytopes],fig=fig,ax=ax,alpha =0.08,linewidth=0.5, facecolor='black')
+        fig, ax = visualize_boxes([zonotope_to_box(p, return_AABB=False) for p in evaluated_zonotopes],fig=fig,ax=ax,alpha =0.2,linewidth=0.5, facecolor='blue')
 
         fig, ax = visZ(closest_zonotope, title="",fig=fig,ax=ax,alpha=1,axis_limit=ax_lim)
         for vertex in zt.key_point_tree.data:
@@ -71,7 +71,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         # fig, ax = visualize_boxes(candidate_boxes,fig=fig,ax=ax,alpha =1)
         # print('Candidate boxes: ', candidate_boxes)
         fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.3,
-                                  xlim=[-centroid_range,centroid_range],ylim=[-centroid_range,centroid_range])
+                                  xlim=[-centroid_range,centroid_range],ylim=[-centroid_range,centroid_range], facecolor='cyan')
         lim = 60
         ax.set_xlim(-lim,lim)
         ax.set_ylim(-lim,lim)

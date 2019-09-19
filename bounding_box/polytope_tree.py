@@ -130,6 +130,11 @@ class PolytopeTree:
                 sample = np.random.randint(len(candidate_ids))
                 #solve linear program for the sampled polytope
                 pivot_polytope = self.index_to_polytope_map[candidate_ids[sample]]
+                if pivot_polytope==best_polytope:
+                    #get rid of this polytope
+                    candidate_ids[sample], candidate_ids[-1] = candidate_ids[-1], candidate_ids[sample]
+                    candidate_ids = candidate_ids[0:-1]
+                    continue
                 if return_intermediate_info:
                     evaluated_zonotopes.append(pivot_polytope)
                 pivot_distance = distance_point_polytope(pivot_polytope, query_point, ball="l2")[0]
