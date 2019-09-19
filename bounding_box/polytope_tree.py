@@ -109,7 +109,6 @@ class PolytopeTree:
         #find candidate box nodes
         candidate_ids = list(self.idx.intersection(heuristic_box_lu))
         # print('Evaluating %d zonotopes') %len(candidate_boxes)
-        print('best centroid', best_polytope.x)
         #map back to zonotopes
         if candidate_ids is None:
             # This should never happen
@@ -127,24 +126,13 @@ class PolytopeTree:
             #     print(cb)
             #     evaluated_zonotopes.append(cb.polytope)
             #find the closest zonotope with randomized approach
-            print('Starting with %i candidates' %len(candidate_ids))
-            while(len(candidate_ids)>1):
+            while(len(candidate_ids)>=1):
                 sample = np.random.randint(len(candidate_ids))
                 #solve linear program for the sampled polytope
                 pivot_polytope = self.index_to_polytope_map[candidate_ids[sample]]
-                if best_polytope == pivot_polytope:
-                    #don't compare against pivot
-                    #get rid of this polytope
-                    candidate_ids[sample], candidate_ids[-1] = candidate_ids[-1], candidate_ids[sample]
-                    candidate_ids = candidate_ids[0:-1]
-                    continue
-                print('bd', best_distance)
-
                 if return_intermediate_info:
                     evaluated_zonotopes.append(pivot_polytope)
                 pivot_distance = distance_point_polytope(pivot_polytope, query_point, ball="l2")[0]
-                print('pd', pivot_distance)
-                print('centroid', pivot_polytope.x)
                 if pivot_distance>=best_distance:#fixme: >= or >?
                     #get rid of this polytope
                     candidate_ids[sample], candidate_ids[-1] = candidate_ids[-1], candidate_ids[sample]
@@ -158,7 +146,6 @@ class PolytopeTree:
                     # find new candidates
                     candidate_ids = list(self.idx.intersection(heuristic_box_lu))
                     best_distance = pivot_distance
-                    print('pd', pivot_distance)
                     best_polytope = pivot_polytope
             if return_intermediate_info:
                 return np.atleast_1d(best_polytope), best_distance, evaluated_zonotopes, heuristic_box_lu
