@@ -309,56 +309,55 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
     else:
         plt.show()
 
-def test_on_rrt(dir, queries = 100):
+def test_on_rrt(dir, queries, query_range):
     polytope_sets, times = get_polytope_sets_in_dir(dir)
-    construction_repeats = 1
-    voronoi_precomputation_times = np.zeros([len(times), construction_repeats])
-    voronoi_query_times = np.zeros([len(times), construction_repeats * queries])
-    voronoi_query_reduction_percentages = np.zeros([len(times), construction_repeats * queries])
-    aabb_precomputation_times = np.zeros([len(times), construction_repeats])
-    aabb_query_times = np.zeros([len(times), construction_repeats * queries])
-    aabb_query_reduction_percentages = np.zeros([len(times), construction_repeats * queries])
-    seed = int(time.time())
+    voronoi_precomputation_times = np.zeros([len(times)])
+    voronoi_query_times = np.zeros([len(times), queries])
+    voronoi_query_reduction_percentages = np.zeros([len(times),queries])
+    aabb_precomputation_times = np.zeros([len(times)])
+    aabb_query_times = np.zeros([len(times), queries])
+    aabb_query_reduction_percentages = np.zeros([len(times), queries])
+
+    query_avg = (query_range[:,1]+query_range[:,0])/2
+    query_diff = (query_range[:,1]-query_range[:,0])/2
 
     for i, polytopes in enumerate(polytope_sets):
         # test voronoi
-        # construction_start_time = default_timer()
-        # print('Precomputing TI...')
-        # vcp = VoronoiClosestPolytope(polytopes)
-        # voronoi_precomputation_times[i, 0] = default_timer() - construction_start_time
-        # print('TI Precomputation completed in %f s!' %voronoi_precomputation_times[i,0])
-        # # query
-        # print('Querying TI...')
-        # for query_index in range(queries):
-        #     query_point = (np.random.rand(polytope_sets[0].t.shape[0]) - 0.5) * 10 * 5  # random query point
-        #     query_start_time = default_timer()
-        #     best_zonotope, best_distance, evaluated_zonotopes = vcp.find_closest_polytope(query_point,
-        #                                                                                   return_intermediate_info=True)
-        #     # voronoi_query_times[
-        #     #     i, cr_index * queries + query_index] = default_timer() - query_start_time
-        #     # voronoi_query_reduction_percentages[dim_index, cr_index * queries + query_index] = len(
-        #     #     evaluated_zonotopes) * 100. / count
-        # print('TI Querying completed!')
+        construction_start_time = default_timer()
+        print('Precomputing TI...')
+        vcp = VoronoiClosestPolytope(polytopes)
+        voronoi_precomputation_times[i] = default_timer() - construction_start_time
+        print('TI Precomputation completed in %f s!' %voronoi_precomputation_times[i])
+        # query
+        print('Querying TI...')
+        for query_index in range(queries):
+            query_point = np.multiply((np.random.rand(query_avg.shape[0]) - 0.5) *2, query_diff)+query_avg
+            query_start_time = default_timer()
+            best_zonotope, best_distance, evaluated_zonotopes = vcp.find_closest_polytope(query_point,
+                                                                                          return_intermediate_info=True)
+            voronoi_query_times[i, query_index] = default_timer() - query_start_time
+            voronoi_query_reduction_percentages[i, query_index] = len(evaluated_zonotopes) * 100. / len(polytopes)
+
+        print('TI Querying completed!')
+
         # test aabb
         construction_start_time = default_timer()
         print('Precomputing AABB...')
         zono_tree = PolytopeTree(polytopes)
-        aabb_precomputation_times[i, 0] = default_timer() - construction_start_time
-        print('AABB Precomputation completed in %f s!' % aabb_precomputation_times[i, 0])
+        aabb_precomputation_times[i] = default_timer() - construction_start_time
+        print('AABB Precomputation completed in %f s!' % aabb_precomputation_times[i])
         # query
         print('Querying AABB...')
         for query_index in range(queries):
-            query_point = (np.random.rand(len(polytopes[0].t)) - 0.5) * 10 * 5  # random query point
+            query_point = np.multiply((np.random.rand(query_avg.shape[0]) - 0.5) *2, query_diff)+query_avg
             query_start_time = default_timer()
             best_zonotope, best_distance, evaluated_zonotopes, query_box = zono_tree.find_closest_polytopes(
                 query_point, return_intermediate_info=True)
-            # aabb_query_times[dim_index, cr_index * queries + query_index] = default_timer() - query_start_time
-            # aabb_query_reduction_percentages[dim_index, cr_index * queries + query_index] = len(
-            #     evaluated_zonotopes) * 100. / count
+            aabb_query_times[i, query_index] = default_timer() - query_start_time
+            aabb_query_reduction_percentages[i, query_index] = len(evaluated_zonotopes) * 100. / len(polytopes)
         print('AABB Querying completed!')
 
-        voronoi_precomputation_times_avg = np.mean(voronoi_precomputation_times, axis=1)
-        voronoi_precomputation_times_std = np.std(voronoi_precomputation_times, axis=1)
+        voronoi_precomputation_times_avg = np.mean(voronoi_precomputation_times)
 
         voronoi_query_times_avg = np.mean(voronoi_query_times, axis=1)
         voronoi_query_times_std = np.std(voronoi_query_times, axis=1)
@@ -366,14 +365,39 @@ def test_on_rrt(dir, queries = 100):
         voronoi_query_reduction_percentages_avg = np.mean(voronoi_query_reduction_percentages, axis=1)
         voronoi_query_reduction_percentages_std = np.std(voronoi_query_reduction_percentages, axis=1)
 
-        aabb_precomputation_times_avg = np.mean(aabb_precomputation_times, axis=1)
-        aabb_precomputation_times_std = np.std(aabb_precomputation_times, axis=1)
+        aabb_precomputation_times_avg = np.mean(aabb_precomputation_times)
 
         aabb_query_times_avg = np.mean(aabb_query_times, axis=1)
         aabb_query_times_std = np.std(aabb_query_times, axis=1)
-
         aabb_query_reduction_percentages_avg = np.mean(aabb_query_reduction_percentages, axis=1)
         aabb_query_reduction_percentages_std = np.std(aabb_query_reduction_percentages, axis=1)
+
+        #save files
+        # save data
+    experiment_name = datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H-%M-%S')
+    os.makedirs('test_on_rrt' + experiment_name)
+    np.save('test_on_rrt' + experiment_name + '/voronoi_precomputation_times_avg',
+            voronoi_precomputation_times_avg)
+    np.save('test_on_rrt' + experiment_name + '/voronoi_query_times_avg', voronoi_query_times_avg)
+    np.save('test_on_rrt' + experiment_name + '/voronoi_query_times_std', voronoi_query_times_std)
+    np.save('test_on_rrt' + experiment_name + '/voronoi_query_reduction_percentages_avg',
+            voronoi_query_reduction_percentages_avg)
+    np.save('test_on_rrt' + experiment_name + '/voronoi_query_reduction_percentages_std',
+            voronoi_query_reduction_percentages_std)
+
+    np.save('test_on_rrt' + experiment_name + '/aabb_precomputation_times_avg',
+            aabb_precomputation_times_avg)
+    np.save('test_on_rrt' + experiment_name + '/aabb_query_times_avg', aabb_query_times_avg)
+    np.save('test_on_rrt' + experiment_name + '/aabb_query_times_std', aabb_query_times_std)
+    np.save('test_on_rrt' + experiment_name + '/aabb_query_reduction_percentages_avg',
+            aabb_query_reduction_percentages_avg)
+    np.save('test_on_rrt' + experiment_name + '/aabb_query_reduction_percentages_std',
+            aabb_query_reduction_percentages_std)
+    params = np.array([['dim', np.atleast_1d(len(times))],
+                       ['construction_repeats', np.atleast_1d(1)], \
+                       ['queries', np.atleast_1d(queries)]])
+    np.save('test_on_rrt' + experiment_name + '/times', times)
+    np.save('test_on_rrt' + experiment_name + '/params', params)
 
 
 if __name__ == '__main__':
@@ -382,5 +406,5 @@ if __name__ == '__main__':
     # print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
     # test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=5, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
     # test_voronoi_closest_zonotope(100, save=False)
-
-    test_on_rrt('/Users/albertwu/exp/r3t/R3T_Pendulum_20190919_21-05-06')
+    # For pendulum
+    test_on_rrt('/Users/albertwu/exp/r3t/R3T_Pendulum_20190919_21-56-03', queries=100, query_range=np.asarray([[-10, 10],[-15,15]]))

@@ -30,7 +30,8 @@ def get_polytope_sets_in_dir(dir_path):
     files, times = get_pickles_in_dir(dir_path)
     polytope_sets = []
     print('Loading files...')
-    for f in files[0:2]:
+    for f in files:
+        print(f)
         polytopes = load_polytopes_from_file(dir_path + '/' + f)
         polytope_sets.append(copy.deepcopy(polytopes))
     print('Files loaded!')
