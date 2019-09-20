@@ -8,7 +8,7 @@ matplotlib.rcParams['font.family'] = "Times New Roman"
 matplotlib.rcParams.update({'font.size': 15})
 
 # Load
-dir = os.path.dirname(os.path.realpath(__file__))+'/../tests/test_random_zonotope_dim20190919_01-56-56'
+dir = '/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Results/test_random_zonotope_dim20190919_01-56-56'#os.path.dirname(os.path.realpath(__file__))+'/../tests/test_random_zonotope_dim20190919_01-56-56'
 
 voronoi_precomputation_times_avg = np.load(dir+'/voronoi_precomputation_times_avg.npy')
 voronoi_precomputation_times_std = np.load(dir+'/voronoi_precomputation_times_std.npy')

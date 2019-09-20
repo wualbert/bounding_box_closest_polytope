@@ -403,8 +403,11 @@ def test_on_rrt(dir, queries, query_range):
 if __name__ == '__main__':
     # print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
     # test_random_zonotope_count(dim=6, counts=np.arange(2, 11, 1) * 100, construction_repeats=5, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
-    # print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
-    # test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=5, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
+    print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
+    test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=5, queries=100, random_zonotope_generator=get_line_random_zonotopes)
     # test_voronoi_closest_zonotope(100, save=False)
     # For pendulum
-    test_on_rrt('/Users/albertwu/exp/r3t/R3T_Pendulum_20190919_21-56-03', queries=100, query_range=np.asarray([[-10, 10],[-15,15]]))
+    # test_on_rrt('/Users/albertwu/exp/r3t/R3T_Pendulum_20190919_21-59-04', queries=100, query_range=np.asarray([[-10, 10],[-15,15]]))
+    # For hopper
+    # test_on_rrt('/Users/albertwu/exp/r3t/RRT_Hopper_2d_20190919_22-00-37', queries=100, query_range=np.asarray([[-15, 15],[-1,3],[-np.pi/2,np.pi/2],[-np.pi/2,np.pi/2],[2,6],\
+                                                                                                               [-4,4],[-15,15],[-6,6],[-3,3],[-20,20]]))
