@@ -14,7 +14,7 @@ except:
 from rtree import index
 
 class PolytopeTree:
-    def __init__(self, polytopes, key_vertex_count = 1):
+    def __init__(self, polytopes, key_vertex_count = 0):
         '''
         Updated implementation using rtree
         :param polytopes:
