@@ -324,7 +324,7 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
 
 def test_on_rrt(dir, queries, query_range):
     polytope_sets, times = get_polytope_sets_in_dir(dir)
-    polytope_counts = [len(p) for p in polytope_sets]
+    polytope_counts = np.asarray([len(p) for p in polytope_sets])
     # print(polytope_counts)
     voronoi_precomputation_times = np.zeros([len(times)])
     voronoi_query_times = np.zeros([len(times), queries])
@@ -340,7 +340,9 @@ def test_on_rrt(dir, queries, query_range):
         # test voronoi
         construction_start_time = default_timer()
         print('Precomputing TI...')
-        vcp = VoronoiClosestPolytope(polytopes)
+        max_number_key_points = 1000000/len(polytopes)
+        print('keypoint limit is %i' % max_number_key_points)
+        vcp = VoronoiClosestPolytope(polytopes, max_number_key_points=max_number_key_points)
         voronoi_precomputation_times[i] = default_timer() - construction_start_time
         print('TI Precomputation completed in %f s!' %voronoi_precomputation_times[i])
         # query
@@ -426,7 +428,7 @@ def test_on_rrt(dir, queries, query_range):
                        ['queries', np.atleast_1d(queries)]])
     np.save('test_on_rrt' + experiment_name + '/times', times)
     np.save('test_on_rrt' + experiment_name + '/params', params)
-
+    np.save('test_on_rrt' + experiment_name + '/polytope_counts', polytope_counts)
     # plots
     fig_index = 0
     plt.figure(fig_index)
@@ -502,7 +504,7 @@ if __name__ == '__main__':
     # test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=5, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
     # test_voronoi_closest_zonotope(100, save=False)
     # For pendulum
-    test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/R3T_Pendulum_20190919_21-59-04', queries=1000, query_range=np.asarray([[-4, 4],[-13,13]]))
+    # test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/R3T_Pendulum_20190919_21-59-04', queries=1000, query_range=np.asarray([[-4, 4],[-13,13]]))
     # For hopper
-    # test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37', queries=100, query_range=np.asarray([[-15, 25],[-1,2.5],[-np.pi/2,np.pi/2],[-np.pi/3,np.pi/3],[2,6],\
-    #                                                                                                            [-2,2],[-10,10],[-5,5],[-3,3],[-10,10]]))
+    test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37', queries=100, query_range=np.asarray([[-15, 25],[-1,2.5],[-np.pi/2,np.pi/2],[-np.pi/3,np.pi/3],[2,6],\
+                                                                                                               [-2,2],[-10,10],[-5,5],[-3,3],[-10,10]]))

@@ -5,7 +5,6 @@
 '''
 from box_tree import *
 from box import *
-from pypolycontain.lib.zonotope import zonotope_distance_point
 from pypolycontain.lib.operations import distance_point_polytope
 try:
     from utils.utils import build_key_point_kd_tree
@@ -99,7 +98,7 @@ class PolytopeTree:
         assert(len(centroid_zonotopes)==1)
         for cz in centroid_zonotopes:
             evaluated_zonotopes.append(cz)
-            zd = zonotope_distance_point(cz,query_point)[0]
+            zd = distance_point_polytope(cz,query_point)[0]
             if best_distance > zd:
                 best_distance=zd
                 best_polytope=cz
