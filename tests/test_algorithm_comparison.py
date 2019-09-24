@@ -184,7 +184,7 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
 
             #test voronoi
             construction_start_time = default_timer()
-            vcp = VoronoiClosestPolytope(zonotopes)
+            vcp = VoronoiClosestPolytope(zonotopes, max_number_key_points=1000000/count)
             voronoi_precomputation_times[dim_index, cr_index] = default_timer() - construction_start_time
             # query
             for query_index in range(queries):
@@ -214,40 +214,56 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
                 aabb_query_times[dim_index, cr_index * queries + query_index] = default_timer() - query_start_time
                 aabb_query_reduction_percentages[dim_index, cr_index * queries + query_index] = len(evaluated_zonotopes) * 100. / count
 
-    voronoi_precomputation_times_avg = np.mean(voronoi_precomputation_times, axis=1)
-    voronoi_precomputation_times_std = np.std(voronoi_precomputation_times, axis=1)
+    voronoi_precomputation_times_median = np.median(voronoi_precomputation_times, axis=1)
+    voronoi_precomputation_times_min = np.min(voronoi_precomputation_times, axis=1)
+    voronoi_precomputation_times_max = np.max(voronoi_precomputation_times, axis=1)
 
-    voronoi_query_times_avg = np.mean(voronoi_query_times, axis=1)
-    voronoi_query_times_std = np.std(voronoi_query_times, axis=1)
+    voronoi_query_times_median = np.median(voronoi_query_times, axis=1)
+    voronoi_query_times_min = np.min(voronoi_query_times, axis=1)
+    voronoi_query_times_max = np.max(voronoi_query_times, axis=1)
 
-    voronoi_query_reduction_percentages_avg = np.mean(voronoi_query_reduction_percentages, axis=1)
-    voronoi_query_reduction_percentages_std = np.std(voronoi_query_reduction_percentages, axis=1)
+    voronoi_query_reduction_percentages_median = np.median(voronoi_query_reduction_percentages, axis=1)
+    voronoi_query_reduction_percentages_min = np.min(voronoi_query_reduction_percentages, axis=1)
+    voronoi_query_reduction_percentages_max = np.max(voronoi_query_reduction_percentages, axis=1)
 
-    aabb_precomputation_times_avg = np.mean(aabb_precomputation_times, axis=1)
-    aabb_precomputation_times_std = np.std(aabb_precomputation_times, axis=1)
+    aabb_precomputation_times_median = np.median(aabb_precomputation_times, axis=1)
+    aabb_precomputation_times_min = np.min(aabb_precomputation_times, axis=1)
+    aabb_precomputation_times_max = np.max(aabb_precomputation_times, axis=1)
 
-    aabb_query_times_avg = np.mean(aabb_query_times, axis=1)
-    aabb_query_times_std = np.std(aabb_query_times, axis=1)
+    aabb_query_times_median = np.median(aabb_query_times, axis=1)
+    aabb_query_times_min = np.min(aabb_query_times, axis=1)
+    aabb_query_times_max = np.max(aabb_query_times, axis=1)
 
-    aabb_query_reduction_percentages_avg = np.mean(aabb_query_reduction_percentages, axis=1)
-    aabb_query_reduction_percentages_std = np.std(aabb_query_reduction_percentages, axis=1)
+    aabb_query_reduction_percentages_median = np.median(aabb_query_reduction_percentages, axis=1)
+    aabb_query_reduction_percentages_min = np.min(aabb_query_reduction_percentages, axis=1)
+    aabb_query_reduction_percentages_max = np.max(aabb_query_reduction_percentages, axis=1)
 
     #save data
     experiment_name = datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H-%M-%S')
     os.makedirs('test_random_zonotope_dim'+experiment_name)
-    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_precomputation_times_avg', voronoi_precomputation_times_avg)
-    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_precomputation_times_std', voronoi_precomputation_times_std)
-    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_query_times_avg', voronoi_query_times_avg)
-    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_query_times_std', voronoi_query_times_std)
-    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_query_reduction_percentages_avg', voronoi_query_reduction_percentages_avg)
-    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_query_reduction_percentages_std', voronoi_query_reduction_percentages_std)
+    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_precomputation_times_median', voronoi_precomputation_times_median)
+    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_precomputation_times_min', voronoi_precomputation_times_min)
+    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_precomputation_times_max', voronoi_precomputation_times_max)
 
-    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_precomputation_times_avg', aabb_precomputation_times_avg)
-    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_precomputation_times_std', aabb_precomputation_times_std)
-    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_query_times_avg', aabb_query_times_avg)
-    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_query_times_std', aabb_query_times_std)
-    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_query_reduction_percentages_avg', aabb_query_reduction_percentages_avg)
-    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_query_reduction_percentages_std', aabb_query_reduction_percentages_std)
+    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_query_times_median', voronoi_query_times_median)
+    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_query_times_min', voronoi_query_times_min)
+    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_query_times_max', voronoi_query_times_max)
+    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_query_reduction_percentages_median', voronoi_query_reduction_percentages_median)
+    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_query_reduction_percentages_min', voronoi_query_reduction_percentages_min)
+    np.save('test_random_zonotope_dim'+experiment_name+'/voronoi_query_reduction_percentages_max', voronoi_query_reduction_percentages_max)
+
+    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_precomputation_times_median', aabb_precomputation_times_median)
+    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_precomputation_times_min', aabb_precomputation_times_min)
+    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_precomputation_times_max', aabb_precomputation_times_max)
+
+    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_query_times_median', aabb_query_times_median)
+    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_query_times_min', aabb_query_times_min)
+    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_query_times_max', aabb_query_times_max)
+
+    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_query_reduction_percentages_median', aabb_query_reduction_percentages_median)
+    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_query_reduction_percentages_min', aabb_query_reduction_percentages_min)
+    np.save('test_random_zonotope_dim'+experiment_name+'/aabb_query_reduction_percentages_max', aabb_query_reduction_percentages_max)
+
     params = np.array([['dim', np.atleast_1d(dims)],['count', np.atleast_1d(count)], ['construction_repeats', np.atleast_1d(construction_repeats)], \
                        ['queries', np.atleast_1d(queries)],['seed',np.atleast_1d(seed)], ['random_zonotope_generator', random_zonotope_generator.__name__]])
     np.save('test_random_zonotope_dim'+experiment_name+'/params', params)
@@ -257,17 +273,19 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
     plt.figure(fig_index)
     fig_index += 1
     plt.subplot(111)
-    plt.errorbar(dims, voronoi_precomputation_times_avg, voronoi_precomputation_times_std, marker='.', color = 'b', ecolor='b', elinewidth=0.3,
+    plt.errorbar(dims, voronoi_precomputation_times_median, np.vstack([voronoi_precomputation_times_median-voronoi_precomputation_times_min,
+                                                                       voronoi_precomputation_times_max-voronoi_precomputation_times_median]), marker='.', color = 'b', ecolor='b', elinewidth=0.3,
                  capsize=2, linewidth=0.5, markersize=7)
-    plt.errorbar(dims, aabb_precomputation_times_avg, aabb_precomputation_times_std, marker='.', color='r', ecolor='r', elinewidth=0.3,
+    plt.errorbar(dims, aabb_precomputation_times_median, np.vstack([aabb_precomputation_times_median-aabb_precomputation_times_min,
+                                                                    aabb_precomputation_times_max-aabb_precomputation_times_median]), marker='.', color='r', ecolor='r', elinewidth=0.3,
                  capsize=2, linewidth=0.5, markersize=7)
     plt.legend(['Triangle Ineq.', 'AABB'])
     plt.xlabel('State Dimension')
     plt.ylabel('Precomputation Time (s)')
-    plt.title('Closest Zonotope Precomputation Time with %d Zonotopes' % count)
+    plt.title('Test on Uniform Synthetic Dataset')
     #
     # plt.subplot(212)
-    # plt.plot(dims, np.log(voronoi_precomputation_times_avg))
+    # plt.plot(dims, np.log(voronoi_precomputation_times_median))
     # plt.xlabel('$log$ State Dimension')
     # plt.ylabel('$log$ Precomputation Time (s)')
     # # plt.title('Voronoi Closest Zonotope Precomputation Time with %d Zonotopes' %count)
@@ -279,17 +297,19 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
     plt.figure(fig_index)
     fig_index += 1
     plt.subplot(111)
-    plt.errorbar(dims, voronoi_query_times_avg, voronoi_query_times_std, marker='.', color='b', ecolor='b', elinewidth=0.3, capsize=2,
+    plt.errorbar(dims, voronoi_query_times_median, np.vstack([voronoi_query_times_median-voronoi_query_times_min,
+                                                              voronoi_query_times_max-voronoi_query_times_median]), marker='.', color='b', ecolor='b', elinewidth=0.3, capsize=2,
                  linewidth=0.5, markersize=7)
-    plt.errorbar(dims, aabb_query_times_avg, aabb_query_times_std, marker='.', color='r', ecolor='r', elinewidth=0.3, capsize=2,
+    plt.errorbar(dims, aabb_query_times_median, np.vstack([aabb_query_times_median-aabb_query_times_min,
+                                                           aabb_query_times_max-aabb_query_times_min]), marker='.', color='r', ecolor='r', elinewidth=0.3, capsize=2,
                  linewidth=0.5, markersize=7)
     plt.legend(['Triangle Ineq.', 'AABB'])
     plt.xlabel('State Dimension')
     plt.ylabel('Query Time (s)')
-    plt.title('Closest Zonotope Single Query Time with %d Zonotopes' % count)
+    plt.title('Test on Uniform Synthetic Dataset')
 
     # plt.subplot(212)
-    # plt.plot(np.log(dims), np.log(voronoi_query_times_avg))
+    # plt.plot(np.log(dims), np.log(voronoi_query_times_median))
     # plt.xlabel('$log$ State Dimension')
     # plt.ylabel('$log$ Query Time (s)')
     # # plt.title('$log$ Voronoi Closest Zonotope Single Query Time with %d Zonotopes' %count)
@@ -301,17 +321,19 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
     plt.figure(fig_index)
     fig_index += 1
     plt.subplot(111)
-    plt.errorbar(dims, voronoi_query_reduction_percentages_avg, voronoi_query_reduction_percentages_std, marker='.', color='b',ecolor='b',
+    plt.errorbar(dims, voronoi_query_reduction_percentages_median, np.vstack([voronoi_query_reduction_percentages_median-voronoi_query_reduction_percentages_min,
+                                                                              voronoi_query_reduction_percentages_max - voronoi_query_reduction_percentages_median]), marker='.', color='b',ecolor='b',
                  elinewidth=0.3, capsize=2, linewidth=0.5, markersize=7)
-    plt.errorbar(dims, aabb_query_reduction_percentages_avg, aabb_query_reduction_percentages_std, marker='.', color='r', ecolor='r',
+    plt.errorbar(dims, aabb_query_reduction_percentages_median, np.vstack([aabb_query_reduction_percentages_median-aabb_query_reduction_percentages_min,
+                                                                           aabb_query_times_max-aabb_query_reduction_percentages_median]), marker='.', color='r', ecolor='r',
                  elinewidth=0.3, capsize=2, linewidth=0.5, markersize=7)
     plt.legend(['Triangle Ineq.', 'AABB'])
     plt.xlabel('State Dimension')
     plt.ylabel('% of Zonotopes Evaluated')
-    plt.title('Closest Zonotope Reduction Percentage with %d Zonotopes' % count)
+    plt.title('Test on Uniform Synthetic Dataset')
 
     # plt.subplot(212)
-    # plt.plot(np.log(dims), np.log(voronoi_query_reduction_percentages_avg))
+    # plt.plot(np.log(dims), np.log(voronoi_query_reduction_percentages_median))
     # plt.xlabel('$log$ State Dimension')
     # plt.ylabel('$log$ % of Zonotopes Evaluated')
     # # plt.title('$log$ Voronoi Closest Zonotope Reduction Percentage with %d Zonotopes' %count)
@@ -321,6 +343,34 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
         plt.savefig('reduction_percentage' + str(default_timer()) + '.png', dpi=500)
     else:
         plt.show()
+
+    plt.figure(fig_index)
+    fig_index += 1
+    plt.subplot(111)
+    plt.errorbar(dims, count/100*voronoi_query_reduction_percentages_median, count/100*np.vstack([voronoi_query_reduction_percentages_median-voronoi_query_reduction_percentages_min,
+                                                                              voronoi_query_reduction_percentages_max - voronoi_query_reduction_percentages_median]), marker='.', color='b',ecolor='b',
+                 elinewidth=0.3, capsize=2, linewidth=0.5, markersize=7)
+    plt.errorbar(dims, count/100*aabb_query_reduction_percentages_median, count/100*np.vstack([aabb_query_reduction_percentages_median-aabb_query_reduction_percentages_min,
+                                                                           aabb_query_times_max-aabb_query_reduction_percentages_median]), marker='.', color='r', ecolor='r',
+                 elinewidth=0.3, capsize=2, linewidth=0.5, markersize=7)
+    plt.legend(['Triangle Ineq.', 'AABB'])
+    plt.xlabel('State Dimension')
+    plt.ylabel('Number of Zonotopes Evaluated')
+    plt.title('Test on Uniform Synthetic Dataset')
+
+    # plt.subplot(212)
+    # plt.plot(np.log(dims), np.log(voronoi_query_reduction_percentages_median))
+    # plt.xlabel('$log$ State Dimension')
+    # plt.ylabel('$log$ % of Zonotopes Evaluated')
+    # # plt.title('$log$ Voronoi Closest Zonotope Reduction Percentage with %d Zonotopes' %count)
+    # plt.tight_layout()
+
+    if save:
+        plt.savefig('number_evaluated' + str(default_timer()) + '.png', dpi=500)
+    else:
+        plt.show()
+
+
 
 def test_on_rrt(dir, queries, query_range):
     polytope_sets, times = get_polytope_sets_in_dir(dir)
@@ -500,11 +550,12 @@ def test_on_rrt(dir, queries, query_range):
 if __name__ == '__main__':
     # print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
     # test_random_zonotope_count(dim=6, counts=np.arange(2, 11, 1) * 100, construction_repeats=5, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
-    # print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
-    # test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=5, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
+    print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
+    test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=5, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
+
     # test_voronoi_closest_zonotope(100, save=False)
     # For pendulum
     # test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/R3T_Pendulum_20190919_21-59-04', queries=1000, query_range=np.asarray([[-4, 4],[-13,13]]))
     # For hopper
-    test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37', queries=100, query_range=np.asarray([[-15, 25],[-1,2.5],[-np.pi/2,np.pi/2],[-np.pi/3,np.pi/3],[2,6],\
-                                                                                                               [-2,2],[-10,10],[-5,5],[-3,3],[-10,10]]))
+    # test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37', queries=100, query_range=np.asarray([[-15, 25],[-1,2.5],[-np.pi/2,np.pi/2],[-np.pi/3,np.pi/3],[2,6],\
+    #                                                                                                            [-2,2],[-10,10],[-5,5],[-3,3],[-10,10]]))

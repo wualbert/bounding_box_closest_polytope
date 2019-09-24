@@ -36,3 +36,9 @@ def get_polytope_sets_in_dir(dir_path):
         polytope_sets.append(copy.deepcopy(polytopes))
     print('Files loaded!')
     return polytope_sets, times
+
+
+def save_polytope_to_dir(polytope_list, dir_path):
+    polytope_list_clean = [[p.T, p.t, p.P.H, p.P.h] for p in polytope_list]
+    with open(dir_path+'/polytopes.p', "wb") as f:
+        pickle.dump(polytope_list_clean, f)
