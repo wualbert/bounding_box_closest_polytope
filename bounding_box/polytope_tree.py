@@ -36,11 +36,11 @@ class PolytopeTree:
                 lu = AH_polytope_to_box(z)
             else:
                 raise NotImplementedError
-            assert(hash(z) not in self.index_to_polytope_map)
+            # assert(hash(z) not in self.index_to_polytope_map)
             #FIXME
-            # if hash(z) not in self.index_to_polytope_map:
-            self.idx.insert(hash(z), lu)
-            self.index_to_polytope_map[hash(z)] = z
+            if hash(z) not in self.index_to_polytope_map:
+                self.idx.insert(hash(z), lu)
+                self.index_to_polytope_map[hash(z)] = z
 
         # build key point tree for query box size guess
         self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes, self.key_vertex_count)
@@ -94,6 +94,8 @@ class PolytopeTree:
         centroid_zonotopes = self.key_point_to_zonotope_map[closest_centroid.tostring()]
         best_distance = np.inf
         best_polytope = None
+        dist_to_query = {}
+
         assert(len(centroid_zonotopes)==1)
         for cz in centroid_zonotopes:
             evaluated_zonotopes.append(cz)
@@ -101,6 +103,7 @@ class PolytopeTree:
             if best_distance > zd:
                 best_distance=zd
                 best_polytope=cz
+                dist_to_query[cz] = best_distance
 
         u = query_point - best_distance
         v = query_point + best_distance
@@ -125,8 +128,11 @@ class PolytopeTree:
             # for cb in candidate_boxes:
             #     print(cb)
             #     evaluated_zonotopes.append(cb.polytope)
-            #find the closest zonotope with randomized approach
+            #find the closest zonotope with randomized approach]
             while(len(candidate_ids)>=1):
+                if best_distance < 1e-9:
+                    # point is contained by polytope, break
+                    break
                 sample = np.random.randint(len(candidate_ids))
                 #solve linear program for the sampled polytope
                 pivot_polytope = self.index_to_polytope_map[candidate_ids[sample]]
@@ -135,9 +141,13 @@ class PolytopeTree:
                     candidate_ids[sample], candidate_ids[-1] = candidate_ids[-1], candidate_ids[sample]
                     candidate_ids = candidate_ids[0:-1]
                     continue
-                if return_intermediate_info:
-                    evaluated_zonotopes.append(pivot_polytope)
-                pivot_distance = distance_point_polytope(pivot_polytope, query_point, ball="l2")[0]
+                if pivot_polytope not in dist_to_query:
+                    pivot_distance = distance_point_polytope(pivot_polytope, query_point, ball="l2")[0]
+                    dist_to_query[pivot_polytope] = dist_to_query
+                    if return_intermediate_info:
+                        evaluated_zonotopes.append(pivot_polytope)
+                else:
+                    pivot_distance = dist_to_query[pivot_polytope]
                 if pivot_distance>=best_distance:#fixme: >= or >?
                     #get rid of this polytope
                     candidate_ids[sample], candidate_ids[-1] = candidate_ids[-1], candidate_ids[sample]

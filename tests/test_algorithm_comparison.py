@@ -100,7 +100,7 @@ def test_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construct
     plt.subplot(111)
     plt.errorbar(counts,voronoi_precomputation_times_avg,voronoi_precomputation_times_std,marker='.',color='b', ecolor='b',elinewidth=0.3,capsize=2,linewidth=0.5,markersize=7)
     plt.errorbar(counts,aabb_precomputation_times_avg,aabb_precomputation_times_std,marker='.',color='r',ecolor='r',elinewidth=0.3,capsize=2,linewidth=0.5,markersize=7)
-    plt.legend(['Centroid Dist.', 'AABB'])
+    plt.legend(['Triangle Ineq.', 'AABB'])
 
     plt.xlabel('Zonotope Count')
     plt.ylabel('Precomputation Time (s)')
@@ -120,7 +120,7 @@ def test_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construct
     plt.subplot(111)
     plt.errorbar(counts,voronoi_query_times_avg,voronoi_query_times_std,marker='.',color='b',ecolor='b',elinewidth=0.3,capsize=2,linewidth=0.5,markersize=7)
     plt.errorbar(counts,aabb_query_times_avg,aabb_query_times_std,marker='.',color='r', ecolor='r',elinewidth=0.3,capsize=2,linewidth=0.5,markersize=7)
-    plt.legend(['Centroid Dist.', 'AABB'])
+    plt.legend(['Triangle Ineq.', 'AABB'])
     plt.xlabel('Zonotope Count')
     plt.ylabel('Query Time (s)')
     plt.title('Closest Zonotope Single Query Time in %d-D' %dim)
@@ -139,7 +139,7 @@ def test_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construct
     plt.subplot(111)
     plt.errorbar(counts,voronoi_query_reduction_percentages_avg,voronoi_query_reduction_percentages_std,marker='.',color='b', ecolor='b',elinewidth=0.3,capsize=2,linewidth=0.5,markersize=7)
     plt.errorbar(counts,aabb_query_reduction_percentages_avg,aabb_query_reduction_percentages_std,marker='.',color='r',ecolor='r',elinewidth=0.3,capsize=2,linewidth=0.5,markersize=7)
-    plt.legend(['Centroid Dist.', 'AABB'])
+    plt.legend(['Triangle Ineq.', 'AABB'])
 
     plt.xlabel('Zonotope Count')
     plt.ylabel('% of Zonotopes Evaluated')
@@ -168,20 +168,29 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
     aabb_query_times = np.zeros([len(dims), construction_repeats * queries])
     aabb_query_reduction_percentages = np.zeros([len(dims), construction_repeats * queries])
     seed = int(time.time())
+    # For line distribution
+    line_width = 10
     for cr_index in range(construction_repeats):
         print('Repetition %d' % cr_index)
         for dim_index, dim in enumerate(dims):
             print('Testing zonotopes in %d-D...' % dim)
             # generate random zonotopes
+            # uniform params
             zonotopes = random_zonotope_generator(count, dim=dim, generator_range=count * 0.3,
                                                      centroid_range=count * 1.5, return_type='zonotope', seed=seed)
+            # # line params
+            # zonotopes = random_zonotope_generator(count, dim=dim, line_width = line_width, generator_range=count * 0.3,
+            #                                          centroid_range=count * 1.5, return_type='zonotope', seed=seed)
+
             #test voronoi
             construction_start_time = default_timer()
             vcp = VoronoiClosestPolytope(zonotopes)
             voronoi_precomputation_times[dim_index, cr_index] = default_timer() - construction_start_time
             # query
             for query_index in range(queries):
-                query_point = (np.random.rand(dim) - 0.5) * count * 5  # random query point
+                query_point = (np.random.rand(dim) - 0.5)
+                query_point[1:] = query_point[1:]*2*line_width*3
+                query_point[0] = query_point[0] * 2* count * 2
                 query_start_time = default_timer()
                 best_zonotope, best_distance, evaluated_zonotopes = vcp.find_closest_polytope(query_point,
                                                                                               return_intermediate_info=True)
@@ -195,9 +204,13 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
             aabb_precomputation_times[dim_index, cr_index] = default_timer() - construction_start_time
             # query
             for query_index in range(queries):
-                query_point = (np.random.rand(dim) - 0.5) * count * 5  # random query point
+                query_point = (np.random.rand(dim) - 0.5)
+                query_point[1:] = query_point[1:]*2*line_width*3
+                query_point[0] = query_point[0] * 2* count * 2  # random query point
+                # print(query_point)
                 query_start_time = default_timer()
                 best_zonotope, best_distance, evaluated_zonotopes, query_box = zono_tree.find_closest_polytopes(query_point, return_intermediate_info=True)
+                # print(len(evaluated_zonotopes))
                 aabb_query_times[dim_index, cr_index * queries + query_index] = default_timer() - query_start_time
                 aabb_query_reduction_percentages[dim_index, cr_index * queries + query_index] = len(evaluated_zonotopes) * 100. / count
 
@@ -248,7 +261,7 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
                  capsize=2, linewidth=0.5, markersize=7)
     plt.errorbar(dims, aabb_precomputation_times_avg, aabb_precomputation_times_std, marker='.', color='r', ecolor='r', elinewidth=0.3,
                  capsize=2, linewidth=0.5, markersize=7)
-    plt.legend(['Centroid Dist.', 'AABB'])
+    plt.legend(['Triangle Ineq.', 'AABB'])
     plt.xlabel('State Dimension')
     plt.ylabel('Precomputation Time (s)')
     plt.title('Closest Zonotope Precomputation Time with %d Zonotopes' % count)
@@ -270,7 +283,7 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
                  linewidth=0.5, markersize=7)
     plt.errorbar(dims, aabb_query_times_avg, aabb_query_times_std, marker='.', color='r', ecolor='r', elinewidth=0.3, capsize=2,
                  linewidth=0.5, markersize=7)
-    plt.legend(['Centroid Dist.', 'AABB'])
+    plt.legend(['Triangle Ineq.', 'AABB'])
     plt.xlabel('State Dimension')
     plt.ylabel('Query Time (s)')
     plt.title('Closest Zonotope Single Query Time with %d Zonotopes' % count)
@@ -292,7 +305,7 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
                  elinewidth=0.3, capsize=2, linewidth=0.5, markersize=7)
     plt.errorbar(dims, aabb_query_reduction_percentages_avg, aabb_query_reduction_percentages_std, marker='.', color='r', ecolor='r',
                  elinewidth=0.3, capsize=2, linewidth=0.5, markersize=7)
-    plt.legend(['Centroid Dist.', 'AABB'])
+    plt.legend(['Triangle Ineq.', 'AABB'])
     plt.xlabel('State Dimension')
     plt.ylabel('% of Zonotopes Evaluated')
     plt.title('Closest Zonotope Reduction Percentage with %d Zonotopes' % count)
@@ -311,6 +324,8 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
 
 def test_on_rrt(dir, queries, query_range):
     polytope_sets, times = get_polytope_sets_in_dir(dir)
+    polytope_counts = [len(p) for p in polytope_sets]
+    # print(polytope_counts)
     voronoi_precomputation_times = np.zeros([len(times)])
     voronoi_query_times = np.zeros([len(times), queries])
     voronoi_query_reduction_percentages = np.zeros([len(times),queries])
@@ -357,57 +372,137 @@ def test_on_rrt(dir, queries, query_range):
             aabb_query_reduction_percentages[i, query_index] = len(evaluated_zonotopes) * 100. / len(polytopes)
         print('AABB Querying completed!')
 
-        voronoi_precomputation_times_avg = np.mean(voronoi_precomputation_times)
+        voronoi_precomputation_times_avg = voronoi_precomputation_times
 
-        voronoi_query_times_avg = np.mean(voronoi_query_times, axis=1)
-        voronoi_query_times_std = np.std(voronoi_query_times, axis=1)
+        voronoi_query_times_median = np.median(voronoi_query_times, axis=1)
+        voronoi_query_times_min = np.min(voronoi_query_times, axis=1)
+        voronoi_query_times_max = np.max(voronoi_query_times, axis=1)
 
-        voronoi_query_reduction_percentages_avg = np.mean(voronoi_query_reduction_percentages, axis=1)
-        voronoi_query_reduction_percentages_std = np.std(voronoi_query_reduction_percentages, axis=1)
+        voronoi_query_reduction_percentages_median = np.median(voronoi_query_reduction_percentages, axis=1)
+        voronoi_query_reduction_percentages_min = np.min(voronoi_query_reduction_percentages, axis=1)
+        voronoi_query_reduction_percentages_max = np.max(voronoi_query_reduction_percentages, axis=1)
 
-        aabb_precomputation_times_avg = np.mean(aabb_precomputation_times)
+        aabb_precomputation_times_avg = aabb_precomputation_times
 
-        aabb_query_times_avg = np.mean(aabb_query_times, axis=1)
-        aabb_query_times_std = np.std(aabb_query_times, axis=1)
-        aabb_query_reduction_percentages_avg = np.mean(aabb_query_reduction_percentages, axis=1)
-        aabb_query_reduction_percentages_std = np.std(aabb_query_reduction_percentages, axis=1)
-
+        aabb_query_times_median = np.median(aabb_query_times, axis=1)
+        aabb_query_times_min = np.min(aabb_query_times, axis=1)
+        aabb_query_times_max = np.max(aabb_query_times, axis=1)
+        aabb_query_reduction_percentages_median = np.median(aabb_query_reduction_percentages, axis=1)
+        aabb_query_reduction_percentages_min = np.min(aabb_query_reduction_percentages, axis=1)
+        aabb_query_reduction_percentages_max = np.max(aabb_query_reduction_percentages, axis=1)
         #save files
         # save data
+    # print(aabb_query_times_min)
     experiment_name = datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H-%M-%S')
     os.makedirs('test_on_rrt' + experiment_name)
-    np.save('test_on_rrt' + experiment_name + '/voronoi_precomputation_times_avg',
+    np.save('test_on_rrt' + experiment_name + '/voronoi_precomputation_times_median',
             voronoi_precomputation_times_avg)
-    np.save('test_on_rrt' + experiment_name + '/voronoi_query_times_avg', voronoi_query_times_avg)
-    np.save('test_on_rrt' + experiment_name + '/voronoi_query_times_std', voronoi_query_times_std)
-    np.save('test_on_rrt' + experiment_name + '/voronoi_query_reduction_percentages_avg',
-            voronoi_query_reduction_percentages_avg)
-    np.save('test_on_rrt' + experiment_name + '/voronoi_query_reduction_percentages_std',
-            voronoi_query_reduction_percentages_std)
+    np.save('test_on_rrt' + experiment_name + '/voronoi_query_times_median', voronoi_query_times_median)
+    np.save('test_on_rrt' + experiment_name + '/voronoi_query_times_min', voronoi_query_times_min)
+    np.save('test_on_rrt' + experiment_name + '/voronoi_query_times_max', voronoi_query_times_max)
+    np.save('test_on_rrt' + experiment_name + '/voronoi_query_reduction_percentages_median',
+            voronoi_query_reduction_percentages_median)
+    np.save('test_on_rrt' + experiment_name + '/voronoi_query_reduction_percentages_min',
+            voronoi_query_reduction_percentages_min)
 
-    np.save('test_on_rrt' + experiment_name + '/aabb_precomputation_times_avg',
+    np.save('test_on_rrt' + experiment_name + '/voronoi_query_reduction_percentages_max',
+            voronoi_query_reduction_percentages_max)
+
+    np.save('test_on_rrt' + experiment_name + '/aabb_precomputation_times_median',
             aabb_precomputation_times_avg)
-    np.save('test_on_rrt' + experiment_name + '/aabb_query_times_avg', aabb_query_times_avg)
-    np.save('test_on_rrt' + experiment_name + '/aabb_query_times_std', aabb_query_times_std)
-    np.save('test_on_rrt' + experiment_name + '/aabb_query_reduction_percentages_avg',
-            aabb_query_reduction_percentages_avg)
-    np.save('test_on_rrt' + experiment_name + '/aabb_query_reduction_percentages_std',
-            aabb_query_reduction_percentages_std)
+    np.save('test_on_rrt' + experiment_name + '/aabb_query_times_median', aabb_query_times_median)
+    np.save('test_on_rrt' + experiment_name + '/aabb_query_times_min', aabb_query_times_min)
+    np.save('test_on_rrt' + experiment_name + '/aabb_query_times_max', aabb_query_times_max)
+
+    np.save('test_on_rrt' + experiment_name + '/aabb_query_reduction_percentages_median',
+            aabb_query_reduction_percentages_median)
+    np.save('test_on_rrt' + experiment_name + '/aabb_query_reduction_percentages_min',
+            aabb_query_reduction_percentages_min)
+    np.save('test_on_rrt' + experiment_name + '/aabb_query_reduction_percentages_max',
+            aabb_query_reduction_percentages_max)
+
     params = np.array([['dim', np.atleast_1d(len(times))],
                        ['construction_repeats', np.atleast_1d(1)], \
                        ['queries', np.atleast_1d(queries)]])
     np.save('test_on_rrt' + experiment_name + '/times', times)
     np.save('test_on_rrt' + experiment_name + '/params', params)
 
+    # plots
+    fig_index = 0
+    plt.figure(fig_index)
+    fig_index += 1
+    plt.subplot(111)
+    plt.plot(polytope_counts, voronoi_precomputation_times_avg, marker='.', color = 'b',
+                 linewidth=0.5, markersize=7)
+    plt.plot(polytope_counts, aabb_precomputation_times_avg, marker='.', color='r',linewidth=0.5, markersize=7)
+    plt.legend(['Triangle Ineq.', 'AABB'])
+    plt.xlabel('Number of Polytopes')
+    plt.ylabel('Precomputation Time (s)')
+    plt.title('Closest Zonotope Precomputation Time with 2D Hopper Dataset')
+    #
+    # plt.subplot(212)
+    # plt.plot(dims, np.log(voronoi_precomputation_times_median))
+    # plt.xlabel('$log$ State Dimension')
+    # plt.ylabel('$log$ Precomputation Time (s)')
+    # # plt.title('Voronoi Closest Zonotope Precomputation Time with %d Zonotopes' %count)
+    # plt.tight_layout()
+
+    plt.savefig('test_on_rrt' + experiment_name + '/precomputation_time' + str(default_timer()) + '.png', dpi=500)
+
+    plt.figure(fig_index)
+    fig_index += 1
+    plt.subplot(111)
+    # plt.errorbar(polytope_counts, voronoi_query_times_median, voronoi_query_times_std, marker='.', color='b', ecolor='b', elinewidth=0.3, capsize=2,
+    #              linewidth=0.5, markersize=7)
+    # plt.errorbar(polytope_counts, aabb_query_times_median, aabb_query_times_std, marker='.', color='r', ecolor='r', elinewidth=0.3, capsize=2,
+    #              linewidth=0.5, markersize=7)
+    plt.plot(polytope_counts, voronoi_query_times_median, marker='.', color='b',
+                 linewidth=0.5, markersize=7)
+    plt.plot(polytope_counts, aabb_query_times_median, marker='.', color='r',
+                 linewidth=0.5, markersize=7)
+
+    plt.legend(['Triangle Ineq.', 'AABB'])
+    plt.xlabel('Number of Polytopes')
+    plt.ylabel('Query Time (s)')
+    plt.title('Closest Zonotope Single Query Time with 2D Hopper Dataset')
+
+    # plt.subplot(212)
+    # plt.plot(np.log(dims), np.log(voronoi_query_times_median))
+    # plt.xlabel('$log$ State Dimension')
+    # plt.ylabel('$log$ Query Time (s)')
+    # # plt.title('$log$ Voronoi Closest Zonotope Single Query Time with %d Zonotopes' %count)
+    # plt.tight_layout()
+
+    plt.savefig('test_on_rrt' + experiment_name + '/query_time' + str(default_timer()) + '.png', dpi=500)
+
+    plt.figure(fig_index)
+    fig_index += 1
+    plt.subplot(111)
+    plt.plot(polytope_counts, voronoi_query_reduction_percentages_median, marker='.', color='b',
+                 linewidth=0.5, markersize=7)
+    plt.plot(polytope_counts, aabb_query_reduction_percentages_median, marker='.', color='r',
+                 linewidth=0.5, markersize=7)
+
+    # plt.errorbar(polytope_counts, voronoi_query_reduction_percentages_median, voronoi_query_reduction_percentages_std, marker='.', color='b',ecolor='b',
+    #              elinewidth=0.3, capsize=2, linewidth=0.5, markersize=7)
+    # plt.errorbar(polytope_counts, aabb_query_reduction_percentages_median, aabb_query_reduction_percentages_std, marker='.', color='r', ecolor='r',
+    #              elinewidth=0.3, capsize=2, linewidth=0.5, markersize=7)
+    plt.legend(['Triangle Ineq.', 'AABB'])
+    plt.xlabel('Number of polytopes')
+    plt.ylabel('% of Polytopes Evaluated')
+    plt.title('Nearest Polytope Reduction Percentage with 2D Hopper Dataset')
+    plt.savefig('test_on_rrt' + experiment_name + '/reduction_percentage' + str(default_timer()) + '.png', dpi=500)
+
+
 
 if __name__ == '__main__':
     # print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
     # test_random_zonotope_count(dim=6, counts=np.arange(2, 11, 1) * 100, construction_repeats=5, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
-    print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
-    test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=5, queries=100, random_zonotope_generator=get_line_random_zonotopes)
+    # print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
+    # test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=5, queries=100, random_zonotope_generator=get_uniform_random_zonotopes)
     # test_voronoi_closest_zonotope(100, save=False)
     # For pendulum
-    # test_on_rrt('/Users/albertwu/exp/r3t/R3T_Pendulum_20190919_21-59-04', queries=100, query_range=np.asarray([[-10, 10],[-15,15]]))
+    test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/R3T_Pendulum_20190919_21-59-04', queries=1000, query_range=np.asarray([[-4, 4],[-13,13]]))
     # For hopper
-    # test_on_rrt('/Users/albertwu/exp/r3t/RRT_Hopper_2d_20190919_22-00-37', queries=100, query_range=np.asarray([[-15, 15],[-1,3],[-np.pi/2,np.pi/2],[-np.pi/2,np.pi/2],[2,6],\
-                                                                                                               [-4,4],[-15,15],[-6,6],[-3,3],[-20,20]]))
+    # test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37', queries=100, query_range=np.asarray([[-15, 25],[-1,2.5],[-np.pi/2,np.pi/2],[-np.pi/3,np.pi/3],[2,6],\
+    #                                                                                                            [-2,2],[-10,10],[-5,5],[-3,3],[-10,10]]))

@@ -8,17 +8,24 @@ matplotlib.rcParams['font.family'] = "Times New Roman"
 matplotlib.rcParams.update({'font.size': 15})
 
 # Load
-dir = '/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Results/test_random_zonotope_dim20190919_01-56-56'#os.path.dirname(os.path.realpath(__file__))+'/../tests/test_random_zonotope_dim20190919_01-56-56'
+dir = '/Users/albertwu/exp/closest_polytope/tests/test_on_rrt20190922_17-26-01'#os.path.dirname(os.path.realpath(__file__))+'/../tests/test_random_zonotope_dim20190919_01-56-56'
 
 voronoi_precomputation_times_avg = np.load(dir+'/voronoi_precomputation_times_avg.npy')
-voronoi_precomputation_times_std = np.load(dir+'/voronoi_precomputation_times_std.npy')
+try:
+    voronoi_precomputation_times_std = np.load(dir+'/voronoi_precomputation_times_std.npy')
+except:
+    voronoi_precomputation_times_std = np.empty(voronoi_precomputation_times_avg)
 voronoi_query_times_avg = np.load(dir+'/voronoi_query_times_avg.npy')
 voronoi_query_times_std = np.load(dir+'/voronoi_query_times_std.npy')
 voronoi_query_reduction_percentages_avg = np.load(dir+'/voronoi_query_reduction_percentages_avg.npy')
 voronoi_query_reduction_percentages_std = np.load(dir+'/voronoi_query_reduction_percentages_std.npy')
 
 aabb_precomputation_times_avg = np.load(dir+'/aabb_precomputation_times_avg.npy')
-aabb_precomputation_times_std = np.load(dir+'/aabb_precomputation_times_std.npy')
+try:
+    aabb_precomputation_times_std = np.load(dir+'/aabb_precomputation_times_std.npy')
+except:
+    aabb_precomputation_times_std = np.empty(aabb_precomputation_times_avg.shape[0])
+
 aabb_query_times_avg = np.load(dir+'/aabb_query_times_avg.npy')
 aabb_query_times_std = np.load(dir+'/aabb_query_times_std.npy')
 aabb_query_reduction_percentages_avg = np.load(dir+'/aabb_query_reduction_percentages_avg.npy')
