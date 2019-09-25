@@ -19,7 +19,7 @@ def set_polytope_pair_distance(arguments):
     key_point = key_points[key_point_index]
     key_point_string = str(key_point)
     polytope = key_point_to_polytope_map[key_point_string]['polytopes'][polytope_index]
-    return distance_point_polytope(to_AH_polytope(polytope), key_point)[0]
+    return distance_point_polytope(to_AH_polytope(polytope), key_point, ball='l2')[0]
 
 class VoronoiClosestPolytope:
     def __init__(self, polytopes, key_vertices_count=0, process_count=8, max_number_key_points = None):
@@ -62,7 +62,7 @@ class VoronoiClosestPolytope:
             n = self.key_points.shape[0]
             chosen_key_points = np.random.choice(n, size=min(n, max_number_key_points), replace=False)
             self.key_points = self.key_points[chosen_key_points, :]
-            print(self.key_points.shape)
+            # print(self.key_points.shape)
         self.key_point_to_polytope_map = dict()  # stores the potential closest polytopes associated with each Voronoi (centroid)
         for key_point in self.key_points:
             ds = np.zeros(self.polytopes.shape[0])
@@ -100,7 +100,7 @@ class VoronoiClosestPolytope:
         # print('closest key point', closest_key_point)
         closest_key_point_polytope = self.key_point_to_polytope_map[str(closest_key_point)]['polytopes'][0]
         # print('closest polytope centroid' + str(closest_key_point_polytope.x))
-        dist_query_centroid_polytope = distance_point_polytope(closest_key_point_polytope, query_point)[0]
+        dist_query_centroid_polytope = distance_point_polytope(closest_key_point_polytope, query_point, ball='l2')[0]
         dist_query_key_point = np.linalg.norm(query_point-closest_key_point)
         # print(dist_query_key_point, dist_query_centroid_polytope)
         cutoff_index = np.searchsorted(self.key_point_to_polytope_map[str(closest_key_point)].distances, dist_query_key_point + dist_query_centroid_polytope)
@@ -116,7 +116,7 @@ class VoronoiClosestPolytope:
         for polytope in closest_polytope_candidates:
             if best_distance < 1e-9:
                 break
-            dist = distance_point_polytope(polytope, query_point)[0]
+            dist = distance_point_polytope(polytope, query_point, ball='l2')[0]
             if best_distance>dist:
                 best_distance = dist
                 best_polytope = polytope
