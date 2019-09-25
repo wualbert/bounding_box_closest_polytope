@@ -114,6 +114,8 @@ class VoronoiClosestPolytope:
         best_polytope = None
         best_distance = np.inf
         for polytope in closest_polytope_candidates:
+            if best_distance < 1e-9:
+                break
             dist = distance_point_polytope(polytope, query_point)[0]
             if best_distance>dist:
                 best_distance = dist

@@ -98,7 +98,7 @@ class PolytopeTree:
         assert(len(centroid_zonotopes)==1)
         for cz in centroid_zonotopes:
             evaluated_zonotopes.append(cz)
-            zd = distance_point_polytope(cz,query_point)[0]
+            zd = distance_point_polytope(cz,query_point, ball='l2')[0]
             if best_distance > zd:
                 best_distance=zd
                 best_polytope=cz

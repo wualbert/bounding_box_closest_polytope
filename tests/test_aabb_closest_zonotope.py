@@ -63,9 +63,9 @@ class ZonotopeTreeTestCase(unittest.TestCase):
 
         fig, ax = visZ(zonotopes, title="", alpha=0.2,axis_limit=ax_lim)
         fig, ax = visualize_boxes([zonotope_to_box(p, return_AABB=False) for p in zt.polytopes],fig=fig,ax=ax,alpha =0.08,linewidth=0.5, facecolor='black')
-        fig, ax = visualize_boxes([zonotope_to_box(p, return_AABB=False) for p in evaluated_zonotopes],fig=fig,ax=ax,alpha =0.2,linewidth=0.5, facecolor='blue')
+        fig, ax = visualize_boxes([zonotope_to_box(p, return_AABB=False) for p in evaluated_zonotopes],fig=fig,ax=ax,alpha =0.2,linewidth=0.5, facecolor='red')
 
-        fig, ax = visZ(closest_zonotope, title="",fig=fig,ax=ax,alpha=1,axis_limit=ax_lim)
+        fig, ax = visZ(closest_zonotope, title="",fig=fig,ax=ax,alpha=1,axis_limit=ax_lim, color='blue')
         for vertex in zt.key_point_tree.data:
             plt.scatter(vertex[0], vertex[1], facecolor='c', s=2, alpha=1)
         # fig, ax = visualize_boxes(candidate_boxes,fig=fig,ax=ax,alpha =1)
