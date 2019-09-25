@@ -40,7 +40,7 @@ def get_polytope_sets_in_dir(dir_path, data_source='rrt'):
             polytope_sets.append(copy.deepcopy(polytopes))
         print('Files loaded!')
         return polytope_sets, times
-    else:
+    elif data_source == 'mpc':
         filenames = []
         polytope_sets = []
         for filename in os.listdir(dir_path):
@@ -49,10 +49,12 @@ def get_polytope_sets_in_dir(dir_path, data_source='rrt'):
         for f in filenames:
             print(f)
             polytopes = load_polytopes_from_file(dir_path + '/' + f, construct_zonotope=True)
-            polytope_sets.append(copy.deepcopy(polytopes))
+            for i in [16, 8, 4, 2, 1]:
+                polytope_sets.append(copy.deepcopy(polytopes[0:int(np.ceil(len(polytopes)/i))]))
         print('Files loaded!')
         return polytope_sets
-
+    else:
+        raise NotImplementedError
 
 def save_polytope_to_dir(polytope_list, dir_path):
     polytope_list_clean = [[p.T, p.t, p.P.H, p.P.h] for p in polytope_list]

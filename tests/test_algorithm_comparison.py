@@ -598,14 +598,13 @@ def test_on_mpc(dir, queries, query_range):
     polytope_sets = get_polytope_sets_in_dir(dir, data_source='mpc')
     polytope_counts = np.asarray([len(p) for p in polytope_sets])
     # extract zonotopes
-    times = [0]
     # print(polytope_counts)
-    voronoi_precomputation_times = np.zeros([len(times)])
-    voronoi_query_times = np.zeros([len(times), queries])
-    voronoi_query_reduction_percentages = np.zeros([len(times),queries])
-    aabb_precomputation_times = np.zeros([len(times)])
-    aabb_query_times = np.zeros([len(times), queries])
-    aabb_query_reduction_percentages = np.zeros([len(times), queries])
+    voronoi_precomputation_times = np.zeros([len(polytope_sets)])
+    voronoi_query_times = np.zeros([len(polytope_sets), queries])
+    voronoi_query_reduction_percentages = np.zeros([len(polytope_sets),queries])
+    aabb_precomputation_times = np.zeros([len(polytope_sets)])
+    aabb_query_times = np.zeros([len(polytope_sets), queries])
+    aabb_query_reduction_percentages = np.zeros([len(polytope_sets), queries])
 
     query_avg = (query_range[:,1]+query_range[:,0])/2
     query_diff = (query_range[:,1]-query_range[:,0])/2
@@ -697,10 +696,10 @@ def test_on_mpc(dir, queries, query_range):
     np.save('test_on_mpc' + experiment_name + '/aabb_query_reduction_percentages_max',
             aabb_query_reduction_percentages_max)
 
-    params = np.array([['dim', np.atleast_1d(len(times))],
+    params = np.array([['dim', np.atleast_1d(len(polytope_sets))],
                        ['construction_repeats', np.atleast_1d(1)], \
                        ['queries', np.atleast_1d(queries)]])
-    np.save('test_on_mpc' + experiment_name + '/times', times)
+    # np.save('test_on_mpc' + experiment_name + '/times', times)
     np.save('test_on_mpc' + experiment_name + '/params', params)
     np.save('test_on_mpc' + experiment_name + '/polytope_counts', polytope_counts)
     # plots
@@ -775,13 +774,13 @@ if __name__ == '__main__':
     # print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=1000), random_zonotope_generator=get_uniform_random_zonotopes')
     # test_random_zonotope_count(dim=6, counts=np.arange(2, 11, 1) * 100, construction_repeats=3, queries=1000, random_zonotope_generator=get_uniform_random_zonotopes, save=True)
     # print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
-    # test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=1, queries=1000, random_zonotope_generator=get_uniform_random_zonotopes)
+    # test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=1, queries=1000, random_zonotope_generator=get_line_random_zonotopes)
     #
     # test_voronoi_closest_zonotope(100, save=False)
     # For pendulum
     # test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/R3T_Pendulum_20190919_21-59-04', queries=1000, query_range=np.asarray([[-4, 4],[-13,13]]))
     # For hopper
-    test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37', queries=1000, query_range=np.asarray([[-15, 25],[-1,2.5],[-np.pi/2,np.pi/2],[-np.pi/3,np.pi/3],[2,6],\
-                                                                                                               [-2,2],[-10,10],[-5,5],[-3,3],[-10,10]]))
+    # test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37', queries=1000, query_range=np.asarray([[-15, 25],[-1,2.5],[-np.pi/2,np.pi/2],[-np.pi/3,np.pi/3],[2,6],\
+    #                                                                                                            [-2,2],[-10,10],[-5,5],[-3,3],[-10,10]]))
     # For mpc
-    # test_on_mpc('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/MPC', queries=1000, query_range=np.asarray([[-0.135, 0.135],[-1.1,1.1]]))
+    test_on_mpc('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/MPC', queries=1000, query_range=np.asarray([[-0.135, 0.135],[-1.1,1.1]]))
