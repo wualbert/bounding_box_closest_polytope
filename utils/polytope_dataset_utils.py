@@ -3,12 +3,15 @@ import os
 from pypolycontain.utils.random_polytope_generator import *
 import copy
 
-def load_polytopes_from_file(file_path):
+def load_polytopes_from_file(file_path, construct_zonotope=False):
     with open(file_path, 'rb') as f:
         polytopes_matrices = pickle.load(f)
     polytopes = []
     for pm in polytopes_matrices:
-        polytopes.append(AH_polytope(pm[0], pm[1], polytope(pm[2], pm[3])))
+        if not construct_zonotope:
+            polytopes.append(AH_polytope(pm[0], pm[1], polytope(pm[2], pm[3])))
+        else:
+            polytopes.append(zonotope(pm[0], pm[1]))
     return polytopes
 
 def get_pickles_in_dir(dir_path):
@@ -26,16 +29,29 @@ def sort_by_filename_time(file_list):
     times, file_list = zip(*sorted(zip(times, file_list)))
     return file_list, times
 
-def get_polytope_sets_in_dir(dir_path):
-    files, times = get_pickles_in_dir(dir_path)
-    polytope_sets = []
-    print('Loading files...')
-    for f in files:
-        print(f)
-        polytopes = load_polytopes_from_file(dir_path + '/' + f)
-        polytope_sets.append(copy.deepcopy(polytopes))
-    print('Files loaded!')
-    return polytope_sets, times
+def get_polytope_sets_in_dir(dir_path, data_source='rrt'):
+    if data_source == 'rrt':
+        files, times = get_pickles_in_dir(dir_path)
+        polytope_sets = []
+        print('Loading files...')
+        for f in files:
+            print(f)
+            polytopes = load_polytopes_from_file(dir_path + '/' + f, construct_zonotope=False)
+            polytope_sets.append(copy.deepcopy(polytopes))
+        print('Files loaded!')
+        return polytope_sets, times
+    else:
+        filenames = []
+        polytope_sets = []
+        for filename in os.listdir(dir_path):
+            if filename.endswith(".p") or filename.endswith(".pkl"):
+                filenames.append(filename)
+        for f in filenames:
+            print(f)
+            polytopes = load_polytopes_from_file(dir_path + '/' + f, construct_zonotope=True)
+            polytope_sets.append(copy.deepcopy(polytopes))
+        print('Files loaded!')
+        return polytope_sets
 
 
 def save_polytope_to_dir(polytope_list, dir_path):

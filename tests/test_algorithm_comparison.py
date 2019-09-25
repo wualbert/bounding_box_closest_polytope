@@ -35,7 +35,12 @@ def test_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construct
             voronoi_precomputation_times[count_index, cr_index] = default_timer()-construction_start_time
             #query
             for query_index in range(queries):
-                query_point = (np.random.rand(dim) - 0.5) * count * 5 #random query point
+                if random_zonotope_generator==get_uniform_random_zonotopes:
+                    query_point = (np.random.rand(dim) - 0.5) * count * 5 #random query point
+                elif random_zonotope_generator==get_line_random_zonotopes:
+                    raise NotImplementedError
+                else:
+                    raise NotImplementedError
                 query_start_time = default_timer()
                 best_zonotope, best_distance, evaluated_zonotopes = vcp.find_closest_polytope(query_point, return_intermediate_info=True)
                 voronoi_query_times[count_index,cr_index*queries+query_index] = default_timer()-query_start_time
@@ -47,7 +52,12 @@ def test_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construct
             aabb_precomputation_times[count_index, cr_index] = default_timer()-construction_start_time
             #query
             for query_index in range(queries):
-                query_point = (np.random.rand(dim) - 0.5) * count * 5 #random query point
+                if random_zonotope_generator==get_uniform_random_zonotopes:
+                    query_point = (np.random.rand(dim) - 0.5) * count * 5 #random query point
+                elif random_zonotope_generator==get_line_random_zonotopes:
+                    raise NotImplementedError
+                else:
+                    raise NotImplementedError
                 query_start_time = default_timer()
                 best_zonotope, best_distance, evaluated_zonotopes, query_box = zono_tree.find_closest_polytopes(query_point, return_intermediate_info=True)
                 aabb_query_times[count_index,cr_index*queries+query_index] = default_timer()-query_start_time
@@ -211,20 +221,25 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
             #                                          centroid_range=count * 1.5, return_type='zonotope', seed=seed)
 
             #test voronoi
-            construction_start_time = default_timer()
-            vcp = VoronoiClosestPolytope(zonotopes, max_number_key_points=1000000/count)
-            voronoi_precomputation_times[dim_index, cr_index] = default_timer() - construction_start_time
-            # query
-            for query_index in range(queries):
-                query_point = (np.random.rand(dim) - 0.5)
-                query_point[1:] = query_point[1:]*2*line_width*3
-                query_point[0] = query_point[0] * 2* count * 2
-                query_start_time = default_timer()
-                best_zonotope, best_distance, evaluated_zonotopes = vcp.find_closest_polytope(query_point,
-                                                                                              return_intermediate_info=True)
-                voronoi_query_times[dim_index, cr_index * queries + query_index] = default_timer() - query_start_time
-                voronoi_query_reduction_percentages[dim_index, cr_index * queries + query_index] = len(
-                    evaluated_zonotopes) * 100. / count
+            # construction_start_time = default_timer()
+            # vcp = VoronoiClosestPolytope(zonotopes, max_number_key_points=1000000/count)
+            # voronoi_precomputation_times[dim_index, cr_index] = default_timer() - construction_start_time
+            # # query
+            # for query_index in range(queries):
+            #     if random_zonotope_generator == get_uniform_random_zonotopes:
+            #         query_point = (np.random.rand(dim) - 0.5) * 2 * count * 2
+            #     elif random_zonotope_generator == get_line_random_zonotopes:
+            #         query_point = (np.random.rand(dim) - 0.5)
+            #         query_point[1:] = query_point[1:] * 2 * line_width * 3
+            #         query_point[0] = query_point[0] * 2 * count * 2  # random query point
+            #     else:
+            #         raise NotImplementedError
+            #     query_start_time = default_timer()
+            #     best_zonotope, best_distance, evaluated_zonotopes = vcp.find_closest_polytope(query_point,
+            #                                                                                   return_intermediate_info=True)
+            #     voronoi_query_times[dim_index, cr_index * queries + query_index] = default_timer() - query_start_time
+            #     voronoi_query_reduction_percentages[dim_index, cr_index * queries + query_index] = len(
+            #         evaluated_zonotopes) * 100. / count
 
             #test aabb
             construction_start_time = default_timer()
@@ -232,9 +247,14 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
             aabb_precomputation_times[dim_index, cr_index] = default_timer() - construction_start_time
             # query
             for query_index in range(queries):
-                query_point = (np.random.rand(dim) - 0.5)
-                query_point[1:] = query_point[1:]*2*line_width*3
-                query_point[0] = query_point[0] * 2* count * 2  # random query point
+                if random_zonotope_generator==get_uniform_random_zonotopes:
+                    query_point = (np.random.rand(dim) - 0.5)* 2 * count * 2
+                elif random_zonotope_generator == get_line_random_zonotopes:
+                    query_point = (np.random.rand(dim) - 0.5)
+                    query_point[1:] = query_point[1:] * 2 * line_width * 3
+                    query_point[0] = query_point[0] * 2 * count * 2  # random query point
+                else:
+                    raise NotImplementedError
                 # print(query_point)
                 query_start_time = default_timer()
                 best_zonotope, best_distance, evaluated_zonotopes, query_box = zono_tree.find_closest_polytopes(query_point, return_intermediate_info=True)
@@ -418,8 +438,9 @@ def test_on_rrt(dir, queries, query_range):
         # test voronoi
         construction_start_time = default_timer()
         print('Precomputing TI...')
-        max_number_key_points = 1000000/len(polytopes)
-        print('keypoint limit is %i' % max_number_key_points)
+        max_number_key_points = int(1000000/len(polytopes))
+        # max_number_key_points=None
+        # print('keypoint limit is %i' % max_number_key_points)
         vcp = VoronoiClosestPolytope(polytopes, max_number_key_points=max_number_key_points)
         voronoi_precomputation_times[i] = default_timer() - construction_start_time
         print('TI Precomputation completed in %f s!' %voronoi_precomputation_times[i])
@@ -574,8 +595,10 @@ def test_on_rrt(dir, queries, query_range):
     plt.savefig('test_on_rrt' + experiment_name + '/reduction_percentage' + str(default_timer()) + '.png', dpi=500)
 
 def test_on_mpc(dir, queries, query_range):
-    polytope_sets, times = get_polytope_sets_in_dir(dir)
+    polytope_sets = get_polytope_sets_in_dir(dir, data_source='mpc')
     polytope_counts = np.asarray([len(p) for p in polytope_sets])
+    # extract zonotopes
+    times = [0]
     # print(polytope_counts)
     voronoi_precomputation_times = np.zeros([len(times)])
     voronoi_query_times = np.zeros([len(times), queries])
@@ -752,14 +775,13 @@ if __name__ == '__main__':
     # print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=1000), random_zonotope_generator=get_uniform_random_zonotopes')
     # test_random_zonotope_count(dim=6, counts=np.arange(2, 11, 1) * 100, construction_repeats=3, queries=1000, random_zonotope_generator=get_uniform_random_zonotopes, save=True)
     # print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
-    test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=1000, random_zonotope_generator=get_uniform_random_zonotopes)
+    # test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=1, queries=1000, random_zonotope_generator=get_uniform_random_zonotopes)
     #
     # test_voronoi_closest_zonotope(100, save=False)
     # For pendulum
     # test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/R3T_Pendulum_20190919_21-59-04', queries=1000, query_range=np.asarray([[-4, 4],[-13,13]]))
     # For hopper
-    # test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37', queries=1000, query_range=np.asarray([[-15, 25],[-1,2.5],[-np.pi/2,np.pi/2],[-np.pi/3,np.pi/3],[2,6],\
-    #                                                                                                            [-2,2],[-10,10],[-5,5],[-3,3],[-10,10]]))
-
+    test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37', queries=1000, query_range=np.asarray([[-15, 25],[-1,2.5],[-np.pi/2,np.pi/2],[-np.pi/3,np.pi/3],[2,6],\
+                                                                                                               [-2,2],[-10,10],[-5,5],[-3,3],[-10,10]]))
     # For mpc
-    # test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/R3T_Pendulum_20190919_21-59-04', queries=1000, query_range=np.asarray([[-4, 4],[-13,13]]))
+    # test_on_mpc('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/MPC', queries=1000, query_range=np.asarray([[-0.135, 0.135],[-1.1,1.1]]))

@@ -32,7 +32,7 @@ aabb_query_reduction_percentages_max = np.load(dir+'/aabb_query_reduction_percen
 
 
 params = np.load(dir+'/params.npy')
-# print(params)
+print(params)
 
 for p in params:
     if p[0] == 'count':

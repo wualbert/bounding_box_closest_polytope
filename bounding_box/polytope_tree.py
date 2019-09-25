@@ -92,20 +92,25 @@ class PolytopeTree:
         evaluated_zonotopes = []
         centroid_zonotopes = self.key_point_to_zonotope_map[closest_centroid.tostring()]
         best_distance = np.inf
+        best_inf_distance = np.inf
         best_polytope = None
         dist_to_query = {}
+        inf_dist_to_query = {}
 
         assert(len(centroid_zonotopes)==1)
         for cz in centroid_zonotopes:
             evaluated_zonotopes.append(cz)
-            zd = distance_point_polytope(cz,query_point, ball='l2')[0]
+            zd = distance_point_polytope(cz,query_point)[0]
+            # zd = distance_point_polytope(cz, query_point, ball='l2')[0]
             if best_distance > zd:
-                best_distance=zd
+                best_distance=distance_point_polytope(cz,query_point, ball='l2')[0]
+                best_inf_distance=zd
                 best_polytope=cz
                 dist_to_query[cz] = best_distance
+                inf_dist_to_query[cz] = best_inf_distance
 
-        u = query_point - best_distance
-        v = query_point + best_distance
+        u = query_point - best_inf_distance
+        v = query_point + best_inf_distance
         heuristic_box_lu = np.concatenate([u, v])
         #create query box
         #find candidate box nodes
@@ -142,11 +147,14 @@ class PolytopeTree:
                     continue
                 if pivot_polytope not in dist_to_query:
                     pivot_distance = distance_point_polytope(pivot_polytope, query_point, ball="l2")[0]
+                    inf_pivot_distance = distance_point_polytope(pivot_polytope, query_point)[0]
                     dist_to_query[pivot_polytope] = dist_to_query
+                    dist_to_query[pivot_polytope] = inf_dist_to_query
                     if return_intermediate_info:
                         evaluated_zonotopes.append(pivot_polytope)
                 else:
                     pivot_distance = dist_to_query[pivot_polytope]
+                    inf_pivot_distance = inf_dist_to_query[pivot_polytope]
                 if pivot_distance>=best_distance:#fixme: >= or >?
                     #get rid of this polytope
                     candidate_ids[sample], candidate_ids[-1] = candidate_ids[-1], candidate_ids[sample]
@@ -154,12 +162,13 @@ class PolytopeTree:
                 else:
                     #reconstruct AABB
                     # create query box
-                    u = query_point - pivot_distance
-                    v = query_point + pivot_distance
+                    u = query_point - inf_pivot_distance
+                    v = query_point + inf_pivot_distance
                     heuristic_box_lu = np.concatenate([u, v])
                     # find new candidates
                     candidate_ids = list(self.idx.intersection(heuristic_box_lu))
                     best_distance = pivot_distance
+                    best_inf_distance = inf_pivot_distance
                     best_polytope = pivot_polytope
             if return_intermediate_info:
                 return np.atleast_1d(best_polytope), best_distance, evaluated_zonotopes, heuristic_box_lu
