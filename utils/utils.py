@@ -3,7 +3,7 @@ from scipy.spatial import cKDTree as KDTree
 from scipy.spatial import Voronoi
 from pypolycontain.utils.random_polytope_generator import get_k_random_edge_points_in_zonotope
 
-def build_key_point_kd_tree(polytopes, key_vertex_count = 2):
+def build_key_point_kd_tree(polytopes, key_vertex_count = 0):
     if key_vertex_count > 0:
         n = len(polytopes)*(1+2**key_vertex_count)
     else:
