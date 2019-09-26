@@ -21,14 +21,22 @@ def test_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construct
     aabb_precomputation_times = np.zeros([len(counts), construction_repeats])
     aabb_query_times = np.zeros([len(counts), construction_repeats*queries])
     aabb_query_reduction_percentages = np.zeros([len(counts), construction_repeats*queries])
-
+    line_width = 10
     seed=int(time.time())
     for cr_index in range(construction_repeats):
         print('Repetition %d' %cr_index)
         for count_index, count in enumerate(counts):
             print('Testing %d zonotopes...' % count)
-            zonotopes = random_zonotope_generator(count, dim=dim, generator_range=count * 0.3,
-                                                     centroid_range=count * 1.5, return_type='zonotope', seed=seed)
+
+            if random_zonotope_generator==get_uniform_random_zonotopes:
+                zonotopes = random_zonotope_generator(count, dim=dim, generator_range=count * 0.3,
+                                                         centroid_range=count * 1.5, return_type='zonotope', seed=seed)
+            # # line params
+            elif random_zonotope_generator==get_line_random_zonotopes:
+                zonotopes = random_zonotope_generator(count, dim=dim, line_width = line_width, generator_range=count * 0.3,
+                                                         centroid_range=count * 1.5, return_type='zonotope', seed=seed)
+            else:
+                raise NotImplementedError
             #test voronoi
             construction_start_time = default_timer()
             vcp = VoronoiClosestPolytope(zonotopes)
@@ -38,7 +46,9 @@ def test_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construct
                 if random_zonotope_generator==get_uniform_random_zonotopes:
                     query_point = (np.random.rand(dim) - 0.5) * count * 5 #random query point
                 elif random_zonotope_generator==get_line_random_zonotopes:
-                    raise NotImplementedError
+                    query_point = (np.random.rand(dim) - 0.5)
+                    query_point[1:] = query_point[1:] * 2 * line_width * 3
+                    query_point[0] = query_point[0] * 2 * count * 2  # random query point
                 else:
                     raise NotImplementedError
                 query_start_time = default_timer()
@@ -55,7 +65,9 @@ def test_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construct
                 if random_zonotope_generator==get_uniform_random_zonotopes:
                     query_point = (np.random.rand(dim) - 0.5) * count * 5 #random query point
                 elif random_zonotope_generator==get_line_random_zonotopes:
-                    raise NotImplementedError
+                    query_point = (np.random.rand(dim) - 0.5)
+                    query_point[1:] = query_point[1:] * 2 * line_width * 3
+                    query_point[0] = query_point[0] * 2 * count * 2  # random query point
                 else:
                     raise NotImplementedError
                 query_start_time = default_timer()
@@ -775,10 +787,10 @@ def test_on_mpc(dir, queries, query_range):
 
 
 if __name__ == '__main__':
-    print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=1000), random_zonotope_generator=get_uniform_random_zonotopes')
-    test_random_zonotope_count(dim=6, counts=np.arange(2, 11, 1) * 100, construction_repeats=3, queries=1000, random_zonotope_generator=get_uniform_random_zonotopes, save=True)
-    # print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
-    # test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=1000, random_zonotope_generator=get_uniform_random_zonotopes)
+    # print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=1000), random_zonotope_generator=get_uniform_random_zonotopes')
+    # test_random_zonotope_count(dim=6, counts=np.arange(2, 11, 1) * 100, construction_repeats=3, queries=1000, random_zonotope_generator=get_line_random_zonotopes, save=True)
+    print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
+    test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=1000, random_zonotope_generator=get_line_random_zonotopes)
     #
     # test_voronoi_closest_zonotope(100, save=False)
     # For pendulum
