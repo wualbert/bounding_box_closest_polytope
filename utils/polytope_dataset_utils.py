@@ -11,7 +11,7 @@ def load_polytopes_from_file(file_path, construct_zonotope=False):
         if not construct_zonotope:
             polytopes.append(AH_polytope(pm[0], pm[1], polytope(pm[2], pm[3])))
         else:
-            polytopes.append(zonotope(pm[0], pm[1]))
+            polytopes.append(zonotope(pm[0].reshape([-1,1]), pm[1]))
     return polytopes
 
 def get_pickles_in_dir(dir_path):

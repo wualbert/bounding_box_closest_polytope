@@ -445,9 +445,24 @@ def test_on_rrt(dir, queries, query_range):
     aabb_precomputation_times = np.zeros([len(times)])
     aabb_query_times = np.zeros([len(times), queries])
     aabb_query_reduction_percentages = np.zeros([len(times), queries])
-
-    query_avg = (query_range[:,1]+query_range[:,0])/2
-    query_diff = (query_range[:,1]-query_range[:,0])/2
+    all_xs = []
+    for p in polytope_sets[-1]:
+        all_xs.append(np.ndarray.flatten(p.x))
+    all_xs = np.asarray(all_xs)
+    if query_range is None:
+        for p in polytope_sets[-1]:
+            all_xs.append(np.ndarray.flatten(p.x))
+        all_xs = np.asarray(all_xs)
+        if query_range is None:
+            query_range = np.vstack([np.min(all_xs, axis=0), np.max(all_xs, axis=0)])
+            query_avg = (query_range[:, 1] + query_range[:, 0]) / 2
+            query_diff = (query_range[:, 1] - query_range[:, 0]) / 2 * 1.05
+        else:
+            query_avg = (query_range[:, 1] + query_range[:, 0]) / 2
+            query_diff = (query_range[:, 1] - query_range[:, 0]) / 2
+    else:
+        query_avg = (query_range[:,1]+query_range[:,0])/2
+        query_diff = (query_range[:,1]-query_range[:,0])/2
 
     for i, polytopes in enumerate(polytope_sets):
         # test voronoi
@@ -613,6 +628,7 @@ def test_on_rrt(dir, queries, query_range):
 def test_on_mpc(dir, queries, query_range):
     polytope_sets = get_polytope_sets_in_dir(dir, data_source='mpc')
     polytope_counts = np.asarray([len(p) for p in polytope_sets])
+    print(polytope_counts)
     # extract zonotopes
     # print(polytope_counts)
     voronoi_precomputation_times = np.zeros([len(polytope_sets)])
@@ -621,10 +637,17 @@ def test_on_mpc(dir, queries, query_range):
     aabb_precomputation_times = np.zeros([len(polytope_sets)])
     aabb_query_times = np.zeros([len(polytope_sets), queries])
     aabb_query_reduction_percentages = np.zeros([len(polytope_sets), queries])
-
-    query_avg = (query_range[:,1]+query_range[:,0])/2
-    query_diff = (query_range[:,1]-query_range[:,0])/2
-
+    all_xs = []
+    for p in polytope_sets[-1]:
+        all_xs.append(np.ndarray.flatten(p.x))
+    all_xs = np.asarray(all_xs)
+    if query_range is None:
+        query_range = np.vstack([np.min(all_xs, axis=0), np.max(all_xs, axis=0)])
+        query_avg = (query_range[:,1]+query_range[:,0])/2
+        query_diff = (query_range[:,1]-query_range[:,0])/2*1.05
+    else:
+        query_avg = (query_range[:,1]+query_range[:,0])/2
+        query_diff = (query_range[:,1]-query_range[:,0])/2
     for i, polytopes in enumerate(polytope_sets):
         # test voronoi
         construction_start_time = default_timer()
@@ -789,8 +812,8 @@ def test_on_mpc(dir, queries, query_range):
 if __name__ == '__main__':
     # print('time_against_count(dim=6, counts=np.arange(2, 11, 2) * 100, construction_repeats=3, queries=1000), random_zonotope_generator=get_uniform_random_zonotopes')
     # test_random_zonotope_count(dim=6, counts=np.arange(2, 11, 1) * 100, construction_repeats=3, queries=1000, random_zonotope_generator=get_line_random_zonotopes, save=True)
-    print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
-    test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=1000, random_zonotope_generator=get_line_random_zonotopes)
+    # print('test_uniform_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=100), random_zonotope_generator=get_line_random_zonotopes')
+    # test_random_zonotope_dim(count=500, dims=np.arange(2, 11, 1), construction_repeats=3, queries=1000, random_zonotope_generator=get_line_random_zonotopes)
     #
     # test_voronoi_closest_zonotope(100, save=False)
     # For pendulum
@@ -798,5 +821,14 @@ if __name__ == '__main__':
     # For hopper
     # test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37', queries=1000, query_range=np.asarray([[-15, 25],[-1,2.5],[-np.pi/2,np.pi/2],[-np.pi/3,np.pi/3],[2,6],\
     #                                                                                                            [-2,2],[-10,10],[-5,5],[-3,3],[-10,10]]))
+    # test_on_rrt(
+    #     '/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37',
+    #     queries=1000,
+    #     query_range=None)
+
     # For mpc
+    # Pendulum
     # test_on_mpc('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/MPC', queries=1000, query_range=np.asarray([[-0.135, 0.135],[-1.1,1.1]]))
+    # Bar balancing
+    test_on_mpc('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/MPC', queries=1000,
+                query_range=None)
