@@ -195,6 +195,14 @@ def AH_polytope_to_box(ahp, return_AABB = False):
         model.setObjective((ahp.t+np.dot(ahp.T, x))[d,0], GRB.MINIMIZE)
         model.update()
         model.optimize()
+        if model.Status!=2:
+            print "WARNING: AH-polytope discarded"
+            lu[0,:] = np.ndarray.flatten(ahp.t)
+            lu[1,:] = np.ndarray.flatten(ahp.t)+10**-3
+            return np.ndarray.flatten(lu)
+#            print ahp.P.H,ahp.P.h
+#            print ahp.T,ahp.t
+#            return
         assert(model.Status==2)
         lu[0,d] = ahp.t[d,0]
         for i in range(x.shape[0]):
