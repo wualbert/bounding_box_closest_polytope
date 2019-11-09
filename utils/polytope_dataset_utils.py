@@ -26,7 +26,7 @@ def sort_by_filename_time(file_list):
     for file in file_list:
         times.append(float(file.split('_')[0]))
     # sort names from file
-    times, file_list = zip(*sorted(zip(times, file_list)))
+    times, file_list = list(zip(*sorted(zip(times, file_list))))
     return file_list, times
 
 def get_polytope_sets_in_dir(dir_path, data_source='rrt'):

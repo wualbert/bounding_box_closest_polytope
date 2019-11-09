@@ -20,7 +20,7 @@ def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None,save=True, key_
     vca = VoronoiClosestPolytope(AH_polytopes, key_vertices_count)
     #build query point
     query_point = (np.random.rand(2)-0.5)*zonotope_count*5
-    print('Query point '+ str(query_point))
+    print(('Query point '+ str(query_point)))
     np.reshape(query_point,(query_point.shape[0],1))
 
     #query
@@ -46,7 +46,7 @@ def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None,save=True, key_
     ax = fig.add_subplot(111)
     # dist, voronoi_centroid_index = vca.centroid_tree.query(query_point)
 
-    print('Checked %d polytopes' %len(closest_AHpolytope_candidates))
+    print(('Checked %d polytopes' %len(closest_AHpolytope_candidates)))
     #visualize vertex circles
     # #sanity check
     # vertex = vca.centroid_voronoi.vertices[15]
@@ -75,7 +75,7 @@ def test_voronoi_closest_zonotope(zonotope_count = 30, seed=None,save=True, key_
     plt.xlabel('$x$')
     plt.ylabel('$y$')
     plt.title('Closest Zonotope with Voronoi Diagram')
-    print('Closest Zonotope: ', closest_polytope)
+    print(('Closest Zonotope: ', closest_polytope))
     if save:
         plt.savefig('closest_zonotope'+str(default_timer())+'.png', dpi=500)
     else:
@@ -91,8 +91,8 @@ def test_voronoi_closest_zonotope_nd(zonotope_count = 30,dim = 2):
 
     #query
     best_polytope, best_distance, evaluated_zonotopes = vca.find_closest_polytope(query_point, return_intermediate_info=True)
-    print('Checked %d of %d zonotopes' %(len(evaluated_zonotopes), zonotope_count))
-    print('Closest zonotope is ', best_polytope)
+    print(('Checked %d of %d zonotopes' %(len(evaluated_zonotopes), zonotope_count)))
+    print(('Closest zonotope is ', best_polytope))
 
 def time_against_count(dim=2, counts = np.arange(3, 16, 3)*10, construction_repeats = 1, queries=100,save=True):
 
@@ -101,9 +101,9 @@ def time_against_count(dim=2, counts = np.arange(3, 16, 3)*10, construction_repe
     query_reduction_percentages = np.zeros([len(counts), construction_repeats*queries])
 
     for cr_index in range(construction_repeats):
-        print('Repetition %d' %cr_index)
+        print(('Repetition %d' %cr_index))
         for count_index, count in enumerate(counts):
-            print('Testing %d zonotopes...' % count)
+            print(('Testing %d zonotopes...' % count))
             zonotopes = get_uniform_random_zonotopes(count, dim=dim, generator_range=count * 1.2,return_type='zonotope')
             construction_start_time = default_timer()
             vcp = VoronoiClosestPolytope(zonotopes)
@@ -186,9 +186,9 @@ def time_against_dim(count = 100, dims = np.arange(2, 11, 1),construction_repeat
     query_times = np.zeros([len(dims), construction_repeats*queries])
     query_reduction_percentages = np.zeros([len(dims), construction_repeats*queries])
     for cr_index in range(construction_repeats):
-        print('Repetition %d' %cr_index)
+        print(('Repetition %d' %cr_index))
         for dim_index, dim in enumerate(dims):
-            print('Testing zonotopes in %d-D...' % dim)
+            print(('Testing zonotopes in %d-D...' % dim))
             # zonotopes = get_uniform_random_zonotopes(count, dim=dim, generator_range=1,centroid_range=count*5, return_type='zonotope', process_count=process_count)
             zonotopes = get_uniform_density_random_polytopes(3, dim=dim, generator_range=1,centroid_range=5, return_type='zonotope', process_count=process_count)
             construction_start_time = default_timer()

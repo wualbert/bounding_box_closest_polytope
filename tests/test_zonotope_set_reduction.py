@@ -19,16 +19,16 @@ def test_with_dataset():
     print(query_point)
     query_point = query_point.reshape(-1, 1)
     closest_zonotope, candidate_boxes, query_box = zonotope_tree.find_closest_polytopes(query_point)
-    print('Query point: ', query_point)
+    print(('Query point: ', query_point))
     ax_lim = np.asarray([-zonotope_count, zonotope_count, -zonotope_count, zonotope_count]) * 1.1
     fig, ax = visZ(zonotope_tree.zonotopes, title="", alpha=0.2, axis_limit=ax_lim)
     fig, ax = visZ(closest_zonotope, title="", fig=fig, ax=ax, alpha=1, axis_limit=ax_lim)
     fig, ax = visualize_box_nodes(zonotope_tree.box_nodes, fig=fig, ax=ax, alpha=0.4, linewidth=0.5)
     fig, ax = visualize_boxes(candidate_boxes, fig=fig, ax=ax, alpha=1)
-    print('Evaluating %d zonotopes out of %d' % (len(candidate_boxes), len(zonotope_tree.zonotopes)))
+    print(('Evaluating %d zonotopes out of %d' % (len(candidate_boxes), len(zonotope_tree.zonotopes))))
     fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.3, fill=True)
     plt.scatter(query_point[0], query_point[1], s=20, color='k')
-    print('Closest Zonotope: ', closest_zonotope)
+    print(('Closest Zonotope: ', closest_zonotope))
     plt.show()
 
 def zonotope_reduction_line_nd(zonotope_count, dim, num_of_queries):
@@ -69,7 +69,7 @@ def zonotope_reduction_line_over_d(zonotope_count, d_start,d_end, num_of_queries
     d = np.arange(d_start,d_end)
     reduction_ratios = np.zeros([d.shape[0],2])
     for i, d_i in enumerate(d):
-        print('Evaluating %d-D' %d_i)
+        print(('Evaluating %d-D' %d_i))
         reduction_ratios[i,0],reduction_ratios[i,1] = zonotope_reduction_line_nd(d_i**zonotope_count,d[i],num_of_queries)
     print(reduction_ratios)
     plt.errorbar(d,100*reduction_ratios[:,0],100*reduction_ratios[:,1],marker='.',ecolor='r',elinewidth=0.3,capsize=2,linewidth=0.5,markersize=7)
@@ -82,8 +82,8 @@ def zonotope_reduction_box_nd(zonotope_count, dim, num_of_queries):
     zonotopes = []
     centroid_range = zonotope_count*8
     generator_range = zonotope_count
-    print('Centroid range: %d' %centroid_range)
-    print('Generator range: %d' %generator_range)
+    print(('Centroid range: %d' %centroid_range))
+    print(('Generator range: %d' %generator_range))
     for i in range(zonotope_count):
         m = np.random.random_integers(dim, 2*dim)
         G = (np.random.rand(dim, m) - 0.5) * generator_range * 1
@@ -114,7 +114,7 @@ def zonotope_reduction_box_over_d(zonotope_count, d_start,d_end, num_of_queries)
     d = np.arange(d_start,d_end)
     reduction_ratios = np.zeros([d.shape[0],2])
     for i, d_i in enumerate(d):
-        print('Evaluating %d-D' %d_i)
+        print(('Evaluating %d-D' %d_i))
         reduction_ratios[i,0],reduction_ratios[i,1] = zonotope_reduction_box_nd(d_i**zonotope_count,d[i],num_of_queries)
     print(reduction_ratios)
     plt.errorbar(d,100*reduction_ratios[:,0],100*reduction_ratios[:,1],marker='.',ecolor='r',elinewidth=0.3,capsize=2,linewidth=0.5,markersize=7)

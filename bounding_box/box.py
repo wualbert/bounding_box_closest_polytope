@@ -196,7 +196,7 @@ def AH_polytope_to_box(ahp, return_AABB = False):
         model.update()
         model.optimize()
         if model.Status!=2:
-            print "WARNING: AH-polytope discarded"
+            print("WARNING: AH-polytope discarded")
             lu[0,:] = np.ndarray.flatten(ahp.t)
             lu[1,:] = np.ndarray.flatten(ahp.t)+10**-3
             return np.ndarray.flatten(lu)

@@ -25,7 +25,7 @@ class PolytopeTree:
         # Initialize rtree structure
         self.rtree_p = index.Property()
         self.rtree_p.dimension = to_AH_polytope(self.polytopes[0]).t.shape[0]
-        print('PolytopeTree dimension is %d-D' % self.rtree_p.dimension)
+        print(('PolytopeTree dimension is %d-D' % self.rtree_p.dimension))
         self.idx = index.Index(properties=self.rtree_p)
         self.index_to_polytope_map = {}
         for z in self.polytopes:

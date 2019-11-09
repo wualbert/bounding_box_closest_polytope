@@ -72,7 +72,7 @@ class VoronoiClosestPolytope:
 
         #build kd-tree for centroids
         self.key_point_tree = KDTree(self.key_points)
-        print('Completed precomputation in %f seconds' % (default_timer() - self.init_start_time))
+        print(('Completed precomputation in %f seconds' % (default_timer() - self.init_start_time)))
 
     def build_cell_polytope_map_default(self):
         polytope_key_point_indices = np.array(np.meshgrid(np.arange(self.polytopes.shape[0]), np.arange(self.key_points.shape[0]))).T.reshape(-1, 2)
