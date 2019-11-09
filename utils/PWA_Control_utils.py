@@ -1,4 +1,4 @@
-from closest_polytope.bounding_box.polytope_tree import PolytopeTree
+from closest_polytope_algorithms.bounding_box.polytope_tree import PolytopeTree
 
 def polytree_to_zonotope_tree(polytree):
     zonotopes = []
