@@ -9,7 +9,7 @@ from pypolycontain.lib.operations import distance_point_polytope
 try:
     from utils.utils import build_key_point_kd_tree
 except:
-    from closest_polytope.utils.utils import build_key_point_kd_tree
+    from closest_polytope_algorithms.utils.utils import build_key_point_kd_tree
 from rtree import index
 
 class PolytopeTree:

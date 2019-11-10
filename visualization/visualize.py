@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from closest_polytope.bounding_box.box import AABB
+from closest_polytope_algorithms.bounding_box.box import AABB
 from matplotlib.collections import PatchCollection
 from scipy.spatial import voronoi_plot_2d
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ

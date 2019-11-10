@@ -9,9 +9,9 @@ matplotlib.rcParams.update({'font.size': 15})
 
 # Load
 # Line
-# dir = '/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Results/line_count/test_random_zonotope_count20190926_03-27-34'
+dir = '/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Results/line_count/test_random_zonotope_count20190926_03-27-34'
 # Uniform
-dir = '/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Results/uniform_count/test_random_zonotope_count20190926_01-10-07'
+# dir = '/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Results/uniform_count/test_random_zonotope_count20190926_01-10-07'
 
 
 voronoi_precomputation_times_median = np.load(dir+'/voronoi_precomputation_times_median.npy')
@@ -86,9 +86,9 @@ kwargs.update(transform=ax2.transAxes)  # switch to the bottom axes
 ax2.plot((-d, +d), (1 - d, 1 + d), **kwargs)  # bottom-left diagonal
 ax2.plot((1 - d, 1 + d), (1 - d, 1 + d), **kwargs)  # bottom-right diagonal
 
-plt.xlabel('Dimension')
+plt.xlabel('Number of Polytopes')
 f.text(0.02,0.5, "Precomputation Time (s)", ha="center", va="center", rotation=90)
-f.text(0.5,0.93, "Dataset Size Scalability with Uniformly Distributed Polytopes", ha="center", va="center")
+f.text(0.5,0.93, "Dataset Size Scalability with Linearly Distributed Polytopes", ha="center", va="center")
 
 # plt.tight_layout()
 plt.savefig('precompute_uniform_count_time.png', dpi=500)

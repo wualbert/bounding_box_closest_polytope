@@ -8,7 +8,8 @@ matplotlib.rcParams['font.family'] = "Times New Roman"
 matplotlib.rcParams.update({'font.size': 15})
 
 # Load
-dir = '/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Results/mpc_pendulum/data'#os.path.dirname(os.path.realpath(__file__))+'/../tests/test_random_zonotope_dim20190919_01-56-56'
+# dir = '/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Results/mpc_pendulum/data'#os.path.dirname(os.path.realpath(__file__))+'/../tests/test_random_zonotope_dim20190919_01-56-56'
+dir = '//Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Results/mpc_manipulation/test_on_mpc20190926_17-19-52'#os.path.dirname(os.path.realpath(__file__))+'/../tests/test_random_zonotope_dim20190919_01-56-56'
 
 voronoi_precomputation_times_median = np.load(dir+'/voronoi_precomputation_times_median.npy')
 voronoi_query_times_median = np.load(dir+'/voronoi_query_times_median.npy')
@@ -84,7 +85,7 @@ plt.ylabel('Query Time (s)')
 # plt.yscale('log')
 # plt.xscale('log')
 # plt.ylim(bottom=0, top=0.02)
-plt.title('Querying Test on MPC Pendulum')
+plt.title('Querying Test on MPC Rod Manipulation')
 
 # plt.plot(polytope_counts, np.multiply(aabb_query_reduction_percentages_median/100, polytope_counts), marker='.', color='r',
 #              linewidth=0.5, markersize=7)
@@ -94,7 +95,7 @@ plt.title('Querying Test on MPC Pendulum')
 # # plt.yscale('log')
 # plt.xscale('log')
 # # plt.ylim(bottom=0, top=0.02)
-# plt.title('AABB Max Query Time on MPC Pendulum')
+# plt.title('AABB Max Query Time on MPC Rod Manipulation')
 
 plt.tight_layout()
 plt.savefig('query_time.png', dpi=500)
@@ -116,7 +117,7 @@ plt.errorbar(polytope_counts, aabb_query_reduction_percentages_median, np.vstack
 plt.legend(['Triangle Ineq.', 'AABB'])
 plt.xlabel('Number of Polytopes')
 plt.ylabel('% of Polytopes Evaluated')
-plt.title('Querying Test on MPC Pendulum')
+plt.title('Querying Test on MPC Rod Manipulation')
 
 # plt.title('Nearest Polytope Evaluated Percentage vs. Number of Polytopes')
 plt.tight_layout()
@@ -134,7 +135,7 @@ plt.errorbar(polytope_counts, aabb_query_count_median, np.vstack([aabb_query_cou
 plt.legend(['Triangle Ineq.', 'AABB'])
 plt.xlabel('Number of Polytopes')
 plt.ylabel('Number of Polytopes Evaluated')
-plt.title('Querying Test on MPC Pendulum')
+plt.title('Querying Test on MPC Rod Manipulation')
 
 # plt.title('Nearest Polytope Evaluated Percentage vs. Number of Polytopes')
 plt.tight_layout()

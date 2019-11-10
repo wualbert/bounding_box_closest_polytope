@@ -61,7 +61,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         print('Query point: ', query_point)
         ax_lim = np.asarray([-centroid_range,centroid_range,-centroid_range,centroid_range])*1.1
 
-        fig, ax = visZ(zonotopes, title="", alpha=0.2,axis_limit=ax_lim)
+        fig, ax = visZ(zonotopes, title="", alpha=0.2,axis_limit=ax_lim, color='black')
         fig, ax = visualize_boxes([zonotope_to_box(p, return_AABB=False) for p in zt.polytopes],fig=fig,ax=ax,alpha =0.08,linewidth=0.5, facecolor='black')
         fig, ax = visualize_boxes([zonotope_to_box(p, return_AABB=False) for p in evaluated_zonotopes],fig=fig,ax=ax,alpha =0.2,linewidth=0.5, facecolor='red')
 

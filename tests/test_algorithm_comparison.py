@@ -1,8 +1,8 @@
-from closest_polytope.voronoi.voronoi import *
+from closest_polytope_algorithms.voronoi.voronoi import *
 from pypolycontain.utils.random_polytope_generator import *
-from closest_polytope.bounding_box.polytope_tree import PolytopeTree
+from closest_polytope_algorithms.bounding_box.polytope_tree import PolytopeTree
 from pypolycontain.visualization.visualize_2D import visualize_2D_zonotopes as visZ
-from closest_polytope.utils.polytope_dataset_utils import *
+from closest_polytope_algorithms.utils.polytope_dataset_utils import *
 from scipy.spatial import voronoi_plot_2d
 from timeit import default_timer
 import matplotlib.pyplot as plt
@@ -434,6 +434,17 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
         plt.show()
 
 
+def find_extremum(polytopes, dim):
+    from bounding_box.box import AH_polytope_to_box
+    maxs = np.ones(dim)*(-np.inf)
+    mins = np.ones(dim) * (np.inf)
+    for p in polytopes:
+        lu = AH_polytope_to_box(p)
+        maxs = np.maximum(lu[dim:], maxs)
+        mins = np.minimum(lu[0:dim], mins)
+    print(maxs, mins)
+    return np.vstack([mins, maxs])
+
 
 def test_on_rrt(dir, queries, query_range):
     polytope_sets, times = get_polytope_sets_in_dir(dir)
@@ -444,17 +455,11 @@ def test_on_rrt(dir, queries, query_range):
     voronoi_query_reduction_percentages = np.zeros([len(times),queries])
     aabb_precomputation_times = np.zeros([len(times)])
     aabb_query_times = np.zeros([len(times), queries])
-    aabb_query_reduction_percentages = np.zeros([len(times), queries])
-    all_xs = []
-    for p in polytope_sets[-1]:
-        all_xs.append(np.ndarray.flatten(p.x))
-    all_xs = np.asarray(all_xs)
+    aabb_query_reduction_percentages = np.zeros([len(times),queries])
+
     if query_range is None:
-        for p in polytope_sets[-1]:
-            all_xs.append(np.ndarray.flatten(p.x))
-        all_xs = np.asarray(all_xs)
         if query_range is None:
-            query_range = np.vstack([np.min(all_xs, axis=0), np.max(all_xs, axis=0)])
+            query_range = find_extremum(polytope_sets[-1], 10).T
             query_avg = (query_range[:, 1] + query_range[:, 0]) / 2
             query_diff = (query_range[:, 1] - query_range[:, 0]) / 2 * 1.05
         else:
@@ -642,7 +647,7 @@ def test_on_mpc(dir, queries, query_range):
         all_xs.append(np.ndarray.flatten(p.x))
     all_xs = np.asarray(all_xs)
     if query_range is None:
-        query_range = np.vstack([np.min(all_xs, axis=0), np.max(all_xs, axis=0)])
+        query_range = np.vstack([np.min(all_xs, axis=0), np.max(all_xs, axis=0)]).T
         query_avg = (query_range[:,1]+query_range[:,0])/2
         query_diff = (query_range[:,1]-query_range[:,0])/2*1.05
     else:
@@ -821,6 +826,7 @@ if __name__ == '__main__':
     # For hopper
     # test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37', queries=1000, query_range=np.asarray([[-15, 25],[-1,2.5],[-np.pi/2,np.pi/2],[-np.pi/3,np.pi/3],[2,6],\
     #                                                                                                            [-2,2],[-10,10],[-5,5],[-3,3],[-10,10]]))
+    test_on_rrt('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37', queries=1000, query_range=None)
     # test_on_rrt(
     #     '/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/RRT_Hopper_2d_20190919_22-00-37',
     #     queries=1000,
@@ -830,5 +836,5 @@ if __name__ == '__main__':
     # Pendulum
     # test_on_mpc('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/MPC', queries=1000, query_range=np.asarray([[-0.135, 0.135],[-1.1,1.1]]))
     # Bar balancing
-    test_on_mpc('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/MPC', queries=1000,
-                query_range=None)
+    # test_on_mpc('/Users/albertwu/Google Drive/MIT/RobotLocomotion/Closest Polytope/ACC2020/Datasets/MPC', queries=1000,
+    #             query_range=None)
