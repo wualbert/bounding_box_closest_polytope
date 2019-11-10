@@ -5,9 +5,8 @@
 '''
 import numpy as np
 from gurobipy import Model, GRB
-from pypolycontain.lib.zonotope import zonotope
-from pypolycontain.lib.polytope import polytope
-from pypolycontain.lib.AH_polytope import AH_polytope, to_AH_polytope
+from pypolycontain.lib.operations import to_AH_polytope
+from pypolycontain.lib.objects import AH_polytope
 from pypolycontain.lib.containment_encodings import constraints_AB_eq_CD
 
 class AABB:
@@ -165,12 +164,12 @@ def zonotope_to_box(z, return_AABB = False):
         return np.ndarray.flatten(np.asarray(results))
 
 def AH_polytope_to_box(ahp, return_AABB = False):
-    if ahp.type == 'zonotope':
-        return zonotope_to_box(ahp, return_AABB=return_AABB)
-    if ahp.type != 'AH_polytope':
-        print('Warning: Input is not AH-Polytope!')
-        for i in range(len(ahp)):
-            ahp[i] = to_AH_polytope(ahp[i])
+    # if ahp.type == 'zonotope':
+    #     return zonotope_to_box(ahp, return_AABB=return_AABB)
+    # if ahp.type != 'AH_polytope':
+    #     print('Warning: Input is not AH-Polytope!')
+    assert(isinstance(ahp, AH_polytope))
+    ahp = to_AH_polytope(ahp)
     model = Model("ah_polytope_AABB")
     model.setParam('OutputFlag', False)
     dim=ahp.t.shape[0]

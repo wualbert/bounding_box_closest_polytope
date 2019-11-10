@@ -21,7 +21,7 @@ class PolytopeTree:
         self.polytopes = polytopes
         self.key_vertex_count = key_vertex_count
         # Create box data structure from zonotopes
-        self.type = self.polytopes[0].type
+        # self.type = self.polytopes[0].type
         # Initialize rtree structure
         self.rtree_p = index.Property()
         self.rtree_p.dimension = to_AH_polytope(self.polytopes[0]).t.shape[0]
@@ -29,12 +29,7 @@ class PolytopeTree:
         self.idx = index.Index(properties=self.rtree_p)
         self.index_to_polytope_map = {}
         for z in self.polytopes:
-            if self.type == 'zonotope':
-                lu = zonotope_to_box(z)
-            elif self.type == 'AH_polytope' or 'H-polytope':
-                lu = AH_polytope_to_box(z)
-            else:
-                raise NotImplementedError
+            lu = AH_polytope_to_box(z)
             # assert(hash(z) not in self.index_to_polytope_map)
             #FIXME
             if hash(z) not in self.index_to_polytope_map:
