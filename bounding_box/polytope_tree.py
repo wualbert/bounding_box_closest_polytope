@@ -147,18 +147,14 @@ class PolytopeTree:
                     continue
                 if pivot_polytope not in dist_to_query:
                     pivot_distance = distance_point_polytope(pivot_polytope, query_point, ball="l2")[0]
-                    print('pd', pivot_distance)
                     # inf_pivot_distance = distance_point_polytope(pivot_polytope, query_point)[0]
                     dist_to_query[pivot_polytope] = pivot_distance
                     # inf_dist_to_query[pivot_polytope] = inf_dist_to_query
                     if return_intermediate_info:
                         evaluated_zonotopes.append(pivot_polytope)
                 else:
-                    print('pp', pivot_polytope)
                     pivot_distance = dist_to_query[pivot_polytope]
-                    print('pd2', pivot_distance)
                     # inf_pivot_distance = inf_dist_to_query[pivot_polytope]
-                print(pivot_distance, best_distance)
                 if pivot_distance>=best_distance:#fixme: >= or >?
                     #get rid of this polytope
                     candidate_ids[sample], candidate_ids[-1] = candidate_ids[-1], candidate_ids[sample]
