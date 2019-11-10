@@ -24,9 +24,9 @@ def test_random_zonotope_count(dim=2, counts = np.arange(3, 16, 3)*10, construct
     line_width = 10
     seed=int(time.time())
     for cr_index in range(construction_repeats):
-        print('Repetition %d' %cr_index)
+        print(('Repetition %d' %cr_index))
         for count_index, count in enumerate(counts):
-            print('Testing %d zonotopes...' % count)
+            print(('Testing %d zonotopes...' % count))
 
             if random_zonotope_generator==get_uniform_random_zonotopes:
                 zonotopes = random_zonotope_generator(count, dim=dim, generator_range=count * 0.3,
@@ -221,9 +221,9 @@ def test_random_zonotope_dim(count=100, dims=np.arange(2, 11, 1), construction_r
     # For line distribution
     line_width = 10
     for cr_index in range(construction_repeats):
-        print('Repetition %d' % cr_index)
+        print(('Repetition %d' % cr_index))
         for dim_index, dim in enumerate(dims):
-            print('Testing zonotopes in %d-D...' % dim)
+            print(('Testing zonotopes in %d-D...' % dim))
             # generate random zonotopes
             # uniform params
             if random_zonotope_generator==get_uniform_random_zonotopes:
@@ -442,7 +442,7 @@ def find_extremum(polytopes, dim):
         lu = AH_polytope_to_box(p)
         maxs = np.maximum(lu[dim:], maxs)
         mins = np.minimum(lu[0:dim], mins)
-    print(maxs, mins)
+    print((maxs, mins))
     return np.vstack([mins, maxs])
 
 
@@ -471,7 +471,7 @@ def test_on_rrt(dir, queries, query_range):
 
     for i, polytopes in enumerate(polytope_sets):
         # test voronoi
-        print('Length of polytopes is %i' %len(polytopes))
+        print(('Length of polytopes is %i' %len(polytopes)))
         construction_start_time = default_timer()
         print('Precomputing TI...')
         max_number_key_points = int(1000000/len(polytopes))
@@ -479,7 +479,7 @@ def test_on_rrt(dir, queries, query_range):
         # print('keypoint limit is %i' % max_number_key_points)
         vcp = VoronoiClosestPolytope(polytopes, max_number_key_points=max_number_key_points)
         voronoi_precomputation_times[i] = default_timer() - construction_start_time
-        print('TI Precomputation completed in %f s!' %voronoi_precomputation_times[i])
+        print(('TI Precomputation completed in %f s!' %voronoi_precomputation_times[i]))
         # query
         print('Querying TI...')
         for query_index in range(queries):
@@ -497,7 +497,7 @@ def test_on_rrt(dir, queries, query_range):
         print('Precomputing AABB...')
         zono_tree = PolytopeTree(polytopes)
         aabb_precomputation_times[i] = default_timer() - construction_start_time
-        print('AABB Precomputation completed in %f s!' % aabb_precomputation_times[i])
+        print(('AABB Precomputation completed in %f s!' % aabb_precomputation_times[i]))
         # query
         print('Querying AABB...')
         for query_index in range(queries):
@@ -658,10 +658,10 @@ def test_on_mpc(dir, queries, query_range):
         construction_start_time = default_timer()
         print('Precomputing TI...')
         max_number_key_points = 1000000/len(polytopes)
-        print('keypoint limit is %i' % max_number_key_points)
+        print(('keypoint limit is %i' % max_number_key_points))
         vcp = VoronoiClosestPolytope(polytopes, max_number_key_points=max_number_key_points)
         voronoi_precomputation_times[i] = default_timer() - construction_start_time
-        print('TI Precomputation completed in %f s!' %voronoi_precomputation_times[i])
+        print(('TI Precomputation completed in %f s!' %voronoi_precomputation_times[i]))
         # query
         print('Querying TI...')
         for query_index in range(queries):
@@ -679,7 +679,7 @@ def test_on_mpc(dir, queries, query_range):
         print('Precomputing AABB...')
         zono_tree = PolytopeTree(polytopes)
         aabb_precomputation_times[i] = default_timer() - construction_start_time
-        print('AABB Precomputation completed in %f s!' % aabb_precomputation_times[i])
+        print(('AABB Precomputation completed in %f s!' % aabb_precomputation_times[i]))
         # query
         print('Querying AABB...')
         for query_index in range(queries):

@@ -10,8 +10,8 @@ def time_construct_box_tree(box_count, dim):
     box_list = []
     box_node_list = []
     for i in range(box_count):
-        xs = random.sample(range(space_size), dim)
-        ys = random.sample(range(space_size),dim)
+        xs = random.sample(list(range(space_size)), dim)
+        ys = random.sample(list(range(space_size)),dim)
         uv = np.zeros((dim,2))
         for j in range(dim):
             uv[j,0] = xs[j]
@@ -31,8 +31,8 @@ def test_closest_box(root, num_of_queries):
     query_boxes = []
     dim = root.box.u.shape[0]
     for i in range(num_of_queries):
-        xs = random.sample(range(space_size), dim)
-        ys = random.sample(range(space_size),dim)
+        xs = random.sample(list(range(space_size)), dim)
+        ys = random.sample(list(range(space_size)),dim)
         uv = np.zeros((dim,2))
         for j in range(dim):
             uv[j,0] = xs[j]
@@ -63,11 +63,11 @@ def box_construction_over_box_count():
     runtime_stdev = np.zeros((num,1))
 
     for i, bc in enumerate(box_counts):
-        print('Starting bounding_box count ', bc)
+        print(('Starting bounding_box count ', bc))
         for r in range(repeats):
-            print('Repeat ', r)
+            print(('Repeat ', r))
             runtime[i, r],_root,_bnl = time_construct_box_tree(int(bc),dimensions)
-            print('Ran for ', runtime[i, r])
+            print(('Ran for ', runtime[i, r]))
         runtime_avg = np.average(runtime, axis=1)
     plt.subplot(2,1,1)
     plt.semilogx(box_counts, runtime_avg)
@@ -94,11 +94,11 @@ def box_construction_over_runtime_dimensions():
     runtime_stdev = np.zeros((num,1))
 
     for i, dim in enumerate(dimensions):
-        print('Starting dimensions ', dim)
+        print(('Starting dimensions ', dim))
         for r in range(repeats):
-            print('Repeat ', r)
+            print(('Repeat ', r))
             runtime[i, r],_root,_bnl = time_construct_box_tree(box_counts, dim)
-            print('Ran for ', runtime[i, r])
+            print(('Ran for ', runtime[i, r]))
         runtime_avg = np.average(runtime, axis=1)
     plt.subplot(2,1,1)
     plt.plot(dimensions, runtime_avg)
@@ -128,12 +128,12 @@ def box_query_over_box_count():
     runtime_stdev = np.zeros((num,1))
 
     for i, bc in enumerate(box_counts):
-        print('Starting bounding_box count ', bc)
+        print(('Starting bounding_box count ', bc))
         for r in range(repeats):
-            print('Repeat ', r)
+            print(('Repeat ', r))
             _rt,root,bnl = time_construct_box_tree(int(bc),dimensions)
             runtime[i, r] = test_closest_box(root,queries)
-            print('Ran for ', runtime[i, r])
+            print(('Ran for ', runtime[i, r]))
         runtime_avg = np.average(runtime, axis=1)
     plt.subplot(2,1,1)
     plt.semilogx(box_counts, runtime_avg)
@@ -161,12 +161,12 @@ def box_query_over_runtime_dimensions():
     runtime_stdev = np.zeros((num,1))
 
     for i, dim in enumerate(dimensions):
-        print('Starting dimensions ', dim)
+        print(('Starting dimensions ', dim))
         for r in range(repeats):
-            print('Repeat ', r)
+            print(('Repeat ', r))
             _rt,root,bnl = time_construct_box_tree(box_counts,dim)
             runtime[i, r] = test_closest_box(root,queries)
-            print('Ran for ', runtime[i, r])
+            print(('Ran for ', runtime[i, r]))
         runtime_avg = np.average(runtime, axis=1)
     plt.subplot(2,1,1)
     plt.plot(dimensions, runtime_avg)

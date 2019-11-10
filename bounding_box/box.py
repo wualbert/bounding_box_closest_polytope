@@ -5,9 +5,8 @@
 '''
 import numpy as np
 from gurobipy import Model, GRB
-from pypolycontain.lib.zonotope import zonotope
-from pypolycontain.lib.polytope import polytope
-from pypolycontain.lib.AH_polytope import AH_polytope, to_AH_polytope
+from pypolycontain.lib.operations import to_AH_polytope
+from pypolycontain.lib.objects import AH_polytope
 from pypolycontain.lib.containment_encodings import constraints_AB_eq_CD
 
 class AABB:
@@ -165,12 +164,12 @@ def zonotope_to_box(z, return_AABB = False):
         return np.ndarray.flatten(np.asarray(results))
 
 def AH_polytope_to_box(ahp, return_AABB = False):
-    if ahp.type == 'zonotope':
-        return zonotope_to_box(ahp, return_AABB=return_AABB)
-    if ahp.type != 'AH_polytope':
-        print('Warning: Input is not AH-Polytope!')
-        for i in range(len(ahp)):
-            ahp[i] = to_AH_polytope(ahp[i])
+    # if ahp.type == 'zonotope':
+    #     return zonotope_to_box(ahp, return_AABB=return_AABB)
+    # if ahp.type != 'AH_polytope':
+    #     print('Warning: Input is not AH-Polytope!')
+    assert(isinstance(ahp, AH_polytope))
+    ahp = to_AH_polytope(ahp)
     model = Model("ah_polytope_AABB")
     model.setParam('OutputFlag', False)
     dim=ahp.t.shape[0]
@@ -195,6 +194,14 @@ def AH_polytope_to_box(ahp, return_AABB = False):
         model.setObjective((ahp.t+np.dot(ahp.T, x))[d,0], GRB.MINIMIZE)
         model.update()
         model.optimize()
+        if model.Status!=2:
+            print("WARNING: AH-polytope discarded")
+            lu[0,:] = np.ndarray.flatten(ahp.t)
+            lu[1,:] = np.ndarray.flatten(ahp.t)+10**-3
+            return np.ndarray.flatten(lu)
+#            print ahp.P.H,ahp.P.h
+#            print ahp.T,ahp.t
+#            return
         assert(model.Status==2)
         lu[0,d] = ahp.t[d,0]
         for i in range(x.shape[0]):

@@ -75,11 +75,11 @@ def query_time_over_zonotope_count():
     runtime_stdev = np.zeros((num,1))
 
     for i, bc in enumerate(zonotope_count):
-        print('Starting bounding_box count ', bc)
+        print(('Starting bounding_box count ', bc))
         for r in range(repeats):
-            print('Repeat ', r)
+            print(('Repeat ', r))
             runtime[i, r] = time_query_zonotope_tree_line(int(bc),dimensions,queries_count)
-            print('Ran for ', runtime[i, r])
+            print(('Ran for ', runtime[i, r]))
         runtime_avg = np.average(runtime, axis=1)
     plt.subplot(2,1,1)
     plt.semilogx(zonotope_count, runtime_avg)

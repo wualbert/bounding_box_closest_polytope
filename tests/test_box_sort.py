@@ -38,8 +38,8 @@ class BoxTreeTestCase(unittest.TestCase):
         box_list = []
         box_node_list = []
         for i in range(10):
-            xs = random.sample(range(100), 2)
-            ys = random.sample(range(100),2)
+            xs = random.sample(list(range(100)), 2)
+            ys = random.sample(list(range(100)),2)
             u = (xs[0],ys[0])
             v = (xs[1],ys[1])
             box = AABB([u,v])
@@ -53,8 +53,8 @@ class BoxTreeTestCase(unittest.TestCase):
         box_list = []
         box_node_list = []
         for i in range(30):
-            centroid = np.asarray(random.sample(range(-80,80), 2))
-            edges = np.asarray(random.sample(range(1,40),2))
+            centroid = np.asarray(random.sample(list(range(-80,80)), 2))
+            edges = np.asarray(random.sample(list(range(1,40)),2))
             box = AABB_centroid_edge(centroid,edges)
             box_list.append(box)
             box_node_list.append(BoxNode(box))
@@ -62,14 +62,14 @@ class BoxTreeTestCase(unittest.TestCase):
         overlapping_box_list = []
         closest_distance = np.inf
         root = binary_split(box_node_list)
-        xs = random.sample(range(-80,80), 2)
-        ys = random.sample(range(-80,80), 2)
+        xs = random.sample(list(range(-80,80)), 2)
+        ys = random.sample(list(range(-80,80)), 2)
         u = (xs[0], ys[0])
         v = (xs[1], ys[1])
         test_box = AABB([u, v])
-        print('test bounding_box: ', test_box)
+        print(('test bounding_box: ', test_box))
         root.evaluate_node(test_box,overlapping_box_list)
-        print('overlaps with', overlapping_box_list)
+        print(('overlaps with', overlapping_box_list))
         for box in box_list:
             #FIXME: slow implementation
             if box in overlapping_box_list:

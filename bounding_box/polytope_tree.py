@@ -3,11 +3,11 @@
 
 @author: wualbert
 '''
-from box_tree import *
-from box import *
+from closest_polytope_algorithms.bounding_box.box_tree import *
+from closest_polytope_algorithms.bounding_box.box import *
 from pypolycontain.lib.operations import distance_point_polytope
 try:
-    from utils.utils import build_key_point_kd_tree
+    from closest_polytope_algorithms.utils.utils import build_key_point_kd_tree
 except:
     from closest_polytope_algorithms.utils.utils import build_key_point_kd_tree
 from rtree import index
@@ -21,20 +21,15 @@ class PolytopeTree:
         self.polytopes = polytopes
         self.key_vertex_count = key_vertex_count
         # Create box data structure from zonotopes
-        self.type = self.polytopes[0].type
+        # self.type = self.polytopes[0].type
         # Initialize rtree structure
         self.rtree_p = index.Property()
         self.rtree_p.dimension = to_AH_polytope(self.polytopes[0]).t.shape[0]
-        print('PolytopeTree dimension is %d-D' % self.rtree_p.dimension)
+        print(('PolytopeTree dimension is %d-D' % self.rtree_p.dimension))
         self.idx = index.Index(properties=self.rtree_p)
         self.index_to_polytope_map = {}
         for z in self.polytopes:
-            if self.type == 'zonotope':
-                lu = zonotope_to_box(z)
-            elif self.type == 'AH_polytope' or 'H-polytope':
-                lu = AH_polytope_to_box(z)
-            else:
-                raise NotImplementedError
+            lu = AH_polytope_to_box(z)
             # assert(hash(z) not in self.index_to_polytope_map)
             #FIXME
             if hash(z) not in self.index_to_polytope_map:
@@ -148,7 +143,7 @@ class PolytopeTree:
                 if pivot_polytope not in dist_to_query:
                     pivot_distance = distance_point_polytope(pivot_polytope, query_point, ball="l2")[0]
                     # inf_pivot_distance = distance_point_polytope(pivot_polytope, query_point)[0]
-                    dist_to_query[pivot_polytope] = dist_to_query
+                    dist_to_query[pivot_polytope] = pivot_distance
                     # inf_dist_to_query[pivot_polytope] = inf_dist_to_query
                     if return_intermediate_info:
                         evaluated_zonotopes.append(pivot_polytope)
