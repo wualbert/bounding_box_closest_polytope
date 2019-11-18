@@ -89,7 +89,6 @@ class PolytopeTree:
 
         #Use dist(polytope, query) as upper bound
         evaluated_zonotopes = []
-        print(closest_centroid)
         centroid_zonotopes = self.key_point_to_zonotope_map[closest_centroid.tostring()]
         best_distance = np.inf
         # best_inf_distance = np.inf

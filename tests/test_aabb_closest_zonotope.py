@@ -40,7 +40,6 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         plt.scatter(query_point[0],query_point[1])
         fig, ax = visZ(closest_zonotope, title="",fig=fig,ax=ax,alpha=0.75)
         # fig, ax = visualize_box_nodes(zt,fig=fig,ax=ax,alpha =0.4)
-        print(('Closest Zonotope: ', closest_zonotope))
         plt.show()
 
     def test_many_zonotopes(self):
