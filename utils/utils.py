@@ -3,7 +3,7 @@ from scipy.spatial import cKDTree as KDTree
 from scipy.spatial import Voronoi
 from pypolycontain.utils.random_polytope_generator import get_k_random_edge_points_in_zonotope
 
-def build_key_point_kd_tree(polytopes, key_vertex_count = 0, distance_scaling_matrix=None):
+def build_key_point_kd_tree(polytopes, key_vertex_count = 0, distance_scaling_array=None):
     if key_vertex_count > 0:
         n = len(polytopes)*(1+2**key_vertex_count)
     else:
@@ -16,20 +16,20 @@ def build_key_point_kd_tree(polytopes, key_vertex_count = 0, distance_scaling_ma
         raise NotImplementedError
     key_point_to_zonotope_map = dict()
     scaled_key_points = np.zeros((n,dim))
-    if distance_scaling_matrix is None:
-        distance_scaling_matrix = np.ones(n)
+    if distance_scaling_array is None:
+        distance_scaling_array = np.ones(n)
     for i, p in enumerate(polytopes):
         if p.__name__=='AH_polytope' and key_vertex_count==0:
-            scaled_key_points[i,:] = np.multiply(distance_scaling_matrix, p.t[:, 0], dtype='float')
+            scaled_key_points[i,:] = np.multiply(distance_scaling_array, p.t[:, 0], dtype='float')
             key_point_to_zonotope_map[str(p.t[:, 0])]=[p]
         elif p.__name__ == 'zonotope' and key_vertex_count==0:
-            scaled_key_points[i,:] = np.multiply(distance_scaling_matrix, p.x[:, 0], dtype='float')
+            scaled_key_points[i,:] = np.multiply(distance_scaling_array, p.x[:, 0], dtype='float')
             key_point_to_zonotope_map[str(p.x[:, 0])]=[p]
         elif p.__name__=='zonotope':
-            scaled_key_points[i*(1+2**key_vertex_count),:] = np.multiply(distance_scaling_matrix, p.x[:, 0], dtype='float')
+            scaled_key_points[i*(1+2**key_vertex_count),:] = np.multiply(distance_scaling_array, p.x[:, 0], dtype='float')
             key_point_to_zonotope_map[str(p.x[:, 0])]=[p]
             other_key_points = get_k_random_edge_points_in_zonotope(p, key_vertex_count)
-            scaled_other_key_points = np.multiply(distance_scaling_matrix, other_key_points, dtype='float')
+            scaled_other_key_points = np.multiply(distance_scaling_array, other_key_points, dtype='float')
             scaled_key_points[i * (2 ** key_vertex_count + 1) + 1:(i + 1) * (2 ** key_vertex_count + 1),
             :] = scaled_other_key_points
             for kp in other_key_points:

@@ -43,7 +43,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         print(('Closest Zonotope: ', closest_zonotope))
         plt.show()
 
-    def test_many_zonotopes(self, distance_scaling_matrix = np.ones(2, dtype='float')):
+    def test_many_zonotopes(self, distance_scaling_array = np.ones(2, dtype='float')):
         zonotope_count = 15
         centroid_range = zonotope_count * 1.5
         # seed = int(time())
@@ -51,7 +51,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         np.random.seed(seed)
         zonotopes = get_uniform_random_zonotopes(zonotope_count, dim=2, generator_range=zonotope_count * 0.3,
                                               centroid_range=centroid_range, return_type='zonotope', seed=seed)
-        zt = PolytopeTree(zonotopes, distance_scaling_matrix=distance_scaling_matrix)
+        zt = PolytopeTree(zonotopes, distance_scaling_array=distance_scaling_array)
 
         query_point = np.asarray([np.random.random_integers(-centroid_range,centroid_range),
                        np.random.random_integers(-centroid_range,centroid_range)])
@@ -68,7 +68,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
 
         fig, ax = visZ(closest_zonotope, title="",fig=fig,ax=ax,alpha=1,axis_limit=ax_lim, color='blue')
         for vertex in zt.scaled_key_point_tree.data:
-            plt.scatter(*np.divide(vertex, distance_scaling_matrix), facecolor='c', s=2, alpha=1)
+            plt.scatter(*np.divide(vertex, distance_scaling_array), facecolor='c', s=2, alpha=1)
         # fig, ax = visualize_boxes(candidate_boxes,fig=fig,ax=ax,alpha =1)
         # print('Candidate boxes: ', candidate_boxes)
         fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.3,
