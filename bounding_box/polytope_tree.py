@@ -5,7 +5,7 @@
 '''
 from closest_polytope_algorithms.bounding_box.box_tree import *
 from closest_polytope_algorithms.bounding_box.box import *
-from pypolycontain.lib.operations import distance_point_polytope
+from pypolycontain.lib.operations import distance_point_polytope, to_AH_polytope
 try:
     from closest_polytope_algorithms.utils.utils import build_key_point_kd_tree
 except:
@@ -35,7 +35,7 @@ class PolytopeTree:
         self.distance_scaling_matrix = distance_scaling_matrix
         self.repeated_scaling_matrix = np.tile(self.distance_scaling_matrix, 2)
         for z in self.polytopes:
-            lu = np.multiply(self.repeated_scaling_matrix, AH_polytope_to_box(z))
+            lu = np.multiply(self.repeated_scaling_matrix, AH_polytope_to_box(to_AH_polytope(z)))
             # assert(hash(z) not in self.index_to_polytope_map)
             #FIXME
             if hash(z) not in self.index_to_polytope_map:
@@ -43,7 +43,7 @@ class PolytopeTree:
                 self.index_to_polytope_map[hash(z)] = z
 
         # build key point tree for query box size guess
-        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes, self.key_vertex_count)
+        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes, self.key_vertex_count, self.distance_scaling_matrix)
 
     def insert(self, new_polytopes):
         '''
@@ -68,7 +68,7 @@ class PolytopeTree:
             self.polytopes.append(new_polytope)
             # insert into kdtree
         # FIXME: Rebuilding a kDtree should not be necessary
-        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes, self.key_vertex_count)
+        self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes, self.key_vertex_count, self.distance_scaling_matrix)
 
     def find_closest_polytopes(self, query_point, return_intermediate_info=False, return_state_projection=False, may_return_multiple=False):
         #find closest centroid
@@ -79,9 +79,8 @@ class PolytopeTree:
         #     # raise ValueError('Query point should be d*1 numpy array')
         #     query_point=query_point.reshape((-1,1))
         # Construct centroid box
-        _x, ind = self.key_point_tree.query(np.ndarray.flatten(np.multiply(self.distance_scaling_matrix,query_point)))
+        _x, ind = self.key_point_tree.query(np.ndarray.flatten(np.multiply(self.distance_scaling_matrix,query_point.flatten())))
         closest_centroid = self.key_point_tree.data[ind]
-        # print('Closest centroid', closest_centroid)
 
         #Use dist(centroid, query) as upper bound
         vector_diff = np.subtract(np.ndarray.flatten(closest_centroid),\
@@ -90,6 +89,7 @@ class PolytopeTree:
 
         #Use dist(polytope, query) as upper bound
         evaluated_zonotopes = []
+        print(closest_centroid)
         centroid_zonotopes = self.key_point_to_zonotope_map[closest_centroid.tostring()]
         best_distance = np.inf
         # best_inf_distance = np.inf

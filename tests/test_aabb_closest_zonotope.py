@@ -27,8 +27,8 @@ class ZonotopeTreeTestCase(unittest.TestCase):
     def test_few_zonotopes(self):
         G_l = np.array([[1, 0, 0, 3], [0, 1, 2, -1]]) * 0.8
         G_r = np.array([[1, 0, 1, 1, 2, -2], [0, 1, 1, -1, 5, 2]]) * 1
-        x_l = np.array([0, 1]).reshape(2, 1)
-        x_r = np.array([5, 0]).reshape(2, 1)
+        x_l = np.array([0., 1.]).reshape(2, 1)
+        x_r = np.array([5., 0.]).reshape(2, 1)
         zono_l = zonotope(x_l, G_l)
         zono_r = zonotope(x_r, G_r)
         zt = PolytopeTree([zono_l, zono_r])
