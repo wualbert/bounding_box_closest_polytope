@@ -21,7 +21,7 @@ def visualize_boxes(box_list, dim_x = 0, dim_y = 1, xlim=None, ylim=None, ax = N
             # lower corner - upper corner representation
             flattened_box = np.ndarray.flatten(box)
             # print(flattened_box)
-            dim = flattened_box.shape[0]/2
+            dim = int(flattened_box.shape[0]/2)
             width = abs(flattened_box[dim_x] - flattened_box[dim_x+dim])
             height = abs(flattened_box[dim_y] - flattened_box[dim_y+dim])
             x = (flattened_box[dim_x] + flattened_box[dim_x+dim])/2-width/2
