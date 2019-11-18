@@ -64,7 +64,7 @@ class PolytopeTree:
         # FIXME: Rebuilding a kDtree should not be necessary
         self.key_point_tree, self.key_point_to_zonotope_map = build_key_point_kd_tree(self.polytopes, self.key_vertex_count)
 
-    def find_closest_polytopes(self, query_point, return_intermediate_info=False):
+    def find_closest_polytopes(self, query_point, return_intermediate_info=False, return_state_projection=False, may_return_multiple=False):
         #find closest centroid
         # try:
         #     query_point.shape[1]
@@ -72,7 +72,6 @@ class PolytopeTree:
         # except:
         #     # raise ValueError('Query point should be d*1 numpy array')
         #     query_point=query_point.reshape((-1,1))
-
         # Construct centroid box
         _x, ind = self.key_point_tree.query(np.ndarray.flatten(query_point))
         closest_centroid = self.key_point_tree.data[ind]
@@ -89,20 +88,21 @@ class PolytopeTree:
         best_distance = np.inf
         # best_inf_distance = np.inf
         best_polytope = None
+        best_state = None
+        polytope_state_projection = {}
         dist_to_query = {}
         # inf_dist_to_query = {}
 
         assert(len(centroid_zonotopes)==1)
-        for cz in centroid_zonotopes:
-            evaluated_zonotopes.append(cz)
-            zd = distance_point_polytope(cz,query_point, ball='l2')[0]
-            # zd = distance_point_polytope(cz, query_point, ball='l2')[0]
-            if best_distance > zd:
-                best_distance=zd
-                # best_inf_distance=zd
-                best_polytope=cz
-                dist_to_query[cz] = best_distance
-                # inf_dist_to_query[cz] = best_inf_distance
+        evaluated_zonotopes.extend(centroid_zonotopes)
+        zd, state = distance_point_polytope(centroid_zonotopes[0],query_point, ball='l2')
+        # zd = distance_point_polytope(cz, query_point, ball='l2')[0]
+        best_distance=zd
+        # best_inf_distance=zd
+        best_polytope={centroid_zonotopes[0]}
+        dist_to_query[centroid_zonotopes[0]] = best_distance
+        polytope_state_projection[centroid_zonotopes[0]] = state
+        # inf_dist_to_query[cz] = best_inf_distance
 
         u = query_point - best_distance
         v = query_point + best_distance
@@ -135,22 +135,28 @@ class PolytopeTree:
                 sample = np.random.randint(len(candidate_ids))
                 #solve linear program for the sampled polytope
                 pivot_polytope = self.index_to_polytope_map[candidate_ids[sample]]
-                if pivot_polytope==best_polytope:
+                if pivot_polytope in best_polytope:
                     #get rid of this polytope
                     candidate_ids[sample], candidate_ids[-1] = candidate_ids[-1], candidate_ids[sample]
                     candidate_ids = candidate_ids[0:-1]
                     continue
                 if pivot_polytope not in dist_to_query:
-                    pivot_distance = distance_point_polytope(pivot_polytope, query_point, ball="l2")[0]
+                    pivot_distance, state = distance_point_polytope(pivot_polytope, query_point, ball="l2")
                     # inf_pivot_distance = distance_point_polytope(pivot_polytope, query_point)[0]
                     dist_to_query[pivot_polytope] = pivot_distance
+                    polytope_state_projection[pivot_polytope] = state
                     # inf_dist_to_query[pivot_polytope] = inf_dist_to_query
                     if return_intermediate_info:
                         evaluated_zonotopes.append(pivot_polytope)
                 else:
                     pivot_distance = dist_to_query[pivot_polytope]
                     # inf_pivot_distance = inf_dist_to_query[pivot_polytope]
-                if pivot_distance>=best_distance:#fixme: >= or >?
+                if pivot_distance>best_distance:#fixme: >= or >?
+                    #get rid of this polytope
+                    candidate_ids[sample], candidate_ids[-1] = candidate_ids[-1], candidate_ids[sample]
+                    candidate_ids = candidate_ids[0:-1]
+                elif np.allclose(pivot_distance, best_distance):
+                    best_polytope.add(pivot_polytope)
                     #get rid of this polytope
                     candidate_ids[sample], candidate_ids[-1] = candidate_ids[-1], candidate_ids[sample]
                     candidate_ids = candidate_ids[0:-1]
@@ -164,10 +170,15 @@ class PolytopeTree:
                     candidate_ids = list(self.idx.intersection(heuristic_box_lu))
                     best_distance = pivot_distance
                     # best_inf_distance = inf_pivot_distance
-                    best_polytope = pivot_polytope
+                    best_polytope = {pivot_polytope}
             if return_intermediate_info:
-                return np.atleast_1d(best_polytope), best_distance, evaluated_zonotopes, heuristic_box_lu
-            return np.atleast_1d(best_polytope)
+                return np.atleast_1d(list(best_polytope)[0]), best_distance, evaluated_zonotopes, heuristic_box_lu
+            if return_state_projection:
+                if not may_return_multiple:
+                    return np.atleast_1d(list(best_polytope)[0]), best_distance, polytope_state_projection[list(best_polytope)[0]]
+                else:
+                    return np.asarray(list(best_polytope)), best_distance, np.asarray([polytope_state_projection[bp].flatten() for bp in best_polytope])
+            return np.atleast_1d(list(best_polytope)[0])
 #
 # class PolytopeTree_Old:
 #     '''
