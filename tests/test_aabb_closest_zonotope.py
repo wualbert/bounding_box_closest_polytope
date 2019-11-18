@@ -43,14 +43,15 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         print(('Closest Zonotope: ', closest_zonotope))
         plt.show()
 
-    def test_many_zonotopes(self):
-        zonotope_count = 30
+    def test_many_zonotopes(self, distance_scaling_matrix = np.ones(2, dtype='float')):
+        zonotope_count = 15
         centroid_range = zonotope_count * 1.5
-        seed = int(time())
+        # seed = int(time())
         seed = np.random.random_integers(0,10000000,1)  # int(time())
+        np.random.seed(seed)
         zonotopes = get_uniform_random_zonotopes(zonotope_count, dim=2, generator_range=zonotope_count * 0.3,
                                               centroid_range=centroid_range, return_type='zonotope', seed=seed)
-        zt = PolytopeTree(zonotopes)
+        zt = PolytopeTree(zonotopes, distance_scaling_matrix=distance_scaling_matrix)
 
         query_point = np.asarray([np.random.random_integers(-centroid_range,centroid_range),
                        np.random.random_integers(-centroid_range,centroid_range)])
@@ -66,15 +67,15 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         fig, ax = visualize_boxes([zonotope_to_box(p, return_AABB=False) for p in evaluated_zonotopes],fig=fig,ax=ax,alpha =0.2,linewidth=0.5, facecolor='red')
 
         fig, ax = visZ(closest_zonotope, title="",fig=fig,ax=ax,alpha=1,axis_limit=ax_lim, color='blue')
-        for vertex in zt.key_point_tree.data:
-            plt.scatter(vertex[0], vertex[1], facecolor='c', s=2, alpha=1)
+        for vertex in zt.scaled_key_point_tree.data:
+            plt.scatter(*np.divide(vertex, distance_scaling_matrix), facecolor='c', s=2, alpha=1)
         # fig, ax = visualize_boxes(candidate_boxes,fig=fig,ax=ax,alpha =1)
         # print('Candidate boxes: ', candidate_boxes)
         fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.3,
                                   xlim=[-centroid_range,centroid_range],ylim=[-centroid_range,centroid_range], facecolor='cyan')
-        lim = 60
-        ax.set_xlim(-lim,lim)
-        ax.set_ylim(-lim,lim)
+        # lim = 60
+        # ax.set_xlim(-lim,lim)
+        # ax.set_ylim(-lim,lim)
         ax.xaxis.set_major_locator(MultipleLocator(15))
         ax.yaxis.set_major_locator(MultipleLocator(15))
         ax.set_title('Nearest Polytope Querying with AABB')
@@ -83,7 +84,11 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         ax.scatter(query_point[0],query_point[1],s=10,color='k')
         print(('Closest Zonotope: ', closest_zonotope))
         plt.savefig('closest_zonotope.png', dpi=300)
+        plt.close()
 
+    def test_scaled_many_zonotopes_repeat(self):
+        for i in range(100):
+            self.test_many_zonotopes(np.asarray([1000., 1.]))
 
     def test_many_zonotopes_repeat(self):
         for itr in range(100):
@@ -196,7 +201,7 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         fig, ax = visZ(zonotopes, title="", alpha=0.2, axis_limit=ax_lim)
         fig, ax = visZ(closest_zonotope, title="", fig=fig, ax=ax, alpha=1, axis_limit=ax_lim)
         # fig, ax = visualize_box_nodes(zt.box_nodes,fig=fig,ax=ax,alpha =0.4,linewidth=0.5)
-        for vertex in zt.key_point_tree.data:
+        for vertex in zt.scaled_key_point_tree.data:
             plt.scatter(vertex[0], vertex[1], facecolor='c', s=2, alpha=1)
 
         # fig, ax = visualize_boxes(candidate_boxes,fig=fig,ax=ax,alpha =1)
@@ -221,9 +226,9 @@ class ZonotopeTreeTestCase(unittest.TestCase):
         fig, ax = visZ(all_zonotopes, title="", alpha=0.2, axis_limit=ax_lim)
         fig, ax = visZ(closest_zonotope, title="", fig=fig, ax=ax, alpha=1, axis_limit=ax_lim)
         # fig, ax = visualize_box_nodes(zt.box_nodes,fig=fig,ax=ax,alpha =0.4,linewidth=0.5)
-        for vertex in zt.key_point_tree.data:
+        for vertex in zt.scaled_key_point_tree.data:
             plt.scatter(vertex[0], vertex[1], facecolor='c', s=2, alpha=1)
-        print((len(zt.key_point_tree.data)))
+        print((len(zt.scaled_key_point_tree.data)))
         # fig, ax = visualize_boxes(candidate_boxes,fig=fig,ax=ax,alpha =1)
         # print('Candidate boxes: ', candidate_boxes)
         fig, ax = visualize_boxes([query_box], fig=fig, ax=ax, alpha=0.1,

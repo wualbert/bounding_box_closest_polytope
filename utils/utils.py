@@ -15,31 +15,28 @@ def build_key_point_kd_tree(polytopes, key_vertex_count = 0, distance_scaling_ma
     else:
         raise NotImplementedError
     key_point_to_zonotope_map = dict()
-    key_points = np.zeros((n,dim))
+    scaled_key_points = np.zeros((n,dim))
+    if distance_scaling_matrix is None:
+        distance_scaling_matrix = np.ones(n)
     for i, p in enumerate(polytopes):
         if p.__name__=='AH_polytope' and key_vertex_count==0:
-            key_points[i,:] = p.t[:, 0]
-            if distance_scaling_matrix is not None:
-                key_points = np.multiply(distance_scaling_matrix, key_points)
-            key_point_to_zonotope_map[p.t[:, 0].tostring()]=[p]
+            scaled_key_points[i,:] = np.multiply(distance_scaling_matrix, p.t[:, 0], dtype='float')
+            key_point_to_zonotope_map[str(p.t[:, 0])]=[p]
         elif p.__name__ == 'zonotope' and key_vertex_count==0:
-            key_points[i,:] = p.x[:, 0]
-            if distance_scaling_matrix is not None:
-                key_points = np.multiply(distance_scaling_matrix, key_points)
-            key_point_to_zonotope_map[p.x[:, 0].tostring()]=[p]
+            scaled_key_points[i,:] = np.multiply(distance_scaling_matrix, p.x[:, 0], dtype='float')
+            key_point_to_zonotope_map[str(p.x[:, 0])]=[p]
         elif p.__name__=='zonotope':
-            key_points[i*(1+2**key_vertex_count),:] = p.x[:, 0]
-            key_point_to_zonotope_map[p.x[:, 0].tostring()]=[p]
+            scaled_key_points[i*(1+2**key_vertex_count),:] = np.multiply(distance_scaling_matrix, p.x[:, 0], dtype='float')
+            key_point_to_zonotope_map[str(p.x[:, 0])]=[p]
             other_key_points = get_k_random_edge_points_in_zonotope(p, key_vertex_count)
-            key_points[i * (2 ** key_vertex_count + 1) + 1:(i + 1) * (2 ** key_vertex_count + 1),
-            :] = other_key_points
-            if distance_scaling_matrix is not None:
-                key_points = np.multiply(distance_scaling_matrix, key_points)
+            scaled_other_key_points = np.multiply(distance_scaling_matrix, other_key_points, dtype='float')
+            scaled_key_points[i * (2 ** key_vertex_count + 1) + 1:(i + 1) * (2 ** key_vertex_count + 1),
+            :] = scaled_other_key_points
             for kp in other_key_points:
-                key_point_to_zonotope_map[kp.tostring()] = [p]
+                key_point_to_zonotope_map[str(kp)] = [p]
         else:
             raise NotImplementedError
-    return KDTree(key_points),key_point_to_zonotope_map
+    return KDTree(scaled_key_points),key_point_to_zonotope_map
 
 def build_polyotpe_centroid_voronoi_diagram(polytopes):
     n = len(polytopes)

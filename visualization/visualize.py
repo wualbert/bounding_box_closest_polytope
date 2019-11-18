@@ -29,7 +29,6 @@ def visualize_boxes(box_list, dim_x = 0, dim_y = 1, xlim=None, ylim=None, ax = N
         # if not fill:
             #FIXME: not working
             # rect = patches.Rectangle((x,y), width, height,linewidth=linewidth, alpha=alpha, facecolor=facecolor)
-
         rect = patches.Rectangle((x, y), width, height, linewidth=linewidth, facecolor=facecolor,alpha=alpha)
         ax.add_patch(rect)
     if xlim is not None:
