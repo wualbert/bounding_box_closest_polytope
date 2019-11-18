@@ -13,7 +13,7 @@ except:
 from rtree import index
 
 class PolytopeTree:
-    def __init__(self, polytopes, key_vertex_count = 0):
+    def __init__(self, polytopes, key_vertex_count = 0, distance_scaling_matrix = None):
         '''
         Updated implementation using rtree
         :param polytopes:
@@ -28,8 +28,14 @@ class PolytopeTree:
         print(('PolytopeTree dimension is %d-D' % self.rtree_p.dimension))
         self.idx = index.Index(properties=self.rtree_p)
         self.index_to_polytope_map = {}
+        if distance_scaling_matrix is not None:
+            assert(self.rtree_p.dimension==distance_scaling_matrix.shape[0])
+        else:
+            distance_scaling_matrix = np.ones(self.rtree_p.dimension)
+        self.distance_scaling_matrix = distance_scaling_matrix
+        self.repeated_scaling_matrix = np.tile(self.distance_scaling_matrix, 2)
         for z in self.polytopes:
-            lu = AH_polytope_to_box(z)
+            lu = np.multiply(self.repeated_scaling_matrix, AH_polytope_to_box(z))
             # assert(hash(z) not in self.index_to_polytope_map)
             #FIXME
             if hash(z) not in self.index_to_polytope_map:
@@ -53,7 +59,7 @@ class PolytopeTree:
                 lu = AH_polytope_to_box(new_polytope)
             else:
                 raise NotImplementedError
-            self.idx.insert(hash(new_polytope), lu)
+            self.idx.insert(hash(new_polytope), np.multiply(self.repeated_scaling_matrix,lu))
             # assert (hash(new_polytope) not in self.index_to_polytope_map)
             self.index_to_polytope_map[hash(new_polytope)] = new_polytope
         if isinstance(self.polytopes, np.ndarray):
@@ -73,7 +79,7 @@ class PolytopeTree:
         #     # raise ValueError('Query point should be d*1 numpy array')
         #     query_point=query_point.reshape((-1,1))
         # Construct centroid box
-        _x, ind = self.key_point_tree.query(np.ndarray.flatten(query_point))
+        _x, ind = self.key_point_tree.query(np.ndarray.flatten(np.multiply(self.distance_scaling_matrix,query_point)))
         closest_centroid = self.key_point_tree.data[ind]
         # print('Closest centroid', closest_centroid)
 
